@@ -1,13 +1,8 @@
 local M = {}
 
--- dynamic menues needs to be deleted before re-generated
--- sort hints / keys
 -- logo
 -- does name need to be stored in data?
 -- we can also get rid off unique if move the keys init into another function
--- <C-key>
--- ishotkey == source = "keybind"
--- hints delay
 
 local awful = require("awful")
 local tree = require("motion.tree")
@@ -16,10 +11,12 @@ local util = require("motion.util")
 local dump = require("motion.vim").inspect
 local akeygrabber = require("motion.keygrabber")
 
-local mod_conversion = nil
 local motion_tree
 
-local function generate_mod_conversion_map()
+local mod_conversion = nil
+local mod_map
+
+local function generate_mod_conversion_maps()
 	if mod_conversion then
 		return nil
 	end
@@ -36,6 +33,21 @@ local function generate_mod_conversion_map()
 			mod_conversion[keysym.keysym] = mod
 		end
 	end
+
+	-- all supported mods
+	local map = {
+		["S"] = mod_conversion["Shift_L"], -- Shift
+		["A"] = mod_conversion["Alt_L"], -- Mod1
+		["C"] = mod_conversion["Control_L"], -- Control
+		["M"] = mod_conversion["Super_L"], -- Mod4
+	}
+
+	for k, v in pairs(map) do
+		map[v] = k
+	end
+
+	mod_map = map
+
 	return nil
 end
 
@@ -50,52 +62,74 @@ local function on_stop(t)
 end
 
 local function parse_key(k)
-	-- upper alpha
+	-- upper alpha (e.g. "S")
 	if string.match(k, "^%u$") then
 		return {
-			{ key = k, mods = { "Shift" } },
+			{ key = k, mods = { "Shift" }, name = k },
 		}
 	end
 
-	-- alphanumeric char
+	-- alphanumeric char (e.g. "s", "4")
 	if string.match(k, "^%w$") then
 		return {
-			{ key = k, mods = {} },
-			-- FIXME: remove me later
-			{ key = k, mods = { "Mod4", "Control" } },
-			{ key = k, mods = { "Mod4", "Mod2", "Control" } },
+			{ key = k, mods = {}, name = k },
 		}
 	end
 
 	-- <keysym> (e.g. <BackSpace> or <F11>)
-	local _, _, key = string.find(k, "^<(%w+)>")
-	if key then
+	local _, _, keysym = string.find(k, "^<(%w+)>$")
+	if keysym then
 		return {
-			{ key = key, mods = {} },
+			{ key = keysym, mods = {}, name = k },
 		}
 	end
 
+	-- <Mod-key> (e.g. <A-C-F1>)
+	local _, _, mod_and_key = string.find(k, "^<([%u%-]+%w+)>$")
+	if mod_and_key then
+		local mods = {}
+		for mod in string.gmatch(mod_and_key, "%u%-") do
+			mod = string.gsub(mod, "%-$", "")
+			local modifier = mod_map[mod]
+			assert(modifier, string.format("unable to parse modifier: %s in key: %s", mod, k))
+			if not vim.tbl_contains(mods, modifier) then
+				-- ignore duplicate mods (e.g. <A-A-F1>)
+				table.insert(mods, modifier)
+			end
+		end
+
+		-- get the actual key
+		local _, _, key = string.find(mod_and_key, "[%u%-]+%-(%w+)$")
+		assert(key, string.format("unable to parse key: %s", k))
+
+		-- user might not have explicitly defined Shift as mod when using an
+		-- upper alpha as key (<A-K> == <A-S-K>)
+		if string.match(key, "^%u$") then
+			local shift = mod_map["S"]
+			if not vim.tbl_contains(mods, shift) then
+				table.insert(mods, shift)
+			end
+		end
+
+		return {
+			{ key = key, mods = mods, name = k },
+		}
+	end
+
+	assert(string.len(k) == 1, string.format("unable to parse unknown key: %s", k))
+
+	-- we assume it's a special character (e.g. $ or #)
+
 	-- HACK: awful.keygrabber requires for special keys to also specify shift as
 	-- mods. This is utterly broken, because for some layouts the
-	-- minus key is on the shift layer, but for others layouts not. therefore we're just
+	-- minus key is on the shift layer, but for others layouts not. Therefore we're just
 	-- ignoring the shift state by adding the key with and without shift to the
 	-- map.
 
 	return {
-		{ key = k, mods = {} },
-		{ key = k, mods = { "Shift" } },
+		{ key = k, mods = {}, name = k },
+		{ key = k, mods = { "Shift" }, name = k },
 	}
-end
-
--- @param key string A keygrabber key to be converted (e.g. Tab)
--- @return string The converted key (e.g. <Tab>)
--- TODO: needs other name
-local function convert_keygrabber_key(key)
-	if string.len(key) > 1 then
-		local converted = string.format("<%s>", key)
-		return converted
-	end
-	return key
 end
 
 -- @param m table Map of parsed keys
@@ -111,8 +145,6 @@ local function add_key_to_map(m, k)
 	table.sort(m[k.key], function(a, b)
 		return #a.mods > #b.mods
 	end)
-
-	print("sorted: ", dump(m[k.key]))
 end
 
 -- @param t table A motion (sub)tree
@@ -368,9 +400,9 @@ function M.grab(t, keybind)
 						end
 
 						if match then
-							local key_internal = convert_keygrabber_key(key)
+							local key_name = v.name
 							-- run the key function
-							local next_t = fn(t[key_internal] or v.back_tree)
+							local next_t = fn(t[key_name] or v.back_tree)
 
 							-- no tree to run next
 							if not next_t then
@@ -458,7 +490,11 @@ function M.setup(opts)
 		M.add_globalkey("", opts.key)
 	end
 
-	generate_mod_conversion_map()
+	awesome.connect_signal("xkb::map_changed", function()
+		generate_mod_conversion_maps()
+	end)
+
+	generate_mod_conversion_maps()
 
 	print(dump(mod_conversion))
 end

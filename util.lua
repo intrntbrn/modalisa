@@ -28,7 +28,9 @@ function M.merge_opts(a, b)
 end
 
 function M.keyname(k)
-	_, _, key = string.find(k, "<(%w+)>")
+	-- we are forced to remove the <> surrounding,
+	-- otherwise the key is interpreted as a tag in widgets
+	_, _, key = string.find(k, "<(.+)>")
 	if key then
 		k = key
 	end
@@ -40,18 +42,30 @@ function M.split_key(str)
 	if not str or string.len(str) == 0 then
 		return nil, nil
 	end
+	local regex
 
 	-- e.g. <Tab> or <F10>
-	if string.match(str, "^<%w+>") then
-		for first in string.gmatch(str, "<%w+>") do
-			local rest = string.gsub(str, "<%w+>", "")
+	regex = "<%w+>"
+	if string.match(str, string.format("^%s", regex)) then
+		for first in string.gmatch(str, regex) do
+			local rest = string.gsub(str, regex, "", 1)
+			return first, rest
+		end
+	end
+
+	-- e.g. <A-C-Tab>
+	regex = "<[%u%-]+%w+>"
+	if string.match(str, string.format("^%s", regex)) then
+		for first in string.gmatch(str, regex) do
+			local rest = string.gsub(str, regex, "", 1)
 			return first, rest
 		end
 	end
 
 	-- use the first character
 	local first = string.sub(str, 1, 1)
-	local rest = string.gsub(str, "^.", "")
+	local rest = string.gsub(str, "^.", "", 1)
+
 	return first, rest
 end
 
@@ -139,7 +153,7 @@ end
 ---@param labels string labels
 -- return string Converted index
 function M.index_to_label(i, labels)
-	labels = labels or "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	labels = labels or M.labels_numericalpha
 	return string.sub(labels, i, i)
 end
 
