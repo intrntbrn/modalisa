@@ -1,8 +1,13 @@
 local M = {}
 
--- logo
--- does name need to be stored in data?
+-- hidden property
+-- force stay open keybind
+-- add keybind support for each tree node
+-- unique stuff
 -- we can also get rid off unique if move the keys init into another function
+-- keyname tester
+-- timestamp
+-- move wm specific configs away from config?
 
 local awful = require("awful")
 local tree = require("motion.tree")
@@ -344,12 +349,6 @@ function M.grab(t, keybind)
 			local converted_key = mod_conversion[key] -- e.g. Super_L -> Mod4
 
 			if keybinds[key] then
-				-- generate mod map
-				local mod = {}
-				for _, v in ipairs(modifiers) do
-					mod[v] = true
-				end
-
 				-- Capslock and Numlock are ignored by default
 				local ignore_mods = { "Lock2", "Mod2" }
 				local ignore_hold_mods = {}
@@ -377,47 +376,49 @@ function M.grab(t, keybind)
 					end
 				end
 
-				-- Consider the following entries:
-				-- a) {{"Mod4", "Shift"}, "K"}
-				-- b) {{"Shift"}, "K" }
-				-- When hold_mod is active, both entries would be matched.
-				-- However, a) should always be matched (first), allowing the user
-				-- to have different keybinds for hold or modal motions.
-				-- Keybinds are sorted by descending mod count,
-				-- therefore the first match has the highest matching mod count
-				-- and can be considered as the best match.
-
+				-- Keybinds are sorted by descending mod count.
 				for _, v in ipairs(keybinds[key]) do
+					-- generate mod map
+					local mod = {}
+					for _, v2 in ipairs(v.mods) do
+						mod[v2] = true
+					end
+
+					-- check if mods are matching
+					local match = false
 					local mod_count = #v.mods
-					if
-						#filtered_modifiers == mod_count
-						or check_hold_mod and #filtered_hold_mod_modifiers == mod_count
-					then
-						local match = true
-						for _, v2 in ipairs(v.mods) do
+					if #filtered_modifiers == mod_count then
+						match = true
+						for _, v2 in ipairs(filtered_modifiers) do
 							match = match and mod[v2]
 						end
+					elseif check_hold_mod and #filtered_hold_mod_modifiers == mod_count then
+						match = true
+						for _, v2 in ipairs(filtered_hold_mod_modifiers) do
+							match = match and mod[v2]
+						end
+					end
 
-						if match then
-							local key_name = v.name
-							-- run the key function
-							local next_t = fn(t[key_name] or v.back_tree)
+					if match then
+						-- run the key function and exit
+						local key_name = v.name
+						print("running key function: ", key_name)
+						local next_t = fn(t[key_name] or v.back_tree)
 
-							-- no tree to run next
-							if not next_t then
-								if not is_hold_mode_active() then
-									self:stop()
-									return
-								end
+						-- no tree to run next
+						if not next_t then
+							if not is_hold_mode_active() then
+								self:stop()
 								return
 							end
-
-							-- run the next tree
-							keybinds = keygrabber_keys(next_t)
-							on_start(next_t)
-							t = next_t
 							return
 						end
+
+						-- run the next tree
+						keybinds = keygrabber_keys(next_t)
+						on_start(next_t)
+						t = next_t
+						return
 					end
 				end
 			else

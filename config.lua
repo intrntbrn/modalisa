@@ -25,7 +25,7 @@ local defaults = {
 	terminal = "alacritty || kitty || wezterm || st || urxvt || xterm",
 	app_menu = "rofi -show drun -display-drun ''",
 
-	unique = {},
+	unique = { "key" },
 }
 
 local options
