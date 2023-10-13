@@ -1,9 +1,5 @@
 local motion = require("motion")
 local wm = require("motion.wm")
-local dump = require("motion.vim.inspect")
-local awful = require("awful")
-local quake = require("config.quake")
-local theme = require("beautiful")
 
 local M = {}
 

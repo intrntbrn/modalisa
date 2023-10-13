@@ -3,7 +3,6 @@ local util = require("motion.util")
 local gears = require("gears")
 local wibox = require("wibox")
 local awful = require("awful")
-local gears = require("gears")
 local dump = require("motion.vim").inspect
 
 local M = {}
