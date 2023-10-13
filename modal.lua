@@ -255,7 +255,6 @@ function M.grab(t, keybind)
 		local succs = t:successors()
 
 		local run = function()
-			print("trying to run: ", t:identifier())
 			local dynamic_succs = t:fn(opts)
 			if dynamic_succs then
 				-- dynamic submenu

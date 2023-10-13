@@ -73,7 +73,7 @@ end
 -- @param key string|table The key object to be parsed
 -- @param index string The key string if the key object does not contain the key string
 function M.parse_key(key, index)
-	local identifier
+	local path
 	local fn
 	local opts
 	local cond
@@ -82,7 +82,7 @@ function M.parse_key(key, index)
 	local t = type(key)
 
 	if t == "string" then
-		identifier = key
+		path = key
 	else
 		assert(t == "table")
 		for k, v in pairs(key) do
@@ -93,8 +93,8 @@ function M.parse_key(key, index)
 					assert(not desc, "multiple desc")
 					desc = v
 				else
-					assert(not identifier, "multiple strings")
-					identifier = v
+					assert(not path, "multiple strings")
+					path = v
 				end
 			elseif t == "table" then
 				assert(not opts, "multiple tables")
@@ -114,14 +114,13 @@ function M.parse_key(key, index)
 		end
 	end
 
-	if not identifier then
-		identifier = index
+	if not path then
+		path = index
 	end
 
-	return {
+	return path, {
 		fn = fn,
 		opts = opts,
-		identifier = identifier,
 		cond = cond,
 		desc = desc,
 	}

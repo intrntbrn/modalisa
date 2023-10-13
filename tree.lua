@@ -64,12 +64,12 @@ local function _add(succ, tree, index)
 	rawset(tree, "data", succ)
 end
 
-local function add(succ, tree, index)
+local function add(succ, tree, path)
 	assert(tree)
-	succ = util.parse_key(succ, index)
-	assert(succ.identifier)
-	assert(string.len(succ.identifier) > 0)
-	return _add(succ, tree, succ.identifier)
+	path, succ = util.parse_key(succ, path)
+	assert(path)
+	assert(string.len(path) > 0)
+	return _add(succ, tree, path)
 end
 
 local function get(index, tree, prev_opts, prev_tree)
@@ -154,33 +154,6 @@ function M.mt(obj, tree, load_default_opts)
 	end
 	obj.predecessor = obj.pred
 
-	obj.identifier = function()
-		local data = rawget(obj, "data")
-		if not data then
-			return nil
-		end
-
-		return rawget(data, "identifier")
-	end
-
-	-- obj.group = function()
-	-- 	local data = rawget(obj, "data")
-	-- 	if not data then
-	-- 		return true
-	-- 	end
-	--
-	-- 	local group = rawget(data, "group")
-	-- 	if not group then
-	-- 		return nil
-	-- 	end
-	--
-	-- 	if type(group) == "function" then
-	-- 		return group()
-	-- 	end
-	--
-	-- 	return group
-	-- end
-
 	obj.cond = function()
 		local data = rawget(obj, "data")
 		if not data then
@@ -249,8 +222,8 @@ function M.mt(obj, tree, load_default_opts)
 
 	obj.add_successors = function(self, succs)
 		for k, succ in pairs(succs) do
-			local key = util.parse_key(succ, k)
-			add(key, self, k)
+			local path, key = util.parse_key(succ, k)
+			add(key, self, path)
 		end
 	end
 
