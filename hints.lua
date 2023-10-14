@@ -14,6 +14,7 @@ local function hide(_)
 	if popup then
 		popup.visible = false
 	end
+	popup = nil
 end
 
 local function create_popup(t)
@@ -112,7 +113,9 @@ local function handle(t)
 	end
 
 	local delay = opts.hints_delay
-	if delay and delay > 0 then
+
+	-- do not delay if hints are already displayed
+	if not popup and delay and delay > 0 then
 		--hide()
 		timer = gears.timer({
 			timeout = delay / 1000,
@@ -134,7 +137,6 @@ function M.setup(_)
 	end)
 	awesome.connect_signal("motion::stop", function(t)
 		if timer then
-			print("stop timer")
 			timer:stop()
 		end
 		hide(t)

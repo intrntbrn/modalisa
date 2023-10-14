@@ -8,7 +8,6 @@ local M = {}
 -- timestamp
 -- move wm specific configs away from config?
 -- fix default clienting floating resize
--- hints delay makes no sense if there are already hints displayed
 -- tests for key parser
 
 local awful = require("awful")
