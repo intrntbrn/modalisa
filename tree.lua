@@ -4,6 +4,7 @@ local vim = require("motion.vim")
 local dump = require("motion.vim").inspect
 
 local M = {}
+
 local root_tree = {}
 
 local id = 0
@@ -266,6 +267,12 @@ function M.mt(obj, tree, load_default_opts)
 	})
 end
 
-function M.setup() end
+function M.setup(opts)
+	root_tree.data = {
+		desc = "motion",
+		name = opts.key,
+		id = get_id(),
+	}
+end
 
 return M.mt(M, root_tree, true)
