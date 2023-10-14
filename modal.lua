@@ -209,7 +209,7 @@ function M.grab(t, keybind)
 	local opts = t:opts()
 
 	-- hold mod init
-	local hold_mod = opts.hold_mod_stay_open and keybind
+	local hold_mod = opts.mod_hold_continue and keybind
 	local hold_mod_ran_once = false
 	local root_key = hold_mod and util.parse_keybind(keybind)
 	if hold_mod then
@@ -336,7 +336,9 @@ function M.grab(t, keybind)
 
 			if not is_hold_mode_active() then
 				-- all mods/keys are cleared
-				if hold_mod_ran_once and t:opts().hold_mod_auto_close then
+
+				local mod_release = t:opts().mod_release_close
+				if mod_release == "always" or hold_mod_ran_once and mod_release == "after" then
 					self:stop()
 					return
 				end
