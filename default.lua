@@ -57,7 +57,7 @@ function M.setup(opts)
 		["o"] = wm.spawn_appmenu(),
 
 		-- awesome
-		["a"] = { desc = "awesome", opts = { group = "awesome" } },
+		["a"] = { desc = "awesome", opts = { group = "awesome", mod_release_close = false } },
 		["aQ"] = wm.awesome_quit(),
 		["aR"] = wm.awesome_restart(),
 		["ax"] = wm.awesome_execute(),
@@ -89,7 +89,7 @@ function M.setup(opts)
 
 		-- layout
 		["r"] = { desc = "layout", opts = { group = "layout", labels = "asdfghjklqwertyuiopzxcvbnmqp" } },
-		["r "] = wm.layout_select(),
+		["r "] = wm.layout_select_menu(),
 		["r<Left>"] = wm.layout_prev(),
 		["r<Right>"] = wm.layout_next(),
 

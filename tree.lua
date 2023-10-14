@@ -6,6 +6,12 @@ local dump = require("motion.vim").inspect
 local M = {}
 local root_tree = {}
 
+local id = 0
+local function get_id()
+	id = id + 1
+	return id
+end
+
 local function _remove(index, tree)
 	-- tree has no children
 	local children = rawget(tree, "children")
@@ -55,10 +61,12 @@ local function _add(succ, tree, index)
 		rawset(tree, "children", rawget(tree, "children") or {})
 		local children = rawget(tree, "children")
 		-- init children[char]
-		rawset(children, char, rawget(children, char) or {})
+		rawset(children, char, rawget(children, char) or { data = { id = get_id() } })
 		local children_char = rawget(children, char)
 		return _add(succ, children_char, next)
 	end
+
+	rawset(succ, "id", get_id())
 
 	-- add/overwrite only the data, keep children
 	rawset(tree, "data", succ)
@@ -197,6 +205,16 @@ function M.mt(obj, tree, load_default_opts)
 
 		return desc
 	end
+
+	obj.id = function()
+		local data = rawget(obj, "data")
+		if not data then
+			return nil
+		end
+
+		return rawget(data, "id")
+	end
+
 	obj.description = obj.desc
 
 	obj.successors = function()

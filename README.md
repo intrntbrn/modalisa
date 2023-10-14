@@ -1,9 +1,8 @@
 WIP
 
-```lua
+```
 require("motion").setup({
-    -- key = { { "Mod4" }, "y" },
-    key = { {}, "Super_L" },
+	key = { {}, "Super_L" },
 	exit_key = { "Escape" },
 	back_key = "BackSpace",
 	default_keys = true,

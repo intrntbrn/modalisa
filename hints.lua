@@ -43,17 +43,24 @@ local function create_popup(t)
 				table.insert(elements, {
 					group = group,
 					text = text,
+					id = succ:id(),
 				})
 			end
 		end
 	end
 
+	-- sort by group and desc
 	table.sort(elements, function(a, b)
 		if a.group == b.group then
 			return a.text < b.text
 		end
 		return a.group < b.group
 	end)
+
+	-- --sort by id
+	-- table.sort(elements, function(a, b)
+	-- 	return a.id < b.id
+	-- end)
 
 	-- header
 	local desc = t:desc()

@@ -102,7 +102,7 @@ function M.client_create_filter(multi_screen, include_focused_client)
 		end
 
 		if c.sticky then
-			if c.screen == s or multi_screen then
+			if c.screen == awful.screen.focused() or multi_screen then
 				return true
 			end
 		end

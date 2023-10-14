@@ -275,7 +275,7 @@ function M.client_swap_picker()
 	}
 end
 
-function M.layout_select()
+function M.layout_select_menu()
 	return {
 		opts = { group = "layout" },
 		desc = "select a layout",
