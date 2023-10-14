@@ -8,8 +8,8 @@ local M = {}
 -- timestamp
 -- move wm specific configs away from config?
 -- fix default clienting floating resize
--- <M-*> (or other special characters) are not getting matched
 -- hints delay makes no sense if there are already hints displayed
+-- tests for key parser
 
 local awful = require("awful")
 local tree = require("motion.tree")
@@ -91,8 +91,8 @@ local function parse_vim_key(k)
 		}
 	end
 
-	-- <Mod-key> (e.g. <A-C-F1>)
-	local _, _, mod_and_key = string.find(k, "^<([%u%-]+[%w%p]+)>$")
+	-- <Mod-key> (e.g. <A-C-BackSpace>, <A- >, <A-*>)
+	local _, _, mod_and_key = string.find(k, "^<([%u%-]+.+)>$")
 	if mod_and_key then
 		local mods = {}
 		for mod in string.gmatch(mod_and_key, "%u%-") do
@@ -106,7 +106,7 @@ local function parse_vim_key(k)
 		end
 
 		-- get the actual key
-		local _, _, key = string.find(mod_and_key, "[%u%-]+%-([%w%p]+)$")
+		local _, _, key = string.find(mod_and_key, "[%u%-]+%-(.+)$")
 		assert(key, string.format("unable to parse key: %s", k))
 
 		-- user might not have defined Shift explicitly as mod when using an
