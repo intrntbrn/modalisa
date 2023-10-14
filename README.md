@@ -2,9 +2,9 @@ WIP
 
 ```
 require("motion").setup({
-	key = { {}, "Super_L" },
-	exit_key = { "Escape" },
-	back_key = "BackSpace",
+	key = "<Super_L>",
+	stop_keys = { "<Escape>" },
+	back_keys = { "<BackSpace>" },
 	default_keys = true,
 	mod_hold_continue = true,
 	mod_release_stop = "after",

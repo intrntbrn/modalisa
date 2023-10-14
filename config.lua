@@ -5,12 +5,10 @@ local unpack = unpack or table.unpack
 
 local defaults = {
 	-- keys
-	-- key = { { "Mod4" }, "y" },
 	key = "<M-y>",
-	key_custom = "<M-v>",
-	exit_key = { "Escape" },
-	back_key = "BackSpace",
-	stop_keys = { "Escape", "q" },
+	back_keys = "<BackSpace>",
+	stop_keys = { "<Escape>" },
+
 	-- core
 	unique = { "key" },
 	mod_hold_continue = true,

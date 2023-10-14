@@ -1,16 +1,15 @@
 local M = {}
 
--- use internal key definition for keys
+-- TODO:
 -- hidden property
 -- force stay open keybind
 -- add keybind support for each tree node
--- unique stuff
--- we can also get rid off unique if move the keys init into another function
 -- keyname tester
 -- timestamp
 -- move wm specific configs away from config?
 -- fix default clienting floating resize
 -- <M-*> (or other special characters) are not getting matched
+-- hints delay makes no sense if there are already hints displayed
 
 local awful = require("awful")
 local tree = require("motion.tree")
@@ -149,7 +148,7 @@ local function add_key_to_map(m, k)
 	m[k.key] = m[k.key] or {}
 	table.insert(m[k.key], k)
 
-	-- sort by mod count desc
+	-- sort by mod count descending
 	table.sort(m[k.key], function(a, b)
 		return #a.mods > #b.mods
 	end)
@@ -161,10 +160,9 @@ local function keygrabber_keys(t)
 	motion_tree = t
 	local succs = t:successors()
 	local opts = t:opts()
-
 	local ret = {}
 
-	-- make succs
+	-- regular keys (successors)
 	for k, v in pairs(succs) do
 		if v:cond() then
 			for _, key in pairs(parse_vim_key(k)) do
@@ -174,49 +172,55 @@ local function keygrabber_keys(t)
 	end
 
 	-- stop keys
-	-- assert(opts.stop_keys, "no stop keys")
-	-- local stop_keys
-	--
-	-- if type(opts.stop_keys) == "table" then
-	-- 	stop_keys = opts.stop_keys
-	-- elseif type(opts.stop_keys) == "string" then
-	-- 	stop_keys = { opts.stop_keys }
-	-- end
-	--
-	--    assert(stop_keys, "no stop keys")
-	--
-	--    for _, v in pairs(stop_keys) do
-	--        local key = {
-	--
-	--        }
-	--    end
+	assert(opts.stop_keys, "no stop keys")
+	local stop_keys
 
-	-- back key
-	if opts.back_key and t:pred() then
-		local key = {
-			mods = {},
-			key = opts.back_key,
-			back_tree = t:pred(),
-		}
-		add_key_to_map(ret, key)
+	if type(opts.stop_keys) == "table" then
+		stop_keys = opts.stop_keys
+	elseif type(opts.stop_keys) == "string" then
+		stop_keys = { opts.stop_keys }
+	end
+
+	assert(stop_keys, "no stop keys")
+
+	for _, sk in pairs(stop_keys) do
+		local parsed_keys = parse_vim_key(sk)
+		for _, parsed_key in pairs(parsed_keys) do
+			local key = {
+				mods = parsed_key.mods,
+				key = parsed_key.key,
+				stop = true,
+			}
+			add_key_to_map(ret, key)
+		end
+	end
+
+	-- back keys
+	if t:pred() then
+		local back_keys
+
+		if type(opts.back_keys) == "table" then
+			back_keys = opts.back_keys
+		elseif type(opts.back_keys) == "string" then
+			back_keys = { opts.back_keys }
+		end
+
+		if back_keys then
+			for _, bk in pairs(back_keys) do
+				local parsed_keys = parse_vim_key(bk)
+				for _, parsed_key in pairs(parsed_keys) do
+					local key = {
+						mods = parsed_key.mods,
+						key = parsed_key.key,
+						back = t:pred(),
+					}
+					add_key_to_map(ret, key)
+				end
+			end
+		end
 	end
 
 	return ret
-end
-
--- TODO: stop keys are NOT dynamic and only set on init
-local function keygrabber_stop_keys(exit_keys)
-	local ks = {}
-
-	if type(exit_keys) == "table" then
-		for _, v in pairs(exit_keys) do
-			table.insert(ks, v)
-		end
-	else
-		table.insert(ks, exit_keys)
-	end
-
-	return ks
 end
 
 function M.run(key_sequence, parsed_keybind)
@@ -332,11 +336,9 @@ function M.grab(t, keybind)
 	end
 
 	local keybinds = keygrabber_keys(t)
-	local stop_keys = keygrabber_stop_keys(opts.exit_key)
-	assert(stop_keys)
+	assert(keybinds)
 
 	local grabber = akeygrabber({
-		stop_key = stop_keys,
 		keyreleased_callback = hold_mod and function(self, _, key)
 			-- keyreleased_callback is only used for hold_mod detection
 			print("released callback: ", dump(key))
@@ -423,10 +425,24 @@ function M.grab(t, keybind)
 					end
 
 					if match then
-						-- run the key function and exit
-						local key_name = v.name
-						print("running key function: ", key_name)
-						local next_t = fn(t[key_name] or v.back_tree)
+						-- stop key
+						if v.stop then
+							print("***** STOP *******")
+							self:stop()
+							return
+						end
+
+						local next_t
+
+						-- back key
+						if v.back then
+							next_t = v.back
+						else
+							-- regular key
+							local key_name = v.name
+							print("running key function: ", key_name)
+							next_t = fn(t[key_name])
+						end
 
 						-- no tree to run next
 						if not next_t then
