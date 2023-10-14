@@ -500,21 +500,21 @@ function M.client_move_smart(c, dir, resize_delta)
 	end
 end
 
-function M.client_resize_smart(c, dir, px, factor)
+function M.client_resize_smart(c, dir, resize_delta, resize_factor)
 	c = c or client.focus
 	if not c then
 		return
 	end
 
-	px = px or default_resize_delta
-	factor = factor or default_resize_factor
+	resize_delta = resize_delta or default_resize_delta
+	resize_factor = resize_factor or default_resize_factor
 
 	local layout = awful.layout.get(awful.screen.focused()).name
 	if layout == "floating" or c.floating then
-		return M.client_floating_resize(c, dir, px)
+		return M.client_floating_resize(c, dir, resize_delta)
 	end
 
-	M.client_resize_tiled(c, dir, factor)
+	M.client_resize_tiled(c, dir, resize_factor)
 end
 
 function M.client_floating_resize(c, dir, px)

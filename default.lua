@@ -14,16 +14,15 @@ function M.setup(opts)
 		["J"] = wm.client_move_smart("down"),
 		["K"] = wm.client_move_smart("up"),
 		["L"] = wm.client_move_smart("right"),
+
 		["<Left>"] = wm.client_resize_smart("left"),
 		["<Down>"] = wm.client_resize_smart("down"),
 		["<Up>"] = wm.client_resize_smart("up"),
 		["<Right>"] = wm.client_resize_smart("right"),
-
-		-- TODO: not supported yet
-		-- ["<S-Left>"] = wm.client_floating_size_decrease("left"),
-		-- ["<S-Down>"] = wm.client_floating_size_decrease("down"),
-		-- ["<S-Up>"] = wm.client_floating_size_decrease("up"),
-		-- ["<S-Right>"] = wm.client_floating_size_decrease("right"),
+		["<S-Left>"] = wm.client_floating_size_decrease("left"),
+		["<S-Down>"] = wm.client_floating_size_decrease("down"),
+		["<S-Up>"] = wm.client_floating_size_decrease("up"),
+		["<S-Right>"] = wm.client_floating_size_decrease("right"),
 
 		["<"] = wm.layout_column_count_decrease(),
 		[">"] = wm.layout_column_count_increase(),
@@ -57,7 +56,7 @@ function M.setup(opts)
 		["o"] = wm.spawn_appmenu(),
 
 		-- awesome
-		["a"] = { desc = "awesome", opts = { group = "awesome", mod_release_close = false } },
+		["a"] = { desc = "awesome", opts = { group = "awesome", mod_release_stop = false } },
 		["aQ"] = wm.awesome_quit(),
 		["aR"] = wm.awesome_restart(),
 		["ax"] = wm.awesome_execute(),

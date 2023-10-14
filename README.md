@@ -7,7 +7,7 @@ require("motion").setup({
 	back_key = "BackSpace",
 	default_keys = true,
 	mod_hold_continue = true,
-	mod_release_close = "after",
+	mod_release_stop = "after",
 	hints_delay = 0,
 	timeout = 0,
 	browser = "firefox",
