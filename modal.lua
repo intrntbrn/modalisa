@@ -1,5 +1,6 @@
 local M = {}
 
+-- use internal key definition for keys
 -- hidden property
 -- force stay open keybind
 -- add keybind support for each tree node
@@ -8,6 +9,8 @@ local M = {}
 -- keyname tester
 -- timestamp
 -- move wm specific configs away from config?
+-- fix default clienting floating resize
+-- <M-*> (or other special characters) are not getting matched
 
 local awful = require("awful")
 local tree = require("motion.tree")
@@ -66,7 +69,7 @@ local function on_stop(t)
 	awesome.emit_signal("motion::stop", t)
 end
 
-local function parse_key(k)
+local function parse_vim_key(k)
 	-- upper alpha (e.g. "S")
 	if string.match(k, "^%u$") then
 		return {
@@ -81,8 +84,8 @@ local function parse_key(k)
 		}
 	end
 
-	-- <keysym> (e.g. <BackSpace> or <F11>)
-	local _, _, keysym = string.find(k, "^<(%w+)>$")
+	-- <keysym> (e.g. <BackSpace>, <F11>, <Alt_L>)
+	local _, _, keysym = string.find(k, "^<([%w_]+)>$")
 	if keysym then
 		return {
 			{ key = keysym, mods = {}, name = k },
@@ -90,7 +93,7 @@ local function parse_key(k)
 	end
 
 	-- <Mod-key> (e.g. <A-C-F1>)
-	local _, _, mod_and_key = string.find(k, "^<([%u%-]+%w+)>$")
+	local _, _, mod_and_key = string.find(k, "^<([%u%-]+[%w%p]+)>$")
 	if mod_and_key then
 		local mods = {}
 		for mod in string.gmatch(mod_and_key, "%u%-") do
@@ -104,10 +107,10 @@ local function parse_key(k)
 		end
 
 		-- get the actual key
-		local _, _, key = string.find(mod_and_key, "[%u%-]+%-(%w+)$")
+		local _, _, key = string.find(mod_and_key, "[%u%-]+%-([%w%p]+)$")
 		assert(key, string.format("unable to parse key: %s", k))
 
-		-- user might not have explicitly defined Shift as mod when using an
+		-- user might not have defined Shift explicitly as mod when using an
 		-- upper alpha as key (<A-K> == <A-S-K>)
 		if string.match(key, "^%u$") then
 			local shift = mod_map["S"]
@@ -156,27 +159,44 @@ end
 -- @return table Table with tables of keys
 local function keygrabber_keys(t)
 	motion_tree = t
-	local succs = motion_tree:successors()
-	local opts = motion_tree:opts()
+	local succs = t:successors()
+	local opts = t:opts()
 
 	local ret = {}
 
 	-- make succs
 	for k, v in pairs(succs) do
 		if v:cond() then
-			for _, key in pairs(parse_key(k)) do
+			for _, key in pairs(parse_vim_key(k)) do
 				add_key_to_map(ret, key)
 			end
 		end
 	end
 
+	-- stop keys
+	-- assert(opts.stop_keys, "no stop keys")
+	-- local stop_keys
+	--
+	-- if type(opts.stop_keys) == "table" then
+	-- 	stop_keys = opts.stop_keys
+	-- elseif type(opts.stop_keys) == "string" then
+	-- 	stop_keys = { opts.stop_keys }
+	-- end
+	--
+	--    assert(stop_keys, "no stop keys")
+	--
+	--    for _, v in pairs(stop_keys) do
+	--        local key = {
+	--
+	--        }
+	--    end
+
 	-- back key
-	if opts.back_key and motion_tree:pred() then
+	if opts.back_key and t:pred() then
 		local key = {
 			mods = {},
 			key = opts.back_key,
-			-- HACK: back key entry has special property back_tree
-			back_tree = motion_tree:pred(),
+			back_tree = t:pred(),
 		}
 		add_key_to_map(ret, key)
 	end
@@ -184,6 +204,7 @@ local function keygrabber_keys(t)
 	return ret
 end
 
+-- TODO: stop keys are NOT dynamic and only set on init
 local function keygrabber_stop_keys(exit_keys)
 	local ks = {}
 
@@ -198,10 +219,10 @@ local function keygrabber_stop_keys(exit_keys)
 	return ks
 end
 
-function M.run(key_sequence, keybind)
+function M.run(key_sequence, parsed_keybind)
 	assert(tree)
 	local t = tree[key_sequence]
-	return M.grab(t, keybind)
+	return M.grab(t, parsed_keybind)
 end
 
 function M.grab(t, keybind)
@@ -211,7 +232,7 @@ function M.grab(t, keybind)
 	-- hold mod init
 	local hold_mod = opts.mod_hold_continue and keybind
 	local hold_mod_ran_once = false
-	local root_key = hold_mod and util.parse_keybind(keybind)
+	local root_key = hold_mod and keybind
 	if hold_mod then
 		assert(root_key.key, "hold_mod is active but there is no root key")
 	end
@@ -300,7 +321,7 @@ function M.grab(t, keybind)
 		return t
 	end
 
-	-- when calling M.run() on an dynamic menu (e.g. via hotkey), we have to force the menu
+	-- when calling M.run() on an dynamic menu (e.g. via custom hotkey), we have to force the menu
 	-- generation
 	if vim.tbl_count(t:successors()) == 0 then
 		fn(t) -- generate the submenu
@@ -317,7 +338,7 @@ function M.grab(t, keybind)
 	local grabber = akeygrabber({
 		stop_key = stop_keys,
 		keyreleased_callback = hold_mod and function(self, _, key)
-			-- keyreleased_callback is only used for hold_mod
+			-- keyreleased_callback is only used for hold_mod detection
 			print("released callback: ", dump(key))
 
 			-- clear key
@@ -337,7 +358,7 @@ function M.grab(t, keybind)
 			if not is_hold_mode_active() then
 				-- all mods/keys are cleared
 
-				local mod_release = t:opts().mod_release_close
+				local mod_release = t:opts().mod_release_stop
 				if mod_release == "always" or hold_mod_ran_once and mod_release == "after" then
 					self:stop()
 					return
@@ -425,9 +446,10 @@ function M.grab(t, keybind)
 				end
 			else
 				-- key is not defined
+				-- it might be a mod key that is pressed again
 
-				-- it might be a mod key
 				if converted_key then
+					-- key is a mod
 					for _, m in pairs(root_key.mods) do
 						if m == converted_key then
 							-- user has re-pressed a root mod key
@@ -436,19 +458,13 @@ function M.grab(t, keybind)
 						end
 					end
 
-					-- user has pressed a mod key that is not a root mod
+					-- mod is not part of keybind
 					-- ignore it
 					return
 				end
 
 				-- key is not defined and not a mod
 				if t:opts().stop_on_unknown_key then
-					-- TODO: remove that?
-					-- user is holding down a non mod key as mod (see case 2 above)
-					-- if hold_mod and hold_mods_active[key] then
-					-- 	return
-					-- end
-
 					self:stop()
 				end
 			end
@@ -470,11 +486,23 @@ function M.grab(t, keybind)
 	grabber:start()
 end
 
-function M.add_globalkey(prefix, key)
-	key = util.parse_keybind(key)
+function M.add_globalkey_vim(prefix, key)
+	local parsed_keys = parse_vim_key(key)
+	for _, parsed_key in pairs(parsed_keys) do
+		print("parsed vim key: ", dump(parsed_key))
+		awful.keyboard.append_global_keybindings({
+			awful.key(parsed_key.mods, parsed_key.key, function()
+				M.run(prefix, parsed_key)
+			end),
+		})
+	end
+end
+
+function M.add_globalkey(prefix, parsed_key)
+	parsed_key = util.parse_awesome_key(parsed_key)
 	awful.keyboard.append_global_keybindings({
-		awful.key(key.mods, key.key, function()
-			M.run(prefix, key)
+		awful.key(parsed_key.mods, parsed_key.key, function()
+			M.run(prefix, parsed_key)
 		end),
 	})
 end
@@ -488,15 +516,15 @@ function M.resume()
 end
 
 function M.setup(opts)
-	if opts.key then
-		M.add_globalkey("", opts.key)
-	end
-
 	awesome.connect_signal("xkb::map_changed", function()
 		generate_mod_conversion_maps()
 	end)
 
 	generate_mod_conversion_maps()
+
+	if opts.key then
+		M.add_globalkey_vim("", opts.key)
+	end
 
 	print(dump(mod_conversion))
 end

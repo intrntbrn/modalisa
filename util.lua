@@ -10,7 +10,6 @@ M.labels_numericalpha = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS
 function M.merge_opts(a, b)
 	a = a or {}
 	b = b or {}
-	-- print("merge_opts: ", dump(a), dump(b))
 	local uniques = vim.tbl_deep_extend("force", a.unique or {}, b.unique or {})
 
 	for _, k in pairs(uniques) do
@@ -21,8 +20,6 @@ function M.merge_opts(a, b)
 
 	local all = { a, b }
 	local ret = vim.tbl_deep_extend("force", unpack(all))
-
-	-- print("merge_opts ret: ", dump(ret))
 
 	return ret
 end
@@ -38,7 +35,7 @@ function M.keyname(k)
 	return k
 end
 
-function M.split_key(str)
+function M.split_vim_key(str)
 	if not str or string.len(str) == 0 then
 		return nil, nil
 	end
@@ -126,7 +123,9 @@ function M.parse_key(key, index)
 	}
 end
 
-function M.parse_keybind(keybind)
+-- input: { { "mods" }, "key" }
+-- output: { mods = { "mods" }, key = "key" }
+function M.parse_awesome_key(keybind)
 	local t = type(keybind)
 	if t == "string" then
 		return { mods = {}, key = keybind }

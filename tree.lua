@@ -19,7 +19,7 @@ local function _remove(index, tree)
 		return
 	end
 
-	local char, next = util.split_key(index)
+	local char, next = util.split_vim_key(index)
 
 	-- tree does not contain char
 	local children_char = rawget(children, char)
@@ -54,7 +54,7 @@ local function remove(index, tree)
 end
 
 local function _add(succ, tree, index)
-	local char, next = util.split_key(index)
+	local char, next = util.split_vim_key(index)
 
 	if char then
 		-- init children
@@ -85,7 +85,7 @@ local function get(index, tree, prev_opts, prev_tree)
 		return nil
 	end
 
-	local c, suffix = util.split_key(index)
+	local c, suffix = util.split_vim_key(index)
 
 	-- node has data stored
 	if rawget(tree, "data") then

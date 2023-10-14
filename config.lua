@@ -4,28 +4,34 @@ local vim = require("motion.vim")
 local unpack = unpack or table.unpack
 
 local defaults = {
-	show_hints = true,
-	default_keys = true,
-	hints_delay = 0,
+	-- keys
+	-- key = { { "Mod4" }, "y" },
+	key = "<M-y>",
+	key_custom = "<M-v>",
 	exit_key = { "Escape" },
 	back_key = "BackSpace",
+	stop_keys = { "Escape", "q" },
+	-- core
+	unique = { "key" },
 	mod_hold_continue = true,
-	mod_release_close = "after", -- always | after
+	mod_release_stop = "after", -- always | after
 	stop_on_unknown_key = true,
-	auto_select_the_only_choice = false,
 	timeout = 0,
 
-	key = { { "Mod4" }, "y" },
-	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+	-- hints
+	hints_delay = 0,
+	show_hints = true,
 
+	default_keys = true,
+
+	-- awesome
+	auto_select_the_only_choice = false,
+	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
 	resize_delta = require("beautiful").xresources.apply_dpi(32),
 	resize_factor = 0.025,
-
 	browser = "firefox || chromium || google-chrome-stable || qutebrowser",
 	terminal = "alacritty || kitty || wezterm || st || urxvt || xterm",
 	app_menu = "rofi -show drun -display-drun ''",
-
-	unique = { "key" },
 }
 
 local options
