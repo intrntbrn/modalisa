@@ -95,9 +95,17 @@ local function create_popup(t)
 		}),
 	})
 
-	-- hide after the new one to prevent flickering
+	-- prevent flickering
 	if old_popup then
-		old_popup.visible = false
+		-- without delay there is still some occasional flickering
+		gears.timer({
+			timeout = 0.01,
+			callback = function()
+				old_popup.visible = false
+			end,
+			single_shot = true,
+			autostart = true,
+		})
 	end
 end
 
