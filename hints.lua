@@ -29,17 +29,18 @@ local function create_popup(t)
 	for k, succ in pairs(succs) do
 		if succ:cond() then
 			local succ_opts = succ:opts()
+			if not succ_opts.hidden then
+				local group = ""
+				if succ_opts and succ_opts.group then
+					group = succ_opts.group
+				end
 
-			local group = ""
-			if succ_opts and succ_opts.group then
-				group = succ_opts.group
-			end
-
-			k = util.keyname(k)
-			local text = string.format("[%s]", k)
-			local desc = succ:desc()
-			if desc and string.len(desc) > 0 then
-				text = text .. string.format(" > %s", succ:desc())
+				k = util.keyname(k, succ_opts.hints_key_aliases)
+				local text = string.format("[%s]", k)
+				local desc = succ:desc()
+				if desc and string.len(desc) > 0 then
+					text = text .. string.format(" > %s", succ:desc())
+				end
 
 				table.insert(elements, {
 					group = group,
@@ -107,7 +108,7 @@ local function handle(t)
 		timer:stop()
 	end
 
-	if not opts.show_hints then
+	if not opts.hints_show then
 		hide()
 		return
 	end

@@ -24,12 +24,18 @@ function M.merge_opts(a, b)
 	return ret
 end
 
-function M.keyname(k)
+function M.keyname(k, aliases)
 	-- we are forced to remove the <> surrounding,
 	-- otherwise the key is interpreted as a tag in widgets
 	_, _, key = string.find(k, "<(.+)>")
 	if key then
 		k = key
+	end
+
+	if aliases then
+		for s, v in pairs(aliases) do
+			k = string.gsub(k, s, v)
+		end
 	end
 
 	return k

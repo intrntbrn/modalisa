@@ -8,6 +8,7 @@ require("motion").setup({
 	default_keys = true,
 	mod_hold_continue = true,
 	mod_release_stop = "after",
+	hints_show = true,
 	hints_delay = 0,
 	timeout = 0,
 	browser = "firefox",

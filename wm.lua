@@ -235,7 +235,7 @@ function M.client_select_picker(multi_window, include_focused_client)
 	return {
 		opts = {
 			group = "client.focus",
-			show_hints = false,
+			hints_show = false,
 			labels = "asdfertgcvjkluionmb",
 		},
 		cond = function()
@@ -256,7 +256,7 @@ function M.client_swap_picker()
 	return {
 		opts = {
 			group = "client.swap",
-			show_hints = false,
+			hints_show = false,
 			labels = "asdfertgcvjkluionmb",
 		},
 		cond = function()
@@ -590,7 +590,7 @@ end
 
 function M.client_unminimize_menu()
 	return {
-		opts = { group = "client.property", hints_delay = 0, show_hints = true },
+		opts = { group = "client.property", hints_delay = 0, hints_show = true },
 		cond = function()
 			local s = awful.screen.focused()
 			for _, t in ipairs(s.tags) do

@@ -10,15 +10,21 @@ local defaults = {
 	stop_keys = { "<Escape>" },
 
 	-- core
-	unique = { "key" },
+	unique = { "key", "hidden" },
 	mod_hold_continue = true,
 	mod_release_stop = "after", -- always | after
 	stop_on_unknown_key = true,
 	timeout = 0,
 
 	-- hints
+	hints_show = true,
 	hints_delay = 0,
-	show_hints = true,
+	hints_key_aliases = {
+		["Left"] = "←",
+		["Right"] = "→",
+		["Up"] = "↑",
+		["Down"] = "→",
+	},
 
 	default_keys = true,
 
