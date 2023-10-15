@@ -35,12 +35,12 @@ local function _remove(index, tree)
 
 	-- we've reached the node
 
-	-- if there are no children, we can delete the whole node
-	local children_char_children = rawget(children_char, "children")
-	if not children_char_children or vim.tbl_count(children_char_children) == 0 then
-		rawset(children, char, nil)
-		return
-	end
+	-- -- if there are no children, we can delete the whole node
+	-- local children_char_children = rawget(children_char, "children")
+	-- if not children_char_children or vim.tbl_count(children_char_children) == 0 then
+	-- 	rawset(children, char, nil)
+	-- 	return
+	-- end
 
 	-- node has children, therefore we can only delete data
 	rawset(children_char, "data", nil)
@@ -73,11 +73,16 @@ local function _add(succ, tree, index)
 	rawset(tree, "data", succ)
 end
 
-local function add(succ, tree, path)
+-- @param[opt=""] prefix
+local function add(succ, tree, path, prefix)
 	assert(tree)
 	path, succ = util.parse_key(succ, path)
 	assert(path)
 	assert(string.len(path) > 0)
+	if prefix then
+		assert(type(prefix) == "string", "prefix is a not a string")
+		path = string.format("%s%s", prefix, path)
+	end
 	return _add(succ, tree, path)
 end
 
@@ -129,13 +134,13 @@ local function get(index, tree, prev_opts, prev_tree)
 	return M.mt(ret)
 end
 
-function M.add_key(key)
-	add(key, root_tree)
+function M.add_key(key, prefix)
+	add(key, root_tree, nil, prefix)
 end
 
-function M.add_keys(keys)
+function M.add_keys(keys, prefix)
 	for k, v in pairs(keys) do
-		add(v, root_tree, k)
+		add(v, root_tree, k, prefix)
 	end
 end
 
@@ -269,9 +274,9 @@ end
 
 function M.setup(opts)
 	root_tree.data = {
+		id = get_id(),
 		desc = "motion",
 		name = opts.key,
-		id = get_id(),
 	}
 end
 
