@@ -14,7 +14,7 @@ local tree = require("motion.tree")
 local vim = require("motion.vim")
 local util = require("motion.util")
 local dump = require("motion.vim").inspect
-local akeygrabber = require("motion.keygrabber")
+local akeygrabber = require("awful.keygrabber")
 
 local motion_tree
 
@@ -66,77 +66,6 @@ local function on_stop(t)
 	awesome.emit_signal("motion::stop", t)
 end
 
-local function parse_vim_key(k)
-	-- upper alpha (e.g. "S")
-	if string.match(k, "^%u$") then
-		return {
-			{ key = k, mods = { "Shift" }, name = k },
-		}
-	end
-
-	-- alphanumeric char (e.g. "s", "4")
-	if string.match(k, "^%w$") then
-		return {
-			{ key = k, mods = {}, name = k },
-		}
-	end
-
-	-- <keysym> (e.g. <BackSpace>, <F11>, <Alt_L>)
-	local _, _, keysym = string.find(k, "^<([%w_]+)>$")
-	if keysym then
-		return {
-			{ key = keysym, mods = {}, name = k },
-		}
-	end
-
-	-- <Mod-key> (e.g. <A-C-BackSpace>, <A- >, <A-*>)
-	local _, _, mod_and_key = string.find(k, "^<([%u%-]+.+)>$")
-	if mod_and_key then
-		local mods = {}
-		for mod in string.gmatch(mod_and_key, "%u%-") do
-			mod = string.gsub(mod, "%-$", "")
-			local modifier = mod_map[mod]
-			assert(modifier, string.format("unable to parse modifier: %s in key: %s", mod, k))
-			if not vim.tbl_contains(mods, modifier) then
-				-- ignore duplicate mods (e.g. <A-A-F1>)
-				table.insert(mods, modifier)
-			end
-		end
-
-		-- get the actual key
-		local _, _, key = string.find(mod_and_key, "[%u%-]+%-(.+)$")
-		assert(key, string.format("unable to parse key: %s", k))
-
-		-- user might not have defined Shift explicitly as mod when using an
-		-- upper alpha as key (<A-K> == <A-S-K>)
-		if string.match(key, "^%u$") then
-			local shift = mod_map["S"]
-			if not vim.tbl_contains(mods, shift) then
-				table.insert(mods, shift)
-			end
-		end
-
-		return {
-			{ key = key, mods = mods, name = k },
-		}
-	end
-
-	assert(string.len(k) == 1, string.format("unable to parse unknown key: %s", k))
-
-	-- we assume it's a special character (e.g. $ or #)
-
-	-- HACK: awful.keygrabber requires for special keys to also specify shift as
-	-- mods. This is utterly broken, because for some layouts the
-	-- minus key is on the shift layer, but for others layouts not. Therefore we're just
-	-- ignoring the shift state by adding the key with and without shift to the
-	-- map.
-
-	return {
-		{ key = k, mods = {}, name = k },
-		{ key = k, mods = { "Shift" }, name = k },
-	}
-end
-
 -- @param m table Map of parsed keys
 -- @param k table Parsed key
 local function add_key_to_map(m, k)
@@ -163,7 +92,7 @@ local function keygrabber_keys(t)
 	-- regular keys (successors)
 	for k, v in pairs(succs) do
 		if v:cond() then
-			for _, key in pairs(parse_vim_key(k)) do
+			for _, key in pairs(M.parse_vim_key(k)) do
 				add_key_to_map(ret, key)
 			end
 		end
@@ -182,7 +111,7 @@ local function keygrabber_keys(t)
 	assert(stop_keys, "no stop keys")
 
 	for _, sk in pairs(stop_keys) do
-		local parsed_keys = parse_vim_key(sk)
+		local parsed_keys = M.parse_vim_key(sk)
 		for _, parsed_key in pairs(parsed_keys) do
 			local key = {
 				mods = parsed_key.mods,
@@ -205,7 +134,7 @@ local function keygrabber_keys(t)
 
 		if back_keys then
 			for _, bk in pairs(back_keys) do
-				local parsed_keys = parse_vim_key(bk)
+				local parsed_keys = M.parse_vim_key(bk)
 				for _, parsed_key in pairs(parsed_keys) do
 					local key = {
 						mods = parsed_key.mods,
@@ -498,8 +427,79 @@ function M.grab(t, keybind)
 	grabber:start()
 end
 
+function M.parse_vim_key(k)
+	-- upper alpha (e.g. "S")
+	if string.match(k, "^%u$") then
+		return {
+			{ key = k, mods = { "Shift" }, name = k },
+		}
+	end
+
+	-- alphanumeric char (e.g. "s", "4")
+	if string.match(k, "^%w$") then
+		return {
+			{ key = k, mods = {}, name = k },
+		}
+	end
+
+	-- <keysym> (e.g. <BackSpace>, <F11>, <Alt_L>)
+	local _, _, keysym = string.find(k, "^<([%w_]+)>$")
+	if keysym then
+		return {
+			{ key = keysym, mods = {}, name = k },
+		}
+	end
+
+	-- <Mod-key> (e.g. <A-C-BackSpace>, <A- >, <A-*>)
+	local _, _, mod_and_key = string.find(k, "^<([%u%-]+.+)>$")
+	if mod_and_key then
+		local mods = {}
+		for mod in string.gmatch(mod_and_key, "%u%-") do
+			mod = string.gsub(mod, "%-$", "")
+			local modifier = mod_map[mod]
+			assert(modifier, string.format("unable to parse modifier: %s in key: %s", mod, k))
+			if not vim.tbl_contains(mods, modifier) then
+				-- ignore duplicate mods (e.g. <A-A-F1>)
+				table.insert(mods, modifier)
+			end
+		end
+
+		-- get the actual key
+		local _, _, key = string.find(mod_and_key, "[%u%-]+%-(.+)$")
+		assert(key, string.format("unable to parse key: %s", k))
+
+		-- user might not have defined Shift explicitly as mod when using an
+		-- upper alpha as key (<A-K> == <A-S-K>)
+		if string.match(key, "^%u$") then
+			local shift = mod_map["S"]
+			if not vim.tbl_contains(mods, shift) then
+				table.insert(mods, shift)
+			end
+		end
+
+		return {
+			{ key = key, mods = mods, name = k },
+		}
+	end
+
+	assert(string.len(k) == 1, string.format("unable to parse unknown key: %s", k))
+
+	-- we assume it's a special character (e.g. $ or #)
+
+	-- HACK: awful.keygrabber requires for special keys to also specify shift as
+	-- mods. This is utterly broken, because for some layouts the
+	-- minus key is on the shift layer, but for others layouts not. Therefore we're just
+	-- ignoring the shift state by adding the key with and without shift to the
+	-- map.
+
+	return {
+		{ key = k, mods = {}, name = k },
+		{ key = k, mods = { "Shift" }, name = k },
+	}
+end
+
 function M.add_globalkey_vim(prefix, key)
-	local parsed_keys = parse_vim_key(key)
+	local parsed_keys = M.parse_vim_key(key)
 	for _, parsed_key in pairs(parsed_keys) do
 		awful.keyboard.append_global_keybindings({
 			awful.key(parsed_key.mods, parsed_key.key, function()
@@ -531,6 +531,8 @@ function M.setup(opts)
 	awesome.connect_signal("xkb::map_changed", function()
 		generate_mod_conversion_maps()
 	end)
+
+	awesome.connect_signal("motion::fake_input", function() end)
 
 	generate_mod_conversion_maps()
 

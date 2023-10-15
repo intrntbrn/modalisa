@@ -17,13 +17,6 @@ local M = {}
 -- icons?
 -- opts:
 -- height %, width %, placement, cell_size, overlap_wibox
--- function beautiful.get_font_height(name)
---
--- local line_height = math.max(
---     beautiful.get_font_height(self.font),
---     beautiful.get_font_height(self.description_font)
--- )
---
 
 local popup
 local timer
@@ -76,13 +69,14 @@ local function make_entries(keys, opts)
 					group = kopts.group
 				end
 
-				k = util.keyname(k, aliases)
+				local keyname = util.keyname(k, aliases)
 
 				local separator = kopts.hints_key_separator
 
 				table.insert(entries, {
+					_key = k,
 					group = group,
-					key = k,
+					key = keyname,
 					desc = key:desc(),
 					id = key:id(),
 					fg = kopts.fg,
@@ -179,7 +173,12 @@ local function create_popup(t)
 			if not entry then
 				break -- no more entries
 			end
-			local odd = (i % 2) == 0
+			local odd_source = opts.hints_odd_style == "row" and r or c
+			if opts.hints_odd_style == "checkered" then
+				odd_source = r + c
+			end
+
+			local odd = (odd_source % 2) == 0
 			local bg = odd and opts.hints_color_entry_odd_bg or opts.hints_color_entry_bg
 			local bg_hover = util.lighten(bg, 20)
 
@@ -235,7 +234,8 @@ local function create_popup(t)
 			widget:connect_signal("button::press", function(_, _, _, button)
 				if button == 1 then
 					print("button press: ", entry.key)
-					entry.run()
+					root.fake_input("key_press", entry._key)
+					root.fake_input("key_release", entry._key)
 				end
 			end)
 

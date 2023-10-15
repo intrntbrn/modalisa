@@ -55,6 +55,7 @@ local defaults = {
 		top = 0,
 		bottom = dpi(50),
 	},
+	hints_odd_style = "checkered", -- row  || column || checkered
 	hints_font = "Monospace Bold 12",
 	hints_font_separator = "Monospace Bold 12",
 	hints_font_desc = "Monospace 12",
