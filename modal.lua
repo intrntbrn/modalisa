@@ -1,7 +1,6 @@
 local M = {}
 
 -- TODO:
--- hidden property
 -- force stay open keybind
 -- add keybind support for each tree node
 -- keyname tester
@@ -350,11 +349,8 @@ function M.grab(t, keybind)
 			-- clear mod
 			local converted_key = mod_conversion[key] -- e.g. Super_L -> Mod4
 			if converted_key and hold_mods_active[converted_key] then
-				print("cleared converted key: ", converted_key)
 				hold_mods_active[converted_key] = nil
 			end
-
-			print("hold_active: ", dump(hold_mods_active))
 
 			if not is_hold_mode_active() then
 				-- all mods/keys are cleared
@@ -426,7 +422,6 @@ function M.grab(t, keybind)
 					if match then
 						-- stop key
 						if v.stop then
-							print("***** STOP *******")
 							self:stop()
 							return
 						end
@@ -439,7 +434,8 @@ function M.grab(t, keybind)
 						else
 							-- regular key
 							local key_name = v.name
-							print("running key function: ", key_name)
+							print("running key function: ", key_name, t[key_name]:desc())
+
 							next_t = fn(t[key_name])
 						end
 
@@ -480,6 +476,7 @@ function M.grab(t, keybind)
 
 				-- key is not defined and not a mod
 				if t:opts().stop_on_unknown_key then
+					print("unknown key: ", key)
 					self:stop()
 				end
 			end
@@ -504,7 +501,6 @@ end
 function M.add_globalkey_vim(prefix, key)
 	local parsed_keys = parse_vim_key(key)
 	for _, parsed_key in pairs(parsed_keys) do
-		print("parsed vim key: ", dump(parsed_key))
 		awful.keyboard.append_global_keybindings({
 			awful.key(parsed_key.mods, parsed_key.key, function()
 				M.run(prefix, parsed_key)
@@ -513,6 +509,7 @@ function M.add_globalkey_vim(prefix, key)
 	end
 end
 
+-- not used currently
 function M.add_globalkey(prefix, parsed_key)
 	parsed_key = util.parse_awesome_key(parsed_key)
 	awful.keyboard.append_global_keybindings({

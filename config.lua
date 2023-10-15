@@ -1,5 +1,7 @@
 local M = {}
 local vim = require("motion.vim")
+local beautiful = require("beautiful")
+local dpi = require("beautiful").xresources.apply_dpi
 
 local unpack = unpack or table.unpack
 
@@ -8,6 +10,7 @@ local defaults = {
 	key = "<M-y>",
 	back_keys = "<BackSpace>",
 	stop_keys = { "<Escape>" },
+	default_keys = true,
 
 	-- core
 	unique = { "key", "hidden" },
@@ -20,18 +23,47 @@ local defaults = {
 	hints_show = true,
 	hints_delay = 0,
 	hints_key_aliases = {
-		["Left"] = "←",
-		["Right"] = "→",
-		["Up"] = "↑",
-		["Down"] = "→",
+		-- ["(A%-)[%u%-]"] = "Alt",
+		-- ["S%-"] = "Shift",
+		-- ["C%-"] = "Ctrl",
+		-- ["M%-"] = "Super",
+		[" "] = "space",
+		Left = "←",
+		Right = "→",
+		Up = "↑",
+		Down = "→",
+		XF86MonBrightnessUp = "🔆+",
+		XF86MonBrightnessDown = "🔅-",
+		XF86AudioRaiseVolume = "🕩+",
+		XF86AudioLowerVolume = "🕩-",
+		XF86AudioMute = "🔇",
+		XF86AudioPlay = "⏯",
+		XF86AudioPrev = "⏮",
+		XF86AudioNext = "⏭",
+		XF86AudioStop = "⏹",
+	},
+	hints_key_separator = " ➜ ",
+	hints_max_key_width = 5,
+	hints_min_entry_width = 30, -- chars
+	hints_width = 0.5,
+	hints_height = 0.2,
+	hints_fill_strategy = "width", -- width | height
+	hints_placement = "top",
+	hints_placement_offset = {
+		left = 0,
+		right = 0,
+		top = 0,
+		bottom = dpi(50),
 	},
 
-	default_keys = true,
+	hints_font = "Monospace Bold 12",
+	hints_separator = "Monospace Bold 12",
+	hints_font_desc = "Monospace 12",
 
 	-- awesome
 	auto_select_the_only_choice = false,
 	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-	resize_delta = require("beautiful").xresources.apply_dpi(32),
+	resize_delta = dpi(32),
 	resize_factor = 0.025,
 	browser = "firefox || chromium || google-chrome-stable || qutebrowser",
 	terminal = "alacritty || kitty || wezterm || st || urxvt || xterm",
