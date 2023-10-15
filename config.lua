@@ -13,7 +13,7 @@ local defaults = {
 	default_keys = true,
 
 	-- core
-	unique = { "key", "hidden" },
+	unique = { "key", "hidden", "fg" },
 	mod_hold_continue = true,
 	mod_release_stop = "after", -- always | after
 	stop_on_unknown_key = true,
@@ -45,20 +45,25 @@ local defaults = {
 	hints_key_separator = " ➜ ",
 	hints_max_key_width = 5,
 	hints_min_entry_width = 30, -- chars
-	hints_width = 0.5,
-	hints_height = 0.2,
+	hints_width = 0.75,
+	hints_height = 0.4,
 	hints_fill_strategy = "width", -- width | height
-	hints_placement = "top",
+	hints_placement = "bottom",
 	hints_placement_offset = {
 		left = 0,
 		right = 0,
 		top = 0,
 		bottom = dpi(50),
 	},
-
 	hints_font = "Monospace Bold 12",
-	hints_separator = "Monospace Bold 12",
+	hints_font_separator = "Monospace Bold 12",
 	hints_font_desc = "Monospace 12",
+
+	hints_color_entry_fg = "#eceffc",
+	hints_color_entry_desc_fg = "#eceffc",
+	hints_color_entry_separator_fg = "#82AAFF",
+	hints_color_entry_bg = "#24283B",
+	hints_color_entry_odd_bg = "#383F5A",
 
 	-- awesome
 	auto_select_the_only_choice = false,

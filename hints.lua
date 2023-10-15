@@ -12,8 +12,9 @@ local M = {}
 -- TODO:
 -- merge keys with same desc
 -- key description
--- calculate size for fonts
 -- margin and padding
+-- group colors
+-- icons?
 -- opts:
 -- height %, width %, placement, cell_size, overlap_wibox
 -- function beautiful.get_font_height(name)
@@ -84,6 +85,8 @@ local function make_entries(keys, opts)
 					key = k,
 					desc = key:desc(),
 					id = key:id(),
+					fg = kopts.fg,
+					bg = kopts.bg,
 					separator = separator,
 					run = function()
 						key:fn(kopts)
@@ -114,10 +117,18 @@ local function create_popup(t)
 	assert(geo)
 	local max_width = math.floor(opts.hints_width * geo.width)
 	local max_height = math.floor(opts.hints_height * geo.height)
-	local font = opts.hints_font
-	local font_desc = opts.hints_font_desc or font
 
-	local cell_height = dpi(math.max(beautiful.get_font_height(font), beautiful.get_font_height(font_desc)))
+	local font = opts.hints_font or opts.hints_font_desc or opts.hints_font_separator
+	local font_desc = opts.hints_font_desc or font
+	local font_separator = opts.hints_font_separator or font
+
+	local cell_height = dpi(
+		math.max(
+			beautiful.get_font_height(font),
+			beautiful.get_font_height(font_desc),
+			beautiful.get_font_height(font_separator)
+		)
+	)
 	local cell_width = dpi(get_font_width(font))
 
 	print("cell_height: ", cell_height)
@@ -168,41 +179,72 @@ local function create_popup(t)
 			if not entry then
 				break -- no more entries
 			end
+			local odd = (i % 2) == 0
+			local bg = odd and opts.hints_color_entry_odd_bg or opts.hints_color_entry_bg
+			local bg_hover = util.lighten(bg, 20)
+
+			local fg = entry.fg or opts.hints_color_entry_fg
+			local fg_desc = opts.hints_color_entry_desc_fg or fg
+			local fg_separator = opts.hints_color_entry_separator_fg or fg
+
 			local widget = wibox.widget.base.make_widget_declarative({
 				{
 					{
 						{
-							id = "textbox_key",
-							halign = "right",
-							text = entry.key,
-							font = opts.hints_font,
+							{
+								id = "textbox_key",
+								halign = "right",
+								markup = util.markup.fg(fg, entry.key),
+								font = font,
+								widget = wibox.widget.textbox,
+							},
+							strategy = "exact", -- TODO:
+							width = opts.hints_max_key_width * cell_width,
+							widget = wibox.container.constraint,
+						},
+						{
+
+							id = "textbox_separator",
+							markup = util.markup.fg(fg_separator, entry.separator),
+							font = font_separator,
 							widget = wibox.widget.textbox,
 						},
-						strategy = "exact", -- TODO:
-						width = opts.hints_max_key_width * cell_width,
-						widget = wibox.container.constraint,
+						{
+							id = "textbox_desc",
+							markup = util.markup.fg(fg_desc, entry.desc),
+							font = font_desc,
+							widget = wibox.widget.textbox,
+						},
+						layout = wibox.layout.fixed.horizontal(),
 					},
-					{
-
-						id = "textbox_separator",
-						text = entry.separator,
-						font = opts.hints_font_separator,
-						widget = wibox.widget.textbox,
-					},
-					{
-
-						id = "textbox_desc",
-						markup = entry.desc,
-						font = opts.hints_font_desc,
-						widget = wibox.widget.textbox,
-					},
-					layout = wibox.layout.fixed.horizontal(),
+					fg = fg,
+					bg = bg,
+					id = "background_entry",
+					widget = wibox.container.background,
 				},
 				strategy = "max", -- TODO:
 				width = entry_width,
 				height = entry_height,
 				widget = wibox.container.constraint,
 			})
+
+			local background_entry = widget:get_children_by_id("background_entry")[1]
+			local textbox_key = widget:get_children_by_id("textbox_key")[1]
+			-- textbox_key:set_markup(util.markup.fg(entry.key, fg))
+
+			widget:connect_signal("button::press", function(_, _, _, button)
+				if button == 1 then
+					print("button press: ", entry.key)
+					entry.run()
+				end
+			end)
+
+			widget:connect_signal("mouse::enter", function()
+				background_entry.bg = bg_hover
+			end)
+			widget:connect_signal("mouse::leave", function()
+				background_entry.bg = bg
+			end)
 
 			column:add(widget)
 			i = i + 1
