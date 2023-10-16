@@ -23,6 +23,13 @@ local mod_map
 
 local ignore_mods = { "Lock2", "Mod2" }
 
+local supported_mods = {
+	["S"] = "Shift_L",
+	["A"] = "Alt_L",
+	["C"] = "Control_L",
+	["M"] = "Super_L",
+}
+
 local function generate_mod_conversion_maps()
 	if mod_conversion then
 		return nil
@@ -42,12 +49,11 @@ local function generate_mod_conversion_maps()
 	end
 
 	-- all supported mods
-	local map = {
-		["S"] = mod_conversion["Shift_L"], -- Shift
-		["A"] = mod_conversion["Alt_L"], -- Mod1
-		["C"] = mod_conversion["Control_L"], -- Control
-		["M"] = mod_conversion["Super_L"], -- Mod4
-	}
+
+	local map = {}
+	for k, v in pairs(supported_mods) do
+		map[k] = mod_conversion[v]
+	end
 
 	for k, v in pairs(map) do
 		map[v] = k
@@ -615,6 +621,66 @@ function M.parse_vim_key(k)
 	}
 end
 
+-- create keybind for every mod combination:
+-- e.g. for <M-y>:
+-- "y"	{ "Mod4", "Mod1" }
+-- "y"	{ "Mod4", "Mod1", "Control" }
+-- "y"	{ "Mod4", "Mod1", "Control", "Shift" }
+-- "y"	{ "Mod4", "Mod1", "Shift" }
+-- "y"	{ "Mod4", "Control" }
+-- "y"	{ "Mod4", "Control", "Shift" }
+-- "y"	{ "Mod4", "Shift" }
+
+function M.add_globalkey_combinations(prefix, key)
+	assert(mod_map)
+	assert(mod_conversion)
+
+	local all_mods = {}
+	for _, mod in pairs(supported_mods) do
+		local converted = mod_conversion[mod]
+		if converted then
+			all_mods[converted] = true
+		end
+	end
+
+	-- filter
+	local parsed_keys = M.parse_vim_key(key)
+
+	for _, parsed_key in pairs(parsed_keys) do
+		if vim.tbl_isempty(parsed_key.mods) then
+			awful.keyboard.append_global_keybindings({
+				awful.key({}, parsed_key.key, function()
+					M.run(prefix, parsed_key)
+				end),
+			})
+		end
+
+		local map = vim.deepcopy(all_mods)
+
+		for _, m in pairs(parsed_key.mods) do
+			map[m] = nil
+		end
+
+		local list = {}
+		for k in pairs(map) do
+			table.insert(list, k)
+		end
+
+		for combo in util.unique_combinations(list) do
+			local all = {}
+			vim.list_extend(all, parsed_key.mods)
+			vim.list_extend(all, combo)
+
+			print("global keybind: ", dump(parsed_key.key), dump(all))
+			awful.keyboard.append_global_keybindings({
+				awful.key(all, parsed_key.key, function()
+					M.run(prefix, parsed_key)
+				end),
+			})
+		end
+	end
+end
+
 function M.add_globalkey_vim(prefix, key)
 	local parsed_keys = M.parse_vim_key(key)
 	for _, parsed_key in pairs(parsed_keys) do
@@ -671,7 +737,7 @@ function M.setup(opts)
 	generate_mod_conversion_maps()
 
 	if opts.key then
-		M.add_globalkey_vim("", opts.key)
+		M.add_globalkey_combinations("", opts.key)
 	end
 
 	print(dump(mod_conversion))
