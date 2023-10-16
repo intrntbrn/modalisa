@@ -167,7 +167,6 @@ local function keygrabber_keys(t)
 	return all_keys
 end
 
--- check:
 local function modmap_set(self, key, mods, only_overwrite)
 	if not self then
 		return
@@ -422,7 +421,7 @@ local function grab(t, keybind)
 
 				-- check exact match first to skip combination calculations
 				for _, v in pairs(keys) do
-					if is_match(v, modifiers) then
+					if is_match(v.mods, modifiers) then
 						return execute_key(v)
 					end
 				end
