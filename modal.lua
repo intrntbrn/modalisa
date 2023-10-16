@@ -105,7 +105,6 @@ end
 -- @param t table A motion (sub)tree
 -- @return table Table with tables of keys
 local function keygrabber_keys(t)
-	global_tree = t -- TODO: this does not belong here
 	local succs = t:successors()
 	local opts = t:opts()
 
@@ -226,9 +225,10 @@ function M.grab(t, keybind)
 			end
 			tree:add_successors(list)
 			return tree
+		else
+			-- user ran something that's not just a submenu
+			hold_mod_ran_once = true
 		end
-		-- do not set to true for dynamic menues!
-		hold_mod_ran_once = true
 	end
 
 	local keybinds = keygrabber_keys(t)
@@ -237,13 +237,14 @@ function M.grab(t, keybind)
 	local function set_next_tree(tree)
 		keybinds = keygrabber_keys(tree)
 		t = tree
+		global_tree = t
 		on_start(tree)
 	end
 
 	local function run_tree(tree, force)
 		-- force is currently only true for timeout nodes
 		if not tree then
-			assert(false, "catch bug: t is nil in fn")
+			assert(false, "catch bug: tree is nil in run_tree")
 			return
 		end
 
@@ -251,7 +252,7 @@ function M.grab(t, keybind)
 		local opts = tree:opts()
 		local succs = tree:successors()
 
-		-- run if no successors
+		-- run if node is a leaf
 		if not succs or vim.tbl_count(succs) == 0 then
 			local next_t = run_key(tree)
 
@@ -266,6 +267,8 @@ function M.grab(t, keybind)
 			return nil
 		end
 
+		-- node is not a leaf but timed out
+		-- run if node has a function
 		if force then
 			run_key(tree)
 		end
@@ -273,6 +276,7 @@ function M.grab(t, keybind)
 		return tree
 	end
 
+	-- bypass the keygrabber with fake_input
 	global_fake_input = function(vimkey)
 		local next_tree = run_tree(t[vimkey])
 		if next_tree then
@@ -381,8 +385,7 @@ function M.grab(t, keybind)
 		else
 			-- key is not defined
 			-- it might be a mod key that is pressed again
-
-			if converted_key then
+			if converted_key and root_key then
 				-- key is a mod
 				for _, m in pairs(root_key.mods) do
 					if m == converted_key then
