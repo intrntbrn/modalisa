@@ -134,16 +134,6 @@ local function get(index, tree, prev_opts, prev_tree)
 	return M.mt(ret)
 end
 
-function M.add_key(key, prefix)
-	add(key, root_tree, nil, prefix)
-end
-
-function M.add_keys(keys, prefix)
-	for k, v in pairs(keys) do
-		add(v, root_tree, k, prefix)
-	end
-end
-
 function M.mt(obj, tree, load_default_opts)
 	if not obj then
 		return
@@ -270,6 +260,44 @@ function M.mt(obj, tree, load_default_opts)
 			assert(false, "not implemented")
 		end,
 	})
+end
+
+-- @param[opt=""] prefix
+function M.add_key(key, prefix)
+	add(key, root_tree, nil, prefix)
+end
+
+-- @param[opt=""] prefix
+function M.add_keys(keys, prefix)
+	for k, v in pairs(keys) do
+		add(v, root_tree, k, prefix)
+	end
+end
+
+function M.get_key(key)
+	return get(key, root_tree, config.get() or {})
+end
+
+-- create inline tree
+
+-- @param[opt=""] name
+-- @param[opt=config.get()] opts
+function M.create_tree(tree, opts, name)
+	local root = {
+		data = {
+			desc = name,
+			id = get_id(),
+		},
+	}
+
+	local t = get("", root, opts or config.get())
+	if not t then
+		return
+	end
+
+	t:add_successors(tree)
+
+	return t
 end
 
 function M.setup(opts)
