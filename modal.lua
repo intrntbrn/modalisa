@@ -82,11 +82,6 @@ function M.resume()
 	M.grab(global_tree)
 end
 
-function M.run(key_sequence, parsed_keybind)
-	local t = require("motion.tree")[key_sequence]
-	return M.grab(t, parsed_keybind)
-end
-
 -- @param m table Map of parsed keys
 -- @param k table Parsed key
 local function add_key_to_map(m, k)
@@ -171,7 +166,7 @@ local function keygrabber_keys(t)
 	return all_keys
 end
 
-function M.grab(t, keybind)
+local function grab(t, keybind)
 	assert(mod_conversion)
 	local opts = t:opts()
 
@@ -215,22 +210,6 @@ function M.grab(t, keybind)
 		return vim.tbl_count(hold_mods_active) > 0
 	end
 
-	local run_key = function(tree)
-		-- run
-		local list = tree:fn(opts)
-		if list then
-			-- dynamically created list
-			if type(list) ~= "table" or vim.tbl_count(list) == 0 then
-				return
-			end
-			tree:add_successors(list)
-			return tree
-		else
-			-- user ran something that's not just a submenu
-			hold_mod_ran_once = true
-		end
-	end
-
 	local keybinds = keygrabber_keys(t)
 	assert(keybinds)
 
@@ -241,7 +220,8 @@ function M.grab(t, keybind)
 		on_start(tree)
 	end
 
-	local function run_tree(tree, force)
+	-- set the tree
+	local function traverse(tree, force)
 		-- force is currently only true for timeout nodes
 		if not tree then
 			assert(false, "catch bug: tree is nil in run_tree")
@@ -252,33 +232,35 @@ function M.grab(t, keybind)
 		local opts = tree:opts()
 		local succs = tree:successors()
 
-		-- run if node is a leaf
-		if not succs or vim.tbl_count(succs) == 0 then
-			local next_t = run_key(tree)
-
-			if next_t then
-				return next_t
-			end
-
-			if opts.stay_open then
-				return tree:pred()
-			end
-
-			return nil
+		if succs and vim.tbl_count(succs) > 0 and not force then
+			-- wait for inputs
+			return tree
 		end
 
-		-- node is not a leaf but timed out
-		-- run if node has a function
-		if force then
-			run_key(tree)
+		-- run!
+		local subtree = tree:fn(opts)
+		if subtree then
+			-- dynamically created list
+			if type(subtree) ~= "table" or vim.tbl_count(subtree) == 0 then
+				return
+			end
+			tree:add_successors(subtree)
+			return tree
 		end
 
-		return tree
+		-- command did not return a new list
+		hold_mod_ran_once = true
+
+		if opts.stay_open then
+			return tree:pred()
+		end
+
+		return nil
 	end
 
 	-- bypass the keygrabber with fake_input
 	global_fake_input = function(vimkey)
-		local next_tree = run_tree(t[vimkey])
+		local next_tree = traverse(t[vimkey])
 		if next_tree then
 			set_next_tree(next_tree)
 		end
@@ -288,7 +270,7 @@ function M.grab(t, keybind)
 	-- dynamic menu node. This should be the only case when we end up here
 	-- without any successors.
 	if vim.tbl_count(t:successors()) == 0 then
-		run_tree(t) -- generate the submenu
+		traverse(t) -- generate the submenu
 		if vim.tbl_count(t:successors()) == 0 then
 			assert(false, "catch bug: no successors on grab")
 			return
@@ -366,7 +348,7 @@ function M.grab(t, keybind)
 						-- regular key
 						local key_name = v.name
 						print("running key function: ", key_name, t[key_name]:desc())
-						next_tree = run_tree(t[key_name])
+						next_tree = traverse(t[key_name])
 					end
 
 					-- no tree to run next
@@ -442,7 +424,7 @@ function M.grab(t, keybind)
 		keypressed_callback = keypressed_callback,
 		timeout = opts.timeout and opts.timeout > 0 and opts.timeout / 1000,
 		timeout_callback = function()
-			run_tree(t, true)
+			traverse(t, true)
 			on_stop(t)
 		end,
 		start_callback = function()
@@ -547,6 +529,11 @@ function M.add_globalkey(prefix, parsed_key)
 			M.run(prefix, parsed_key)
 		end),
 	})
+end
+
+function M.run(key_sequence, parsed_keybind)
+	local t = require("motion.tree")[key_sequence]
+	return grab(t, parsed_keybind)
 end
 
 function M.setup(opts)
