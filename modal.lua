@@ -532,9 +532,10 @@ function M.add_globalkey(prefix, parsed_key)
 	})
 end
 
+-- TODO: rename
 -- run inline table
-function M.run_tree(tree)
-	local t = require("motion.tree").create_tree(tree)
+function M.run_tree(tree, opts, name)
+	local t = require("motion.tree").create_tree(tree, opts, name)
 	if not t then
 		return
 	end

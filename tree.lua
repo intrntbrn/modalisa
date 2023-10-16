@@ -282,7 +282,7 @@ end
 
 -- @param[opt=""] name
 -- @param[opt=config.get()] opts
-function M.create_tree(tree, opts, name)
+function M.create_tree(successors, opts, name)
 	local root = {
 		data = {
 			desc = name,
@@ -290,12 +290,14 @@ function M.create_tree(tree, opts, name)
 		},
 	}
 
-	local t = get("", root, opts or config.get())
+	local t = get("", root, config.get(opts))
 	if not t then
 		return
 	end
 
-	t:add_successors(tree)
+	print("got t: ", dump(t))
+
+	t:add_successors(successors)
 
 	return t
 end
