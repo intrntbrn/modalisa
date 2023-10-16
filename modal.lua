@@ -168,7 +168,7 @@ local function keygrabber_keys(t)
 end
 
 -- check:
-local function mm_set(self, key, mods, only_overwrite)
+local function modmap_set(self, key, mods, only_overwrite)
 	if not self then
 		return
 	end
@@ -176,7 +176,6 @@ local function mm_set(self, key, mods, only_overwrite)
 	for _, mod in pairs(mods) do
 		if not only_overwrite or not (self[mod] == nil) then
 			self[mod] = true
-			print("mm: pressed mod: ", mod)
 		end
 	end
 
@@ -186,56 +185,49 @@ local function mm_set(self, key, mods, only_overwrite)
 	-- key is actually a mod (e.g. Super_L -> Mod4)
 	if converted_key then
 		if not only_overwrite or not (self[converted_key] == nil) then
-			print("mm: pressed converted mod: ", converted_key)
 			self[converted_key] = true
 		end
 	end
 end
 
-local function mm_press(self, key, mods)
+local function modmap_press(self, key, mods)
 	-- do not set pressed for mods that we don't care about
-	return mm_set(self, key, mods, false)
+	return modmap_set(self, key, mods, false)
 end
 
-local function mm_init(self, key, mods)
+local function modmap_init(self, key, mods)
 	assert(self)
-	mm_set(self, key, mods, false)
+	modmap_set(self, key, mods, false)
 end
 
-local function mm_release(self, key)
+local function modmap_release(self, key)
 	if not self then
 		return
 	end
 
-	print("mm release: ", key, dump(self))
 	---@diagnostic disable-next-line: need-check-nil
 	local converted_key = mod_conversion[key]
 	-- key is actually a mod (e.g. Super_L -> Mod4)
 	if converted_key then
-		print("mm is converted: ", key, converted_key)
 		if not (self[converted_key] == nil) then
 			self[converted_key] = false
-			print("mm: cleared mod: ", key, converted_key)
-		else
-			print("mm is not registered: ", key, converted_key)
 		end
 	end
 end
 
-local function mm_has_pressed_mods(self)
+local function modmap_has_pressed_mods(self)
 	if not self then
 		return
 	end
 	for k, m in pairs(self) do
 		if m then
-			print("mm: has mod pressed: ", k)
 			return true
 		end
 	end
 	return false
 end
 
-local function mm_get_pressed_mods(self)
+local function modmap_get_pressed_mods(self)
 	local pressed_mods = {}
 	for mod, is_pressed in pairs(self or {}) do
 		if is_pressed then
@@ -261,10 +253,8 @@ local function grab(t, keybind)
 
 	local mm = {}
 	if hold_mod then
-		mm_init(mm, root_key.key, root_key.mods)
+		modmap_init(mm, root_key.key, root_key.mods)
 	end
-
-	----------------------------------------------------------------------------------------------
 
 	local keybinds = keygrabber_keys(t)
 	assert(keybinds)
@@ -337,7 +327,7 @@ local function grab(t, keybind)
 			return
 		end
 
-		if not mm_has_pressed_mods(mm) and not continue then
+		if not modmap_has_pressed_mods(mm) and not continue then
 			grabber:stop()
 			return
 		end
@@ -363,9 +353,9 @@ local function grab(t, keybind)
 		keyreleased_callback = hold_mod and function(self, _, key)
 			-- print("released callback: ", dump(key))
 
-			mm_release(mm, key)
-			print("active mods: ", dump(mm_get_pressed_mods(mm)))
-			if not mm_has_pressed_mods(mm) then
+			modmap_release(mm, key)
+			print("active mods: ", dump(modmap_get_pressed_mods(mm)))
+			if not modmap_has_pressed_mods(mm) then
 				local mod_release = t:opts().mod_release_stop
 				if mod_release == "always" or hold_mod_ran_once and mod_release == "after" then
 					print("mm: all mods are released: ", mod_release)
@@ -388,7 +378,7 @@ local function grab(t, keybind)
 				end
 				modifiers = filtered_modifiers
 
-				mm_press(mm, key, modifiers)
+				modmap_press(mm, key, modifiers)
 			end
 
 			print("pressed callback: ", dump(modifiers), dump(key))
@@ -406,7 +396,6 @@ local function grab(t, keybind)
 					-- back key
 					if v.back then
 						execute("back", self)
-						-- set_next_tree(v.back)
 						return
 					end
 
@@ -414,28 +403,20 @@ local function grab(t, keybind)
 					local key_name = v.name
 					print("running key function: ", key_name, t[key_name]:desc())
 					execute(key_name, self)
-					return
 				end
-
-				-- remove all mods that are ignored by default
-				local filtered_modifiers = {}
 
 				local function is_match(v, comparator)
 					if not (#v == #comparator) then
 						return false
 					end
-
-					-- generate mod map
 					local mod = {}
 					for _, v2 in ipairs(v) do
 						mod[v2] = true
 					end
-
 					local match = true
 					for _, v2 in ipairs(comparator) do
 						match = match and mod[v2]
 					end
-
 					return match
 				end
 
@@ -446,114 +427,46 @@ local function grab(t, keybind)
 					end
 				end
 
-				-- if not hold then TODO:
+				if hold_mod then
+					-- find the match with the least amount of ignored mods
+					local pressed_mods_list = modmap_get_pressed_mods(mm)
+					local combinations = {}
+					for combo in util.unique_combinations(pressed_mods_list) do
+						table.insert(combinations, combo)
+					end
+					table.sort(combinations, function(a, b)
+						return #a < #b
+					end)
 
-				-- hold mod combinations
-				local pressed_mods_list = mm_get_pressed_mods(mm)
-				local combinations = {}
-				for combo in util.unique_combinations(pressed_mods_list) do
-					table.insert(combinations, combo)
-				end
-				table.sort(combinations, function(a, b)
-					return #a < #b
-				end)
-
-				print("combinations sorted: ", dump(combinations))
-				print("actual mods: ", dump(modifiers))
-
-				-- hold_mod match: v.mods == modifiers - combi
-
-				-- combinations are sorted by mod count ascending
-				for _, combi in ipairs(combinations) do
-					-- keys are sorted by mod count descending
-					for _, v in pairs(keys) do
-						print("v = ", dump(v))
-						local filtered = {}
-						for _, mod in ipairs(modifiers) do
-							print(string.format("check if mod = %s in combi = %s", dump(mod), dump(combi)))
-							if not vim.tbl_contains(combi, mod) then
-								table.insert(filtered, mod)
+					-- combinations are sorted by mod count ascending
+					for _, combi in ipairs(combinations) do
+						-- keys are sorted by mod count descending
+						for _, v in pairs(keys) do
+							local filtered = {} -- modifiers - combi
+							for _, mod in ipairs(modifiers) do
+								if not vim.tbl_contains(combi, mod) then
+									table.insert(filtered, mod)
+								end
 							end
-						end
-						print("filtered = %s", dump(filtered))
-						if is_match(v.mods, filtered) then
-							print("found combination! combi: ", dump(combi), dump(filtered))
-							return execute_key(v)
-						else
-							print(
-								string.format(
-									"#######no match \nv=%s, \ncombi=%s, \nfiltered=%s",
-									dump(v),
-									dump(combi),
-									dump(filtered)
-								)
-							)
-						end
-					end
-				end
-
-				local ignore_hold_mods = {}
-				local filtered_hold_mod_modifiers = {}
-				local check_hold_mod = mm_has_pressed_mods(mm)
-
-				if check_hold_mod then
-					local pressed_mods = mm_get_pressed_mods(mm)
-					for _, mod in pairs(pressed_mods) do
-						table.insert(ignore_hold_mods, mod)
-					end
-				end
-
-				for _, m in ipairs(modifiers) do
-					local ignore = vim.tbl_contains(ignore_mods, m)
-					if not ignore then
-						table.insert(filtered_modifiers, m)
-						if check_hold_mod then
-							local ignore_hold_mod = vim.tbl_contains(ignore_hold_mods, m)
-							if not ignore_hold_mod then
-								table.insert(filtered_hold_mod_modifiers, m)
+							-- v.mods == modifiers - combi?
+							if is_match(v.mods, filtered) then
+								return execute_key(v)
 							end
 						end
 					end
 				end
+			end
+			-- no match!
 
-				-- keybinds are sorted by descending mod count
-				for _, v in ipairs(keys) do
-					-- generate mod map
-					local mod = {}
-					for _, v2 in ipairs(v.mods) do
-						mod[v2] = true
-					end
+			if converted_key then
+				-- user is pressing a mod key, we have to ignore it
+				return
+			end
 
-					-- check if mods are matching
-					local match = false
-					local mod_count = #v.mods
-					if #filtered_modifiers == mod_count then
-						match = true
-						for _, v2 in ipairs(filtered_modifiers) do
-							match = match and mod[v2]
-						end
-					elseif check_hold_mod and #filtered_hold_mod_modifiers == mod_count then
-						match = true
-						for _, v2 in ipairs(filtered_hold_mod_modifiers) do
-							match = match and mod[v2]
-						end
-					end
-
-					if match then
-						return execute_key(v)
-					end
-				end
-			else
-				if converted_key then
-					-- user is pressing a mod key, we have to ignore it
-					return
-				end
-
-				-- key is not defined and not a mod
-				if t:opts().stop_on_unknown_key then
-					print("unknown key: ", key)
-					self:stop()
-				end
+			-- key is not defined and not a mod
+			if t:opts().stop_on_unknown_key then
+				print("unknown key: ", key)
+				self:stop()
 			end
 		end,
 		timeout = opts.timeout and opts.timeout > 0 and opts.timeout / 1000,
