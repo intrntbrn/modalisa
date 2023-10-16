@@ -49,12 +49,12 @@ local function generate_mod_conversion_maps()
 	end
 
 	-- all supported mods
-
 	local map = {}
 	for k, v in pairs(supported_mods) do
 		map[k] = mod_conversion[v]
 	end
 
+	-- vice versa
 	for k, v in pairs(map) do
 		map[v] = k
 	end
@@ -221,27 +221,6 @@ local function mm_release(self, key)
 		end
 	end
 end
-
--- local function mm_is_key_pressed(self, key)
--- 	if not self then
--- 		return
--- 	end
---
--- 	if not (self[key] == nil) then
--- 		return self[key]
--- 	end
---
--- 	---@diagnostic disable-next-line: need-check-nil
--- 	local converted_key = mod_conversion[key]
---
--- 	if converted_key then
--- 		if not (self[converted_key] == nil) then
--- 			return self[converted_key]
--- 		end
--- 	end
---
--- 	return false
--- end
 
 local function mm_has_pressed_mods(self)
 	if not self then
@@ -438,16 +417,6 @@ local function grab(t, keybind)
 
 				-- remove all mods that are ignored by default
 				local filtered_modifiers = {}
-				-- for _, m in ipairs(modifiers) do
-				-- 	local ignore = vim.tbl_contains(ignore_mods, m)
-				-- 	if not ignore then
-				-- 		table.insert(filtered_modifiers, m)
-				-- 	end
-				-- end
-
-				-- algo: remove mod, and check each key again
-
-				-- modifiers = filtered_modifiers
 
 				local function is_match(v, comparator)
 					if not (#v == #comparator) then
@@ -546,7 +515,24 @@ local function grab(t, keybind)
 	})
 
 	global_keygrabber = grabber
-	global_execute = execute
+	global_execute = function(...)
+		local ret = execute(...)
+
+		-- HACK:
+		-- force update after clicks
+		require("gears").timer({
+			timeout = 0.05,
+			callback = function()
+				if global_keygrabber then
+					on_start(t)
+				end
+			end,
+			autostart = true,
+			single_shot = true,
+		})
+
+		return ret
+	end
 	grabber:start()
 end
 
@@ -648,6 +634,7 @@ function M.add_globalkey_combinations(prefix, key)
 
 	for _, parsed_key in pairs(parsed_keys) do
 		if vim.tbl_isempty(parsed_key.mods) then
+			-- special case: no mods
 			awful.keyboard.append_global_keybindings({
 				awful.key({}, parsed_key.key, function()
 					M.run(prefix, parsed_key)
@@ -671,18 +658,21 @@ function M.add_globalkey_combinations(prefix, key)
 			vim.list_extend(all, parsed_key.mods)
 			vim.list_extend(all, combo)
 
-			print("global keybind: ", dump(parsed_key.key), dump(all))
+			local keybind = vim.deepcopy(parsed_key)
+			keybind.mods = all
+
+			print("global keybind: ", dump(keybind.key), dump(keybind.mods))
 			awful.keyboard.append_global_keybindings({
-				awful.key(all, parsed_key.key, function()
-					M.run(prefix, parsed_key)
+				awful.key(keybind.mods, keybind.key, function()
+					M.run(prefix, keybind)
 				end),
 			})
 		end
 	end
 end
 
-function M.add_globalkey_vim(prefix, key)
-	local parsed_keys = M.parse_vim_key(key)
+function M.add_globalkey_vim(prefix, vimkey)
+	local parsed_keys = M.parse_vim_key(vimkey)
 	for _, parsed_key in pairs(parsed_keys) do
 		awful.keyboard.append_global_keybindings({
 			awful.key(parsed_key.mods, parsed_key.key, function()
@@ -693,11 +683,11 @@ function M.add_globalkey_vim(prefix, key)
 end
 
 -- not used currently
-function M.add_globalkey(sequence, parsed_key)
-	parsed_key = util.parse_awesome_key(parsed_key)
+function M.add_globalkey(prefix, awmkey)
+	local parsed_key = util.parse_awesome_key(awmkey)
 	awful.keyboard.append_global_keybindings({
 		awful.key(parsed_key.mods, parsed_key.key, function()
-			M.run(sequence, parsed_key)
+			M.run(prefix, parsed_key)
 		end),
 	})
 end
