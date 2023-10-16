@@ -376,8 +376,6 @@ local function grab(t, keybind)
 			end
 		end,
 		keypressed_callback = function(self, modifiers, key)
-			print("pressed callback: ", dump(modifiers), dump(key))
-
 			local converted_key = mod_conversion[key]
 			if hold_mod then
 				-- filter mods that are ignored by default (capslock, numlock)
@@ -393,8 +391,12 @@ local function grab(t, keybind)
 				mm_press(mm, key, modifiers)
 			end
 
-			if keybinds[key] then
-				local function on_match(v)
+			print("pressed callback: ", dump(modifiers), dump(key))
+
+			local keys = keybinds[key]
+
+			if keys then
+				local function execute_key(v)
 					-- stop key
 					if v.stop then
 						self:stop()
@@ -437,6 +439,59 @@ local function grab(t, keybind)
 					return match
 				end
 
+				-- check exact match first to skip combination calculations
+				for _, v in pairs(keys) do
+					if is_match(v, modifiers) then
+						return execute_key(v)
+					end
+				end
+
+				-- if not hold then TODO:
+
+				-- hold mod combinations
+				local pressed_mods_list = mm_get_pressed_mods(mm)
+				local combinations = {}
+				for combo in util.unique_combinations(pressed_mods_list) do
+					table.insert(combinations, combo)
+				end
+				table.sort(combinations, function(a, b)
+					return #a < #b
+				end)
+
+				print("combinations sorted: ", dump(combinations))
+				print("actual mods: ", dump(modifiers))
+
+				-- hold_mod match: v.mods == modifiers - combi
+
+				-- combinations are sorted by mod count ascending
+				for _, combi in ipairs(combinations) do
+					-- keys are sorted by mod count descending
+					for _, v in pairs(keys) do
+						print("v = ", dump(v))
+						local filtered = {}
+						for _, mod in ipairs(modifiers) do
+							print(string.format("check if mod = %s in combi = %s", dump(mod), dump(combi)))
+							if not vim.tbl_contains(combi, mod) then
+								table.insert(filtered, mod)
+							end
+						end
+						print("filtered = %s", dump(filtered))
+						if is_match(v.mods, filtered) then
+							print("found combination! combi: ", dump(combi), dump(filtered))
+							return execute_key(v)
+						else
+							print(
+								string.format(
+									"#######no match \nv=%s, \ncombi=%s, \nfiltered=%s",
+									dump(v),
+									dump(combi),
+									dump(filtered)
+								)
+							)
+						end
+					end
+				end
+
 				local ignore_hold_mods = {}
 				local filtered_hold_mod_modifiers = {}
 				local check_hold_mod = mm_has_pressed_mods(mm)
@@ -462,7 +517,7 @@ local function grab(t, keybind)
 				end
 
 				-- keybinds are sorted by descending mod count
-				for _, v in ipairs(keybinds[key]) do
+				for _, v in ipairs(keys) do
 					-- generate mod map
 					local mod = {}
 					for _, v2 in ipairs(v.mods) do
@@ -485,7 +540,7 @@ local function grab(t, keybind)
 					end
 
 					if match then
-						return on_match(v)
+						return execute_key(v)
 					end
 				end
 			else
