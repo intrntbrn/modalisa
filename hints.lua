@@ -77,7 +77,7 @@ local function make_entries(keys, opts)
 					_key = k, -- unescaped key
 					key = keyname, -- escaped
 					group = group,
-					desc = key:desc(),
+					desc = key:desc() or "",
 					id = key:id(),
 					fg = kopts.fg,
 					bg = kopts.bg,
@@ -234,7 +234,7 @@ local function create_popup(t)
 					id = "background_entry",
 					widget = wibox.container.background,
 				},
-				strategy = "max", -- TODO:
+				strategy = "exact", -- TODO:
 				width = entry_width,
 				height = entry_height,
 				widget = wibox.container.constraint,

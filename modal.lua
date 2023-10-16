@@ -159,6 +159,94 @@ local function keygrabber_keys(t)
 	return all_keys
 end
 
+local function mm_press(self, key, mods)
+	if not self then
+		return
+	end
+
+	for _, mod in pairs(mods) do
+		self[mod] = true
+		print("mm: pressed mod: ", mod)
+	end
+
+	---@diagnostic disable-next-line: need-check-nil
+	local converted_key = mod_conversion[key]
+	-- key is actually a mod (e.g. Super_L -> Mod4)
+	if converted_key then
+		print("mm: pressed mod: ", converted_key)
+		self[converted_key] = true
+	end
+end
+
+local function mm_new(self, key, mods)
+	assert(self)
+	mm_press(self, key, mods)
+end
+
+local function mm_release(self, key)
+	if not self then
+		return
+	end
+
+	print("mm release: ", key, dump(self))
+	---@diagnostic disable-next-line: need-check-nil
+	local converted_key = mod_conversion[key]
+	-- key is actually a mod (e.g. Super_L -> Mod4)
+	if converted_key then
+		print("mm is converted: ", key, converted_key)
+		if not (self[converted_key] == nil) then
+			self[converted_key] = false
+			print("mm: cleared mod: ", key, converted_key)
+		else
+			print("mm is not registered: ", key, converted_key)
+		end
+	end
+end
+
+local function mm_is_key_pressed(self, key)
+	if not self then
+		return
+	end
+
+	if not (self[key] == nil) then
+		return self[key]
+	end
+
+	---@diagnostic disable-next-line: need-check-nil
+	local converted_key = mod_conversion[key]
+
+	if converted_key then
+		if not (self[converted_key] == nil) then
+			return self[converted_key]
+		end
+	end
+
+	return false
+end
+
+local function mm_has_pressed_mods(self)
+	if not self then
+		return
+	end
+	for k, m in pairs(self) do
+		if m then
+			print("mm: has mod pressed: ", k)
+			return true
+		end
+	end
+	return false
+end
+
+local function mm_get_pressed_mods(self)
+	local pressed_mods = {}
+	for mod, is_pressed in pairs(self or {}) do
+		if is_pressed then
+			table.insert(pressed_mods, mod)
+		end
+	end
+	return pressed_mods
+end
+
 local function grab(t, keybind)
 	assert(mod_conversion)
 	local opts = t:opts()
@@ -172,36 +260,13 @@ local function grab(t, keybind)
 	end
 
 	local hold_mod_ran_once = false
-	local hold_mods_active = {}
 
+	local mm = {}
 	if hold_mod then
-		-- we assume that all mods are still pressed down
-		for _, mod in pairs(root_key.mods) do
-			hold_mods_active[mod] = true
-		end
-		if vim.tbl_count(hold_mods_active) == 0 then
-			-- no mods have been assigned by the user,
-			-- two cases:
-			-- 1) an actual mod is being used as the root key (e.g. Super_L)
-			-- 2) the user uses something like XF86Calculator as the root key
-			-- either way the key has to work like a mod
-			local key = root_key.key
-			assert(key, "root key has neither a mod or a key")
-			local converted_key = mod_conversion[key] -- Super_L -> Mod4
-			if mod_conversion[key] then
-				-- case 1)
-				hold_mods_active[converted_key] = true
-				root_key.mods = { converted_key }
-			else
-				-- case 2)
-				hold_mods_active[key] = true
-			end
-		end
+		mm_new(mm, root_key.key, root_key.mods)
 	end
 
-	local function is_hold_mode_active()
-		return vim.tbl_count(hold_mods_active) > 0
-	end
+	----------------------------------------------------------------------------------------------
 
 	local keybinds = keygrabber_keys(t)
 	assert(keybinds)
@@ -274,7 +339,7 @@ local function grab(t, keybind)
 			return
 		end
 
-		if not is_hold_mode_active() and not continue then
+		if not mm_has_pressed_mods(mm) and not continue then
 			grabber:stop()
 			return
 		end
@@ -298,33 +363,25 @@ local function grab(t, keybind)
 	local grabber = akeygrabber({
 		-- keyreleased_callback is only used for hold_mod detection
 		keyreleased_callback = hold_mod and function(self, _, key)
-			print("released callback: ", dump(key))
+			-- print("released callback: ", dump(key))
 
-			-- clear key
-			if hold_mods_active[key] then
-				hold_mods_active[key] = nil
-			end
+			mm_release(mm, key)
 
-			-- clear mod
-			local converted_key = mod_conversion[key] -- e.g. Super_L -> Mod4
-			if converted_key and hold_mods_active[converted_key] then
-				hold_mods_active[converted_key] = nil
-			end
-
-			if not is_hold_mode_active() then
-				-- all mods/keys are cleared
-
+			if not mm_has_pressed_mods(mm) then
 				local mod_release = t:opts().mod_release_stop
 				if mod_release == "always" or hold_mod_ran_once and mod_release == "after" then
+					print("mm: all mods are released: ", mod_release)
 					self:stop()
 					return
 				end
-				print("************** RELEASED ALL MODS ********")
+				print("mm: all mods are released: ", mod_release)
 			end
 		end,
 		keypressed_callback = function(self, modifiers, key)
 			print("pressed callback: ", dump(modifiers), dump(key))
 			local converted_key = mod_conversion[key] -- e.g. Super_L -> Mod4
+
+			mm_press(mm, key, modifiers)
 
 			if keybinds[key] then
 				-- Capslock and Numlock are ignored by default
@@ -333,11 +390,12 @@ local function grab(t, keybind)
 				local filtered_modifiers = {}
 				local filtered_hold_mod_modifiers = {}
 
-				local check_hold_mod = is_hold_mode_active()
+				local check_hold_mod = mm_has_pressed_mods(mm)
 
 				if check_hold_mod then
-					for k in pairs(hold_mods_active) do
-						table.insert(ignore_hold_mods, k)
+					local pressed_mods = mm_get_pressed_mods(mm)
+					for _, mod in pairs(pressed_mods) do
+						table.insert(ignore_hold_mods, mod)
 					end
 				end
 
@@ -386,7 +444,8 @@ local function grab(t, keybind)
 
 						-- back key
 						if v.back then
-							set_next_tree(v.back)
+							execute("back", self)
+							-- set_next_tree(v.back)
 							return
 						end
 
@@ -398,20 +457,25 @@ local function grab(t, keybind)
 					end
 				end
 			else
-				-- key is not defined
-				-- it might be a mod key that is pressed again
-				if converted_key and root_key then
-					-- key is a mod
-					for _, m in pairs(root_key.mods) do
-						if m == converted_key then
-							-- user has re-pressed a root mod key
-							hold_mods_active[converted_key] = true
-							break
-						end
-					end
+				-- -- key is not defined
+				-- -- it might be a mod key that is pressed again
+				-- if converted_key and root_key then
+				-- 	-- key is a mod
+				-- 	for _, m in pairs(root_key.mods) do
+				-- 		if m == converted_key then
+				-- 			-- user has re-pressed a root mod key
+				-- 			hold_mods_active[converted_key] = true
+				-- 			break
+				-- 		end
+				-- 	end
+				--
+				-- 	-- mod is not part of keybind
+				-- 	-- ignore it
+				-- 	return
+				-- end
 
-					-- mod is not part of keybind
-					-- ignore it
+				if converted_key then
+					-- user is pressing a mod key, we have to ignore it
 					return
 				end
 
@@ -523,11 +587,11 @@ function M.add_globalkey_vim(prefix, key)
 end
 
 -- not used currently
-function M.add_globalkey(prefix, parsed_key)
+function M.add_globalkey(sequence, parsed_key)
 	parsed_key = util.parse_awesome_key(parsed_key)
 	awful.keyboard.append_global_keybindings({
 		awful.key(parsed_key.mods, parsed_key.key, function()
-			M.run(prefix, parsed_key)
+			M.run(sequence, parsed_key)
 		end),
 	})
 end
