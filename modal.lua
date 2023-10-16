@@ -178,7 +178,7 @@ local function mm_press(self, key, mods)
 	end
 end
 
-local function mm_new(self, key, mods)
+local function mm_init(self, key, mods)
 	assert(self)
 	mm_press(self, key, mods)
 end
@@ -203,26 +203,26 @@ local function mm_release(self, key)
 	end
 end
 
-local function mm_is_key_pressed(self, key)
-	if not self then
-		return
-	end
-
-	if not (self[key] == nil) then
-		return self[key]
-	end
-
-	---@diagnostic disable-next-line: need-check-nil
-	local converted_key = mod_conversion[key]
-
-	if converted_key then
-		if not (self[converted_key] == nil) then
-			return self[converted_key]
-		end
-	end
-
-	return false
-end
+-- local function mm_is_key_pressed(self, key)
+-- 	if not self then
+-- 		return
+-- 	end
+--
+-- 	if not (self[key] == nil) then
+-- 		return self[key]
+-- 	end
+--
+-- 	---@diagnostic disable-next-line: need-check-nil
+-- 	local converted_key = mod_conversion[key]
+--
+-- 	if converted_key then
+-- 		if not (self[converted_key] == nil) then
+-- 			return self[converted_key]
+-- 		end
+-- 	end
+--
+-- 	return false
+-- end
 
 local function mm_has_pressed_mods(self)
 	if not self then
@@ -263,7 +263,7 @@ local function grab(t, keybind)
 
 	local mm = {}
 	if hold_mod then
-		mm_new(mm, root_key.key, root_key.mods)
+		mm_init(mm, root_key.key, root_key.mods)
 	end
 
 	----------------------------------------------------------------------------------------------
@@ -366,7 +366,6 @@ local function grab(t, keybind)
 			-- print("released callback: ", dump(key))
 
 			mm_release(mm, key)
-
 			if not mm_has_pressed_mods(mm) then
 				local mod_release = t:opts().mod_release_stop
 				if mod_release == "always" or hold_mod_ran_once and mod_release == "after" then
@@ -384,12 +383,62 @@ local function grab(t, keybind)
 			mm_press(mm, key, modifiers)
 
 			if keybinds[key] then
-				-- Capslock and Numlock are ignored by default
-				local ignore_mods = { "Lock2", "Mod2" }
-				local ignore_hold_mods = {}
-				local filtered_modifiers = {}
-				local filtered_hold_mod_modifiers = {}
+				local function on_match(v)
+					-- stop key
+					if v.stop then
+						self:stop()
+						return
+					end
 
+					-- back key
+					if v.back then
+						execute("back", self)
+						-- set_next_tree(v.back)
+						return
+					end
+
+					-- regular key
+					local key_name = v.name
+					print("running key function: ", key_name, t[key_name]:desc())
+					execute(key_name, self)
+					return
+				end
+
+				-- remove all mods that are ignored by default
+				local ignore_mods = { "Lock2", "Mod2" }
+				local filtered_modifiers = {}
+				-- for _, m in ipairs(modifiers) do
+				-- 	local ignore = vim.tbl_contains(ignore_mods, m)
+				-- 	if not ignore then
+				-- 		table.insert(filtered_modifiers, m)
+				-- 	end
+				-- end
+
+				-- algo: remove mod, and check each key again
+
+				-- modifiers = filtered_modifiers
+
+				local function is_match(v, comparator)
+					if not (#v == #comparator) then
+						return false
+					end
+
+					-- generate mod map
+					local mod = {}
+					for _, v2 in ipairs(v) do
+						mod[v2] = true
+					end
+
+					local match = true
+					for _, v2 in ipairs(comparator) do
+						match = match and mod[v2]
+					end
+
+					return match
+				end
+
+				local ignore_hold_mods = {}
+				local filtered_hold_mod_modifiers = {}
 				local check_hold_mod = mm_has_pressed_mods(mm)
 
 				if check_hold_mod then
@@ -436,24 +485,7 @@ local function grab(t, keybind)
 					end
 
 					if match then
-						-- stop key
-						if v.stop then
-							self:stop()
-							return
-						end
-
-						-- back key
-						if v.back then
-							execute("back", self)
-							-- set_next_tree(v.back)
-							return
-						end
-
-						-- regular key
-						local key_name = v.name
-						print("running key function: ", key_name, t[key_name]:desc())
-						execute(key_name, self)
-						return
+						return on_match(v)
 					end
 				end
 			else
