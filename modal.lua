@@ -532,6 +532,16 @@ function M.add_globalkey(prefix, parsed_key)
 	})
 end
 
+-- run inline table
+function M.run_tree(tree)
+	local t = require("motion.tree").create_tree(tree)
+	if not t then
+		return
+	end
+	return grab(t)
+end
+
+-- run root_tree
 function M.run(key_sequence, parsed_keybind)
 	local t = require("motion.tree")[key_sequence]
 	return grab(t, parsed_keybind)
