@@ -355,4 +355,10 @@ function M.markup.bg(color, text)
 	return '<span background="' .. rgba(color, beautiful.bg_normal) .. '">' .. tostring(text) .. "</span>"
 end
 
+-- https://stackoverflow.com/questions/9790688/escaping-strings-for-gsub/20778724#20778724
+local quotepattern = "([" .. ("%^$().[]*+-?"):gsub("(.)", "%%%1") .. "])"
+M.quote = function(str)
+	return str:gsub(quotepattern, "%%%1")
+end
+
 return M

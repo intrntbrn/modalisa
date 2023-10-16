@@ -109,7 +109,7 @@ local function keygrabber_keys(t)
 	-- regular keys (successors)
 	for k, v in pairs(succs) do
 		if v:cond() then
-			for _, key in pairs(M.parse_vim_key(k)) do
+			for _, key in pairs(M.parse_vim_key(k, opts)) do
 				add_key_to_map(all_keys, key)
 			end
 		end
@@ -128,7 +128,7 @@ local function keygrabber_keys(t)
 	assert(stop_keys, "no stop keys found")
 
 	for _, sk in pairs(stop_keys) do
-		local parsed_keys = M.parse_vim_key(sk)
+		local parsed_keys = M.parse_vim_key(sk, opts)
 		for _, parsed_key in pairs(parsed_keys) do
 			local key = {
 				mods = parsed_key.mods,
@@ -151,7 +151,7 @@ local function keygrabber_keys(t)
 
 		if back_keys then
 			for _, bk in pairs(back_keys) do
-				local parsed_keys = M.parse_vim_key(bk)
+				local parsed_keys = M.parse_vim_key(bk, opts)
 				for _, parsed_key in pairs(parsed_keys) do
 					local key = {
 						mods = parsed_key.mods,
@@ -503,7 +503,7 @@ local function grab(t, keybind)
 	grabber:start()
 end
 
-function M.parse_vim_key(k)
+function M.parse_vim_key(k, opts)
 	-- upper alpha (e.g. "S")
 	if string.match(k, "^%u$") then
 		return {
@@ -567,6 +567,12 @@ function M.parse_vim_key(k)
 	-- minus key is on the shift layer, but for others layouts not. Therefore we're just
 	-- ignoring the shift state by adding the key with and without shift to the
 	-- map.
+
+	if opts and not opts.ignore_shift_state_for_special_characters then
+		return {
+			{ key = k, mods = {}, name = k },
+		}
+	end
 
 	return {
 		{ key = k, mods = {}, name = k },

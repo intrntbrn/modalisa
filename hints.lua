@@ -210,7 +210,7 @@ local function create_popup(t)
 								font = font,
 								widget = wibox.widget.textbox,
 							},
-							strategy = "exact", -- TODO:
+							strategy = "exact",
 							width = opts.hints_max_key_width * cell_width,
 							widget = wibox.container.constraint,
 						},

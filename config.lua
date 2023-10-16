@@ -17,6 +17,7 @@ local defaults = {
 	mod_hold_continue = true,
 	mod_release_stop = "after", -- always | after
 	stop_on_unknown_key = true,
+	ignore_shift_state_for_special_characters = true,
 	timeout = 0,
 
 	-- hints

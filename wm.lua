@@ -462,7 +462,7 @@ end
 function M.client_swap_master_smart()
 	return {
 		opts = { group = "client" },
-		desc = "master swap",
+		desc = "master swap smart",
 		cond = function()
 			return client.focus
 		end,
@@ -672,7 +672,7 @@ function M.tag_move_focused_client_to_tag(i)
 			return client.focus and awful.screen.focused().tags[i]
 		end,
 		desc = function()
-			return helper.tagname_by_index(i)
+			return string.format("move client to tag %s", helper.tagname_by_index(i))
 		end,
 		fn = function()
 			local c = client.focus

@@ -65,7 +65,7 @@ function M.setup(opts)
 		["ap"] = wm.awesome_menubar(),
 
 		-- tag
-		["t"] = { desc = "tag", opts = { group = "awesome" } },
+		["t"] = { desc = "tag", opts = { group = "tag" } },
 		["tD"] = wm.tag_delete(),
 		["tr"] = { desc = "rename tag" }, -- TODO
 		["tn"] = { desc = "new tag" }, -- TODO
