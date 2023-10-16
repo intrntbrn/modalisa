@@ -260,7 +260,7 @@ local function grab(t, keybind)
 	end
 
 	local function execute(key, grabber)
-		-- HACK:
+		-- hack: special key for going back
 		if key == "back" then
 			local prev = t:pred()
 			if prev then
@@ -278,6 +278,10 @@ local function grab(t, keybind)
 			grabber:stop()
 			return
 		end
+
+		-- the execution might cause some hinting labels to change
+		-- therefore we are emitting the signal again
+		on_start(t)
 	end
 
 	-- we have to force the menu generation if the user calls M.run() on an
@@ -317,7 +321,6 @@ local function grab(t, keybind)
 				end
 				print("************** RELEASED ALL MODS ********")
 			end
-			on_start(t)
 		end,
 		keypressed_callback = function(self, modifiers, key)
 			print("pressed callback: ", dump(modifiers), dump(key))
