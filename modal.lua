@@ -69,18 +69,10 @@ end
 
 local global_execute
 -- bypass the keygrabber
-function M.fake_input(key)
+function M.fake_input(key, force_continue)
 	if global_keygrabber and global_execute then
-		global_execute(key, global_keygrabber)
+		global_execute(key, global_keygrabber, force_continue)
 	end
-end
-
-function M.resume()
-	if not global_tree then
-		print("no previous tree found")
-		return
-	end
-	M.grab(global_tree)
 end
 
 -- @param m table Map of parsed keys
@@ -259,8 +251,7 @@ local function grab(t, keybind)
 		return nil
 	end
 
-	local function execute(key, grabber)
-		-- hack: special key for going back
+	local function execute(key, grabber, continue)
 		if key == "back" then
 			local prev = t:pred()
 			if prev then
@@ -268,20 +259,29 @@ local function grab(t, keybind)
 			end
 			return
 		end
+
+		if key == "stop" then
+			grabber = grabber or global_keygrabber
+			if grabber then
+				grabber:stop()
+			end
+			return
+		end
+
 		local next_tree = run(t[key])
 		if next_tree then
 			set_next_tree(next_tree)
 			return
 		end
 
-		if not is_hold_mode_active() then
+		if not is_hold_mode_active() and not continue then
 			grabber:stop()
 			return
 		end
 
 		-- the execution might cause some hinting labels to change
 		-- therefore we are emitting the signal again
-		on_start(t)
+		-- on_start(t)
 	end
 
 	-- we have to force the menu generation if the user calls M.run() on an
@@ -542,8 +542,15 @@ function M.setup(opts)
 		generate_mod_conversion_maps()
 	end)
 
-	awesome.connect_signal("motion::fake_input", function(key)
-		M.fake_input(key)
+	awesome.connect_signal("motion::fake_input", function(args)
+		if type(args) == "string" then
+			M.fake_input(args)
+			return
+		end
+		if type(args) == "table" then
+			M.fake_input(args.key, args.continue)
+			return
+		end
 	end)
 
 	generate_mod_conversion_maps()

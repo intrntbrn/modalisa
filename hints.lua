@@ -74,9 +74,9 @@ local function make_entries(keys, opts)
 				local separator = kopts.hints_key_separator
 
 				table.insert(entries, {
-					_key = k,
+					_key = k, -- unescaped key
+					key = keyname, -- escaped
 					group = group,
-					key = keyname,
 					desc = key:desc(),
 					id = key:id(),
 					fg = kopts.fg,
@@ -164,6 +164,12 @@ local function create_popup(t)
 	local layout_columns = wibox.layout.fixed.horizontal({})
 
 	layout_columns:connect_signal("button::press", function(_, _, _, button)
+		-- middle click
+		if button == 2 then
+			awesome.emit_signal("motion::fake_input", "stop")
+			return
+		end
+		-- back click
 		if button == 8 then
 			awesome.emit_signal("motion::fake_input", "back")
 			return
@@ -239,8 +245,14 @@ local function create_popup(t)
 			-- textbox_key:set_markup(util.markup.fg(entry.key, fg))
 
 			widget:connect_signal("button::press", function(_, _, _, button)
+				-- left click
 				if button == 1 then
-					awesome.emit_signal("motion::fake_input", entry._key)
+					awesome.emit_signal("motion::fake_input", { key = entry._key, continue = false })
+					return
+				end
+				-- right click
+				if button == 3 then
+					awesome.emit_signal("motion::fake_input", { key = entry._key, continue = true })
 					return
 				end
 			end)
