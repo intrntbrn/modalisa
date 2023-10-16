@@ -221,7 +221,7 @@ local function grab(t, keybind)
 	end
 
 	-- set the tree
-	local function traverse(tree, force)
+	local function run(tree, force)
 		-- force is currently only true for timeout nodes
 		if not tree then
 			assert(false, "catch bug: tree is nil in run_tree")
@@ -258,11 +258,17 @@ local function grab(t, keybind)
 		return nil
 	end
 
-	-- bypass the keygrabber with fake_input
-	global_fake_input = function(vimkey)
-		local next_tree = traverse(t[vimkey])
+	local function input(key)
+		local next_tree = run(t[key])
 		if next_tree then
 			set_next_tree(next_tree)
+			return
+		end
+
+		if not is_hold_mode_active() then
+			assert(global_keygrabber)
+			global_keygrabber:stop()
+			return
 		end
 	end
 
@@ -270,129 +276,16 @@ local function grab(t, keybind)
 	-- dynamic menu node. This should be the only case when we end up here
 	-- without any successors.
 	if vim.tbl_count(t:successors()) == 0 then
-		traverse(t) -- generate the submenu
+		run(t) -- populate the tree
 		if vim.tbl_count(t:successors()) == 0 then
 			assert(false, "catch bug: no successors on grab")
 			return
 		end
 	end
 
-	local keypressed_callback = function(self, modifiers, key)
-		print("pressed callback: ", dump(modifiers), dump(key))
-		local converted_key = mod_conversion[key] -- e.g. Super_L -> Mod4
-
-		if keybinds[key] then
-			-- Capslock and Numlock are ignored by default
-			local ignore_mods = { "Lock2", "Mod2" }
-			local ignore_hold_mods = {}
-			local filtered_modifiers = {}
-			local filtered_hold_mod_modifiers = {}
-
-			local check_hold_mod = is_hold_mode_active()
-
-			if check_hold_mod then
-				for k in pairs(hold_mods_active) do
-					table.insert(ignore_hold_mods, k)
-				end
-			end
-
-			for _, m in ipairs(modifiers) do
-				local ignore = vim.tbl_contains(ignore_mods, m)
-				if not ignore then
-					table.insert(filtered_modifiers, m)
-					if check_hold_mod then
-						local ignore_hold_mod = vim.tbl_contains(ignore_hold_mods, m)
-						if not ignore_hold_mod then
-							table.insert(filtered_hold_mod_modifiers, m)
-						end
-					end
-				end
-			end
-
-			-- keybinds are sorted by descending mod count
-			for _, v in ipairs(keybinds[key]) do
-				-- generate mod map
-				local mod = {}
-				for _, v2 in ipairs(v.mods) do
-					mod[v2] = true
-				end
-
-				-- check if mods are matching
-				local match = false
-				local mod_count = #v.mods
-				if #filtered_modifiers == mod_count then
-					match = true
-					for _, v2 in ipairs(filtered_modifiers) do
-						match = match and mod[v2]
-					end
-				elseif check_hold_mod and #filtered_hold_mod_modifiers == mod_count then
-					match = true
-					for _, v2 in ipairs(filtered_hold_mod_modifiers) do
-						match = match and mod[v2]
-					end
-				end
-
-				if match then
-					-- stop key
-					if v.stop then
-						self:stop()
-						return
-					end
-
-					local next_tree
-
-					-- back key
-					if v.back then
-						next_tree = v.back
-					else
-						-- regular key
-						local key_name = v.name
-						print("running key function: ", key_name, t[key_name]:desc())
-						next_tree = traverse(t[key_name])
-					end
-
-					-- no tree to run next
-					if not next_tree then
-						if not is_hold_mode_active() then
-							self:stop()
-							return
-						end
-						return
-					end
-
-					set_next_tree(next_tree)
-					return
-				end
-			end
-		else
-			-- key is not defined
-			-- it might be a mod key that is pressed again
-			if converted_key and root_key then
-				-- key is a mod
-				for _, m in pairs(root_key.mods) do
-					if m == converted_key then
-						-- user has re-pressed a root mod key
-						hold_mods_active[converted_key] = true
-						break
-					end
-				end
-
-				-- mod is not part of keybind
-				-- ignore it
-				return
-			end
-
-			-- key is not defined and not a mod
-			if t:opts().stop_on_unknown_key then
-				print("unknown key: ", key)
-				self:stop()
-			end
-		end
-	end
-
-	-- keyreleased_callback is only used for hold_mod detection
-	local keyreleased_callback = hold_mod
-		and function(self, _, key)
+	local grabber = akeygrabber({
+		-- keyreleased_callback is only used for hold_mod detection
+		keyreleased_callback = hold_mod and function(self, _, key)
 			print("released callback: ", dump(key))
 
 			-- clear key
@@ -417,14 +310,110 @@ local function grab(t, keybind)
 				print("************** RELEASED ALL MODS ********")
 			end
 			on_start(t)
-		end
+		end,
+		keypressed_callback = function(self, modifiers, key)
+			print("pressed callback: ", dump(modifiers), dump(key))
+			local converted_key = mod_conversion[key] -- e.g. Super_L -> Mod4
 
-	local grabber = akeygrabber({
-		keyreleased_callback = keyreleased_callback,
-		keypressed_callback = keypressed_callback,
+			if keybinds[key] then
+				-- Capslock and Numlock are ignored by default
+				local ignore_mods = { "Lock2", "Mod2" }
+				local ignore_hold_mods = {}
+				local filtered_modifiers = {}
+				local filtered_hold_mod_modifiers = {}
+
+				local check_hold_mod = is_hold_mode_active()
+
+				if check_hold_mod then
+					for k in pairs(hold_mods_active) do
+						table.insert(ignore_hold_mods, k)
+					end
+				end
+
+				for _, m in ipairs(modifiers) do
+					local ignore = vim.tbl_contains(ignore_mods, m)
+					if not ignore then
+						table.insert(filtered_modifiers, m)
+						if check_hold_mod then
+							local ignore_hold_mod = vim.tbl_contains(ignore_hold_mods, m)
+							if not ignore_hold_mod then
+								table.insert(filtered_hold_mod_modifiers, m)
+							end
+						end
+					end
+				end
+
+				-- keybinds are sorted by descending mod count
+				for _, v in ipairs(keybinds[key]) do
+					-- generate mod map
+					local mod = {}
+					for _, v2 in ipairs(v.mods) do
+						mod[v2] = true
+					end
+
+					-- check if mods are matching
+					local match = false
+					local mod_count = #v.mods
+					if #filtered_modifiers == mod_count then
+						match = true
+						for _, v2 in ipairs(filtered_modifiers) do
+							match = match and mod[v2]
+						end
+					elseif check_hold_mod and #filtered_hold_mod_modifiers == mod_count then
+						match = true
+						for _, v2 in ipairs(filtered_hold_mod_modifiers) do
+							match = match and mod[v2]
+						end
+					end
+
+					if match then
+						-- stop key
+						if v.stop then
+							self:stop()
+							return
+						end
+
+						-- back key
+						if v.back then
+							set_next_tree(v.back)
+							return
+						end
+
+						-- regular key
+						local key_name = v.name
+						print("running key function: ", key_name, t[key_name]:desc())
+						input(key_name)
+						return
+					end
+				end
+			else
+				-- key is not defined
+				-- it might be a mod key that is pressed again
+				if converted_key and root_key then
+					-- key is a mod
+					for _, m in pairs(root_key.mods) do
+						if m == converted_key then
+							-- user has re-pressed a root mod key
+							hold_mods_active[converted_key] = true
+							break
+						end
+					end
+
+					-- mod is not part of keybind
+					-- ignore it
+					return
+				end
+
+				-- key is not defined and not a mod
+				if t:opts().stop_on_unknown_key then
+					print("unknown key: ", key)
+					self:stop()
+				end
+			end
+		end,
 		timeout = opts.timeout and opts.timeout > 0 and opts.timeout / 1000,
 		timeout_callback = function()
-			traverse(t, true)
+			run(t, true)
 			on_stop(t)
 		end,
 		start_callback = function()
@@ -436,6 +425,7 @@ local function grab(t, keybind)
 	})
 
 	global_keygrabber = grabber
+	global_fake_input = input
 	grabber:start()
 end
 
