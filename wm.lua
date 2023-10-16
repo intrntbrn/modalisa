@@ -537,11 +537,11 @@ function M.client_resize_smart(dir)
 			return client.focus
 		end,
 		desc = function()
-			local c = client.focus
-			local layout = awful.layout.get(awful.screen.focused()).name
-			if layout == "floating" or c.floating then
-				return string.format("increase client size %s", dir)
-			end
+			-- local c = client.focus
+			-- local layout = awful.layout.get(awful.screen.focused()).name
+			-- if layout == "floating" or c.floating then
+			-- 	return string.format("increase client size %s", dir)
+			-- end
 			return string.format("resize client %s", dir)
 		end,
 		fn = function(opts)

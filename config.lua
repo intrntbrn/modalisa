@@ -48,14 +48,14 @@ local defaults = {
 	hints_width = 0.75,
 	hints_height = 0.4,
 	hints_fill_strategy = "width", -- width | height
-	hints_placement = "bottom",
+	hints_placement = "top",
 	hints_placement_offset = {
 		left = 0,
 		right = 0,
 		top = 0,
 		bottom = dpi(50),
 	},
-	hints_odd_style = "checkered", -- row  || column || checkered
+	hints_odd_style = "checkered", -- row  || column || checkered || none
 	hints_font = "Monospace Bold 12",
 	hints_font_separator = "Monospace Bold 12",
 	hints_font_desc = "Monospace 12",

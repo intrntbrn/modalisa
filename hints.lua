@@ -233,9 +233,7 @@ local function create_popup(t)
 
 			widget:connect_signal("button::press", function(_, _, _, button)
 				if button == 1 then
-					print("button press: ", entry.key)
-					root.fake_input("key_press", entry._key)
-					root.fake_input("key_release", entry._key)
+					awesome.emit_signal("motion::fake_input", entry._key)
 				end
 			end)
 

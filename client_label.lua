@@ -29,7 +29,8 @@ end
 function M.show_label(parent, label)
 	local p = M.create_popup(parent, string.format("%s", label))
 	p.visible = true
-	awful.placement.centered(p, { parent = parent })
+	-- TODO: fix offset
+	awful.placement.centered(p, { parent = parent, offset = { x = -50, y = -50 } })
 	table.insert(popups, p)
 end
 
@@ -62,13 +63,6 @@ function M.create_popup(c, text)
 			widget = wibox.container.background,
 		}),
 	})
-
-	-- local popup = awful.popup({
-	-- 	border_color = "#777777",
-	-- 	border_width = 2,
-	-- 	visible = true,
-	-- 	screen = awful.screen.focused(),
-	-- })
 
 	return popup
 end
