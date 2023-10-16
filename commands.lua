@@ -7,7 +7,7 @@ local config = require("motion.config")
 local M = {}
 
 M.run = function(...)
-	return modal.run(...)
+	return modal.start(...)
 end
 
 M.add_key = function(key)
