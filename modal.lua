@@ -82,6 +82,11 @@ function M.resume()
 	M.grab(global_tree)
 end
 
+function M.run(key_sequence, parsed_keybind)
+	local t = require("motion.tree")[key_sequence]
+	return M.grab(t, parsed_keybind)
+end
+
 -- @param m table Map of parsed keys
 -- @param k table Parsed key
 local function add_key_to_map(m, k)
@@ -166,7 +171,7 @@ local function keygrabber_keys(t)
 	return all_keys
 end
 
-local function run(t, keybind)
+function M.grab(t, keybind)
 	assert(mod_conversion)
 	local opts = t:opts()
 
@@ -210,7 +215,6 @@ local function run(t, keybind)
 		return vim.tbl_count(hold_mods_active) > 0
 	end
 
-	-- run the key's function
 	local run_key = function(tree)
 		-- run
 		local list = tree:fn(opts)
@@ -228,6 +232,7 @@ local function run(t, keybind)
 	end
 
 	local keybinds = keygrabber_keys(t)
+	assert(keybinds)
 
 	local function set_next_tree(tree)
 		keybinds = keygrabber_keys(tree)
@@ -236,65 +241,54 @@ local function run(t, keybind)
 		on_start(tree)
 	end
 
-	-- step into the current tree, run if leaf
-	local function traverse(tree, force)
+	local function run_tree(tree, force)
 		-- force is currently only true for timeout nodes
 		if not tree then
 			assert(false, "catch bug: tree is nil in run_tree")
 			return
 		end
 
-		print("run tree")
-
 		---@diagnostic disable-next-line: redefined-local
 		local opts = tree:opts()
 		local succs = tree:successors()
 
-		-- not a leaf
-		if succs and vim.tbl_count(succs) > 0 and not force then
-			return tree
-		end
-
 		-- run if node is a leaf
-		local next_t = run_key(tree)
-		if next_t then
-			return next_t
+		if not succs or vim.tbl_count(succs) == 0 then
+			local next_t = run_key(tree)
+
+			if next_t then
+				return next_t
+			end
+
+			if opts.stay_open then
+				return tree:pred()
+			end
+
+			return nil
 		end
 
-		if opts.stay_open then
-			return tree:pred()
+		-- node is not a leaf but timed out
+		-- run if node has a function
+		if force then
+			run_key(tree)
 		end
-
-		-- -- node is not a leaf but timed out
-		-- -- run if node has a function
-		-- if force then
-		-- 	run_key(tree)
-		-- end
 
 		return tree
 	end
 
 	-- bypass the keygrabber with fake_input
 	global_fake_input = function(vimkey)
-		local next_tree = traverse(t[vimkey])
+		local next_tree = run_tree(t[vimkey])
 		if next_tree then
 			set_next_tree(next_tree)
-			return
 		end
-
-		if is_hold_mode_active() then
-			return
-		end
-
-		assert(global_keygrabber)
-		global_keygrabber:stop()
 	end
 
 	-- we have to force the menu generation if the user calls M.run() on an
 	-- dynamic menu node. This should be the only case when we end up here
 	-- without any successors.
 	if vim.tbl_count(t:successors()) == 0 then
-		traverse(t) -- generate the submenu
+		run_tree(t) -- generate the submenu
 		if vim.tbl_count(t:successors()) == 0 then
 			assert(false, "catch bug: no successors on grab")
 			return
@@ -372,7 +366,7 @@ local function run(t, keybind)
 						-- regular key
 						local key_name = v.name
 						print("running key function: ", key_name, t[key_name]:desc())
-						next_tree = traverse(t[key_name])
+						next_tree = run_tree(t[key_name])
 					end
 
 					-- no tree to run next
@@ -448,7 +442,7 @@ local function run(t, keybind)
 		keypressed_callback = keypressed_callback,
 		timeout = opts.timeout and opts.timeout > 0 and opts.timeout / 1000,
 		timeout_callback = function()
-			traverse(t, true)
+			run_tree(t, true)
 			on_stop(t)
 		end,
 		start_callback = function()
@@ -539,7 +533,7 @@ function M.add_globalkey_vim(prefix, key)
 	for _, parsed_key in pairs(parsed_keys) do
 		awful.keyboard.append_global_keybindings({
 			awful.key(parsed_key.mods, parsed_key.key, function()
-				M.start(prefix, parsed_key)
+				M.run(prefix, parsed_key)
 			end),
 		})
 	end
@@ -550,14 +544,9 @@ function M.add_globalkey(prefix, parsed_key)
 	parsed_key = util.parse_awesome_key(parsed_key)
 	awful.keyboard.append_global_keybindings({
 		awful.key(parsed_key.mods, parsed_key.key, function()
-			M.start(prefix, parsed_key)
+			M.run(prefix, parsed_key)
 		end),
 	})
-end
-
-function M.start(key_sequence, parsed_keybind)
-	local t = require("motion.tree")[key_sequence]
-	return run(t, parsed_keybind)
 end
 
 function M.setup(opts)
