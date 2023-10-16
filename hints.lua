@@ -163,6 +163,13 @@ local function create_popup(t)
 
 	local layout_columns = wibox.layout.fixed.horizontal({})
 
+	layout_columns:connect_signal("button::press", function(_, _, _, button)
+		if button == 8 then
+			awesome.emit_signal("motion::fake_input", "back")
+			return
+		end
+	end)
+
 	local i = 1
 	for c = 1, num_columns do
 		local column = wibox.layout.fixed.vertical({})
@@ -234,6 +241,7 @@ local function create_popup(t)
 			widget:connect_signal("button::press", function(_, _, _, button)
 				if button == 1 then
 					awesome.emit_signal("motion::fake_input", entry._key)
+					return
 				end
 			end)
 

@@ -67,11 +67,11 @@ local function on_stop(t)
 	awesome.emit_signal("motion::stop", t)
 end
 
-local global_input
+local global_execute
 -- bypass the keygrabber
 function M.fake_input(key)
-	if global_keygrabber and global_input then
-		global_input(key, global_keygrabber)
+	if global_keygrabber and global_execute then
+		global_execute(key, global_keygrabber)
 	end
 end
 
@@ -259,7 +259,15 @@ local function grab(t, keybind)
 		return nil
 	end
 
-	local function input(key, grabber)
+	local function execute(key, grabber)
+		-- HACK:
+		if key == "back" then
+			local prev = t:pred()
+			if prev then
+				set_next_tree(prev)
+			end
+			return
+		end
 		local next_tree = run(t[key])
 		if next_tree then
 			set_next_tree(next_tree)
@@ -382,7 +390,7 @@ local function grab(t, keybind)
 						-- regular key
 						local key_name = v.name
 						print("running key function: ", key_name, t[key_name]:desc())
-						input(key_name, self)
+						execute(key_name, self)
 						return
 					end
 				end
@@ -425,7 +433,7 @@ local function grab(t, keybind)
 	})
 
 	global_keygrabber = grabber
-	global_input = input
+	global_execute = execute
 	grabber:start()
 end
 
