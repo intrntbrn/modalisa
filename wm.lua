@@ -499,8 +499,8 @@ end
 
 function M.client_focus_navigator(dir)
 	return {
-		opts = { group = "client.focus" },
-		desc = string.format("focus %s client", dir),
+		opts = { group = "client.navigate" },
+		desc = string.format("navigate %s", dir),
 		fn = function()
 			awm.client_navigate(dir)
 		end,
@@ -542,7 +542,7 @@ function M.client_resize_smart(dir)
 			-- if layout == "floating" or c.floating then
 			-- 	return string.format("increase client size %s", dir)
 			-- end
-			return string.format("resize client %s", dir)
+			return string.format("resize client smart %s", dir)
 		end,
 		fn = function(opts)
 			awm.client_resize_smart(client.focus, dir, opts.resize_delta, opts.resize_factor)

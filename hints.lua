@@ -74,8 +74,8 @@ local function make_entries(keys, opts)
 				local separator = kopts.hints_key_separator
 
 				table.insert(entries, {
-					_key = k, -- unescaped key
-					key = keyname, -- escaped
+					key_unescaped = k,
+					key = keyname,
 					group = group,
 					desc = key:desc() or "",
 					id = key:id(),
@@ -247,12 +247,12 @@ local function create_popup(t)
 			widget:connect_signal("button::press", function(_, _, _, button)
 				-- left click
 				if button == 1 then
-					awesome.emit_signal("motion::fake_input", { key = entry._key, continue = false })
+					awesome.emit_signal("motion::fake_input", { key = entry.key_unescaped, continue = false })
 					return
 				end
 				-- right click
 				if button == 3 then
-					awesome.emit_signal("motion::fake_input", { key = entry._key, continue = true })
+					awesome.emit_signal("motion::fake_input", { key = entry.key_unescaped, continue = true })
 					return
 				end
 			end)

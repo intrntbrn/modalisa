@@ -295,8 +295,6 @@ function M.create_tree(successors, opts, name)
 		return
 	end
 
-	print("got t: ", dump(t))
-
 	t:add_successors(successors)
 
 	return t

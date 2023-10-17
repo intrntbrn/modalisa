@@ -74,24 +74,24 @@ local defaults = {
 	resize_factor = 0.025,
 	browser = "firefox || chromium || google-chrome-stable || qutebrowser",
 	terminal = "alacritty || kitty || wezterm || st || urxvt || xterm",
-	app_menu = "rofi -show drun -display-drun ''",
+	app_menu = "rofi -show drun || dmenu_run",
 }
 
 local options
 
-local function update(key)
+local function on_update(key)
 	local value = rawget(options, key)
 	print("motion::config: ", key, " = ", vim.inspect(value))
 	awesome.emit_signal(string.format("motion::property::%s", key), value)
 end
 
 function M.setup(opts)
-	assert(not options, "setup called twice")
+	assert(not options, "config setup once")
 	options = defaults
 	options = M.get(opts or {})
 
 	for k in pairs(options) do
-		update(k)
+		on_update(k)
 	end
 end
 
@@ -128,6 +128,6 @@ return setmetatable(M, {
 		end
 		---@diagnostic disable-next-line: param-type-mismatch
 		rawset(options, key, value)
-		update(key)
+		on_update(key)
 	end,
 })

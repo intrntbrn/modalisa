@@ -30,14 +30,14 @@ end
 
 local once
 local function gen_signals()
-	-- BUG: this might be called over and over again
-	assert(once == nil, "signals are getting initialized again")
+	-- TODO: some signatures have more than 1 arg
+	assert(once == nil, "commands gen_signals once")
 	once = true
 	for k, v in pairs(M) do
-		-- if type(v) == "function" then
-		local name = string.format("motion::%s", k)
-		awesome.connect_signal(name, v)
-		-- end
+		if type(v) == "function" then
+			local name = string.format("motion::%s", k)
+			awesome.connect_signal(name, v)
+		end
 	end
 end
 

@@ -258,6 +258,9 @@ local function grab(t, keybind)
 	local keybinds = keygrabber_keys(t)
 	assert(keybinds)
 
+	print("keybinds: ", dump(keybinds))
+	print("t", dump(t))
+
 	local function set_next_tree(tree)
 		keybinds = keygrabber_keys(tree)
 		t = tree
@@ -351,7 +354,6 @@ local function grab(t, keybind)
 		-- keyreleased_callback is only used for hold_mod detection
 		keyreleased_callback = hold_mod and function(self, _, key)
 			-- print("released callback: ", dump(key))
-
 			modmap_release(mm, key)
 			print("active mods: ", dump(modmap_get_pressed_mods(mm)))
 			if not modmap_has_pressed_mods(mm) then
@@ -365,25 +367,24 @@ local function grab(t, keybind)
 			end
 		end,
 		keypressed_callback = function(self, modifiers, key)
-			local converted_key = mod_conversion[key]
-			if hold_mod then
-				-- filter mods that are ignored by default (capslock, numlock)
-				local filtered_modifiers = {}
-				for _, m in ipairs(modifiers) do
-					local ignore = vim.tbl_contains(ignore_mods, m)
-					if not ignore then
-						table.insert(filtered_modifiers, m)
-					end
+			-- filter mods that are ignored by default (capslock, numlock)
+			local filtered_modifiers = {}
+			for _, m in ipairs(modifiers) do
+				local ignore = vim.tbl_contains(ignore_mods, m)
+				if not ignore then
+					table.insert(filtered_modifiers, m)
 				end
-				modifiers = filtered_modifiers
-
-				modmap_press(mm, key, modifiers)
 			end
+			modifiers = filtered_modifiers
 
 			print("pressed callback: ", dump(modifiers), dump(key))
 
-			local keys = keybinds[key]
+			local converted_key = mod_conversion[key]
+			if hold_mod then
+				modmap_press(mm, key, modifiers)
+			end
 
+			local keys = keybinds[key]
 			if keys then
 				local function execute_key(v)
 					-- stop key
