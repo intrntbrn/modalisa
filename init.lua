@@ -22,8 +22,8 @@ function M.setup(opts)
 end
 
 return setmetatable(M, {
-	__call = function(_, ...)
-		return M.setup(...)
+	__call = function(_, opts)
+		return M.setup(opts)
 	end,
 	__index = function(_, k)
 		return require("motion.commands")[k]

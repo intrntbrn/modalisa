@@ -9,11 +9,15 @@ local M = {}
 -- fix default clienting floating resize
 -- tests for key parser
 -- on_enter
+-- pre(opts, t)
+-- post(opts, t)
+-- post_run hook
 
 local awful = require("awful")
 local vim = require("motion.vim")
 local util = require("motion.util")
 local dump = require("motion.vim").inspect
+local mtree = require("motion.tree")
 local akeygrabber = require("awful.keygrabber")
 
 -- global
@@ -266,7 +270,7 @@ local function grab(t, keybind)
 	-- assert(keybinds)
 
 	local function set_next_tree(tree)
-		require("naughty").notify({ text = string.format("on_enter: %s", tree:desc()) })
+		require("naughty").notify({ text = string.format("on_update: %s", tree:desc()) })
 		keybinds = keygrabber_keys(tree)
 		t = tree
 		global_tree = t
@@ -294,7 +298,7 @@ local function grab(t, keybind)
 		end
 
 		-- run!
-		local subtree = tree:fn(opts)
+		local subtree = tree:fn(opts, t)
 		if subtree then
 			-- dynamically created list
 			if type(subtree) ~= "table" or vim.tbl_count(subtree) == 0 then
@@ -515,6 +519,12 @@ local function grab(t, keybind)
 	grabber:start()
 end
 
+local function run(sequence, parsed_keybind)
+	---@diagnostic disable-next-line: need-check-nil
+	local t = mtree[sequence or ""]
+	return grab(t, parsed_keybind)
+end
+
 function M.parse_vim_key(k, opts)
 	-- upper alpha (e.g. "S")
 	if string.match(k, "^%u$") then
@@ -594,12 +604,13 @@ end
 
 local function make_awful_key(prefix, parsed_key)
 	return awful.key(parsed_key.mods, parsed_key.key, function()
-		M.run(prefix, parsed_key)
+		run(prefix, parsed_key)
 	end)
 end
 
 -- create keybind for every mod combination:
 -- e.g. for <M-y>:
+-- "y"	{ "Mod4", }
 -- "y"	{ "Mod4", "Mod1" }
 -- "y"	{ "Mod4", "Mod1", "Control" }
 -- "y"	{ "Mod4", "Mod1", "Control", "Shift" }
@@ -608,7 +619,7 @@ end
 -- "y"	{ "Mod4", "Control", "Shift" }
 -- "y"	{ "Mod4", "Shift" }
 
-function M.add_globalkey_combinations(prefix, key)
+function M.create_run_globalkey_combinations(prefix, key)
 	assert(mod_map)
 	assert(mod_conversion)
 
@@ -621,8 +632,6 @@ function M.add_globalkey_combinations(prefix, key)
 	end
 
 	local keys = {}
-
-	-- filter
 	local parsed_keys = M.parse_vim_key(key)
 
 	for _, parsed_key in pairs(parsed_keys) do
@@ -656,13 +665,48 @@ function M.add_globalkey_combinations(prefix, key)
 	awful.keyboard.append_global_keybindings(keys)
 end
 
-function M.add_globalkey_vim(prefix, vimkey)
+function M.parse_key_all(key)
+	local t = type(key)
+
+	if t == "string" then
+		return M.parse_vim_key(key)
+	end
+
+	if t ~= "table" then
+		return nil
+	end
+
+	if key.key and key.mods then
+		-- already parsed
+		return key
+	end
+
+	if #key == 2 then
+		local k, m
+		for _ = 1, 2 do
+			local p = key[1]
+			if type(p) == "table" then
+				assert(m == nil)
+				m = p
+				break
+			end
+			if type(p) == "string" then
+				assert(k == nil)
+				k = p
+				break
+			end
+		end
+		return { key = k, mods = m }
+	end
+
+	return nil
+end
+
+function M.create_run_globalkey_vim(prefix, vimkey)
 	local parsed_keys = M.parse_vim_key(vimkey)
 	for _, parsed_key in pairs(parsed_keys) do
 		awful.keyboard.append_global_keybindings({
-			awful.key(parsed_key.mods, parsed_key.key, function()
-				M.run(prefix, parsed_key)
-			end),
+			make_awful_key(prefix, parsed_key),
 		})
 	end
 end
@@ -671,29 +715,36 @@ end
 function M.add_globalkey(prefix, awmkey)
 	local parsed_key = util.parse_awesome_key(awmkey)
 	awful.keyboard.append_global_keybindings({
-		awful.key(parsed_key.mods, parsed_key.key, function()
-			M.run(prefix, parsed_key)
-		end),
+		make_awful_key(prefix, parsed_key),
 	})
 end
 
 -- TODO: rename
 -- run inline table
 function M.run_tree(tree, opts, name)
-	local t = require("motion.tree").create_tree(tree, opts, name)
+	---@diagnostic disable-next-line: need-check-nil
+	local t = mtree.create_tree(tree, opts, name)
 	if not t then
 		return
 	end
 	return grab(t)
 end
 
--- run root_tree
-function M.run(key_sequence, parsed_keybind)
-	local t = require("motion.tree")[key_sequence]
-	return grab(t, parsed_keybind)
+-- run keyroot_tree with a keybind (opt)
+function M.run(sequence, keybind)
+	sequence = sequence or ""
+	if keybind then
+		keybind = M.parse_key_all(keybind)
+		assert(keybind)
+	end
+	run(sequence, keybind)
 end
 
+local once
 function M.setup(opts)
+	assert(once == nil, "modal setup once")
+	once = true
+
 	awesome.connect_signal("xkb::map_changed", function()
 		generate_mod_conversion_maps()
 	end)
@@ -712,10 +763,14 @@ function M.setup(opts)
 	generate_mod_conversion_maps()
 
 	if opts.key then
-		M.add_globalkey_combinations("", opts.key)
+		M.create_run_globalkey_combinations("", opts.key)
 	end
 
 	print(dump(mod_conversion))
 end
 
-return M
+return setmetatable(M, {
+	__call = function(self, ...)
+		self.run(...)
+	end,
+})

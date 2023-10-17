@@ -1,29 +1,33 @@
 local awesome = awesome
-
 local tree = require("motion.tree")
 local modal = require("motion.modal")
 local config = require("motion.config")
 
 local M = {}
 
+-- run key sequence on root
 M.run = function(...)
 	return modal.run(...)
 end
 
+-- add key to root
 M.add_key = function(key)
 	---@diagnostic disable-next-line: need-check-nil
-	tree.add_key(key)
+	return tree.add_key(key)
 end
 
+-- add keys to root
 M.add_keys = function(keys)
 	---@diagnostic disable-next-line: need-check-nil
-	tree.add_keys(keys)
+	return tree.add_keys(keys)
 end
 
+-- config set
 M.set = function(k, v)
 	config[k] = v
 end
 
+-- config get
 M.get = function(k)
 	return config[k]
 end

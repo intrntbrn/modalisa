@@ -1,5 +1,6 @@
 local M = {}
 local vim = require("motion.vim")
+local dump = require("motion.vim").inspect
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
 
@@ -129,5 +130,11 @@ return setmetatable(M, {
 		---@diagnostic disable-next-line: param-type-mismatch
 		rawset(options, key, value)
 		on_update(key)
+	end,
+	__tostring = function(t)
+		if options == nil then
+			M.setup()
+		end
+		return dump(options)
 	end,
 })

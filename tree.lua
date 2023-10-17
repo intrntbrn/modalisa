@@ -141,7 +141,7 @@ function M.mt(obj, tree, load_default_opts)
 
 	tree = tree or obj
 
-	obj.fn = function(_, opts)
+	obj.fn = function(_, opts, t)
 		local data = rawget(obj, "data")
 		if not data then
 			return nil
@@ -149,7 +149,7 @@ function M.mt(obj, tree, load_default_opts)
 		local fn = rawget(data, "fn")
 
 		if fn then
-			return fn(opts)
+			return fn(opts, t)
 		end
 	end
 
