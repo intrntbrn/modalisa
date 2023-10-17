@@ -125,8 +125,8 @@ local function create_popup(t)
 	)
 	local cell_width = dpi(get_font_width(font))
 
-	print("cell_height: ", cell_height)
-	print("cell_width: ", cell_width)
+	-- print("cell_height: ", cell_height)
+	-- print("cell_width: ", cell_width)
 
 	local entry_height = cell_height
 	local entry_width = cell_width * opts.hints_min_entry_width
@@ -135,9 +135,9 @@ local function create_popup(t)
 	local max_columns = math.floor(max_width / entry_width)
 	local max_rows = math.floor(max_height / entry_height)
 
-	print("max_entries: ", max_entries)
-	print("max_columns: ", max_columns)
-	print("max_rows: ", math.floor(max_rows))
+	-- print("max_entries: ", max_entries)
+	-- print("max_columns: ", max_columns)
+	-- print("max_rows: ", math.floor(max_rows))
 
 	local num_entries = #entries
 	local num_columns = max_columns
@@ -157,9 +157,9 @@ local function create_popup(t)
 		end
 	end
 
-	print("num_entries: ", num_entries)
-	print("num_rows: ", num_rows)
-	print("num_columns: ", num_columns)
+	-- print("num_entries: ", num_entries)
+	-- print("num_rows: ", num_rows)
+	-- print("num_columns: ", num_columns)
 
 	local layout_columns = wibox.layout.fixed.horizontal({})
 
@@ -343,14 +343,14 @@ local function handle(t)
 end
 
 function M.setup(_)
-	awesome.connect_signal("motion::start", function(t)
-		handle(t)
+	awesome.connect_signal("motion::update", function(args)
+		handle(args.tree)
 	end)
-	awesome.connect_signal("motion::stop", function(t)
+	awesome.connect_signal("motion::stop", function(args)
 		if timer then
 			timer:stop()
 		end
-		hide(t)
+		hide(args.tree)
 	end)
 end
 

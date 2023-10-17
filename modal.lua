@@ -8,6 +8,7 @@ local M = {}
 -- move wm specific configs away from config?
 -- fix default clienting floating resize
 -- tests for key parser
+-- on_enter
 
 local awful = require("awful")
 local vim = require("motion.vim")
@@ -66,13 +67,18 @@ end
 
 -- @param t table A motion (sub)tree
 local function on_start(t)
-	awesome.emit_signal("motion::start", t)
+	awesome.emit_signal("motion::start", { tree = t })
+end
+
+-- @param t table A motion (sub)tree
+local function on_update(t)
+	awesome.emit_signal("motion::update", { tree = t })
 end
 
 -- @param t table A motion (sub)tree
 local function on_stop(t)
 	global_keygrabber = nil
-	awesome.emit_signal("motion::stop", t)
+	awesome.emit_signal("motion::stop", { tree = t })
 end
 
 local global_execute
@@ -255,18 +261,20 @@ local function grab(t, keybind)
 		modmap_init(mm, root_key.key, root_key.mods)
 	end
 
-	local keybinds = keygrabber_keys(t)
-	assert(keybinds)
-
-	print("keybinds: ", dump(keybinds))
-	print("t", dump(t))
+	local keybinds
+	-- local keybinds = keygrabber_keys(t)
+	-- assert(keybinds)
 
 	local function set_next_tree(tree)
+		require("naughty").notify({ text = string.format("on_enter: %s", tree:desc()) })
 		keybinds = keygrabber_keys(tree)
 		t = tree
 		global_tree = t
-		on_start(tree)
+		on_update(tree)
 	end
+
+	-- print("keybinds: ", dump(keybinds))
+	-- print("t", dump(t))
 
 	-- set the tree
 	local function run(tree, force)
@@ -342,13 +350,16 @@ local function grab(t, keybind)
 	-- we have to force the menu generation if the user calls M.run() on an
 	-- dynamic menu node. This should be the only case when we end up here
 	-- without any successors.
-	if vim.tbl_count(t:successors()) == 0 then
-		run(t) -- populate the tree
-		if vim.tbl_count(t:successors()) == 0 then
-			assert(false, "catch bug: no successors on grab")
-			return
-		end
-	end
+	-- if vim.tbl_count(t:successors()) == 0 then
+	-- 	run(t) -- populate the tree
+	-- 	if vim.tbl_count(t:successors()) == 0 then
+	-- 		assert(false, "catch bug: no successors on grab")
+	-- 		return
+	-- 	end
+	-- end
+
+	run(t)
+	set_next_tree(t)
 
 	local grabber = akeygrabber({
 		-- keyreleased_callback is only used for hold_mod detection
@@ -492,7 +503,7 @@ local function grab(t, keybind)
 			timeout = 0.05,
 			callback = function()
 				if global_keygrabber then
-					on_start(t)
+					on_update(t)
 				end
 			end,
 			autostart = true,
@@ -581,6 +592,12 @@ function M.parse_vim_key(k, opts)
 	}
 end
 
+local function make_awful_key(prefix, parsed_key)
+	return awful.key(parsed_key.mods, parsed_key.key, function()
+		M.run(prefix, parsed_key)
+	end)
+end
+
 -- create keybind for every mod combination:
 -- e.g. for <M-y>:
 -- "y"	{ "Mod4", "Mod1" }
@@ -603,18 +620,14 @@ function M.add_globalkey_combinations(prefix, key)
 		end
 	end
 
+	local keys = {}
+
 	-- filter
 	local parsed_keys = M.parse_vim_key(key)
 
 	for _, parsed_key in pairs(parsed_keys) do
-		if vim.tbl_isempty(parsed_key.mods) then
-			-- special case: no mods
-			awful.keyboard.append_global_keybindings({
-				awful.key({}, parsed_key.key, function()
-					M.run(prefix, parsed_key)
-				end),
-			})
-		end
+		-- the specified key
+		table.insert(keys, make_awful_key(prefix, parsed_key))
 
 		local map = vim.deepcopy(all_mods)
 
@@ -636,13 +649,11 @@ function M.add_globalkey_combinations(prefix, key)
 			keybind.mods = all
 
 			print("global keybind: ", dump(keybind.key), dump(keybind.mods))
-			awful.keyboard.append_global_keybindings({
-				awful.key(keybind.mods, keybind.key, function()
-					M.run(prefix, keybind)
-				end),
-			})
+			table.insert(keys, make_awful_key(prefix, keybind))
 		end
 	end
+
+	awful.keyboard.append_global_keybindings(keys)
 end
 
 function M.add_globalkey_vim(prefix, vimkey)
