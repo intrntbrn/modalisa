@@ -24,8 +24,6 @@ local akeygrabber = require("awful.keygrabber")
 local global_tree
 local global_keygrabber
 local mod_conversion = nil
-local mod_map
-
 local ignore_mods = { "Lock2", "Mod2" }
 
 local supported_mods = {
@@ -34,6 +32,7 @@ local supported_mods = {
 	["C"] = "Control_L",
 	["M"] = "Super_L",
 }
+local mod_map
 
 local function generate_mod_conversion_maps()
 	if mod_conversion then
@@ -526,17 +525,37 @@ local function run(sequence, parsed_keybind)
 end
 
 function M.parse_vim_key(k, opts)
+	print("parse: ", k)
 	-- upper alpha (e.g. "S")
 	if string.match(k, "^%u$") then
 		return {
-			{ key = k, mods = { "Shift" }, name = k },
+			{ key = k, mods = { mod_map["S"] }, name = k },
 		}
 	end
 
-	-- alphanumeric char (e.g. "s", "4")
-	if string.match(k, "^%w$") then
+	-- alphanumeric char and space (e.g. "s", "4", " ")
+	if string.match(k, "^[%w%s]$") then
 		return {
 			{ key = k, mods = {}, name = k },
+		}
+	end
+
+	-- punctuation char (e.g. ";")
+	if string.match(k, "^%p$") then
+		-- HACK: awful.keygrabber requires for special keys to also specify shift as
+		-- mods. This is utterly broken, because for some layouts the
+		-- minus key is on the shift layer, but for others layouts not. Therefore we're just
+		-- ignoring the shift state by adding the key with and without shift to the
+		-- map.
+		if opts and not opts.ignore_shift_state_for_special_characters then
+			return {
+				{ key = k, mods = {}, name = k },
+			}
+		end
+
+		return {
+			{ key = k, mods = {}, name = k },
+			{ key = k, mods = { mod_map["S"] }, name = k },
 		}
 	end
 
@@ -575,31 +594,26 @@ function M.parse_vim_key(k, opts)
 			end
 		end
 
+		if string.match(k, "^%p$") and not vim.tbl_contains(mods, mod_map["S"]) then
+			if opts and not opts.ignore_shift_state_for_special_characters then
+				local mods_with_shift = vim.deepcopy(mods)
+				table.insert(mods_with_shift, mod_map["S"])
+				return {
+					{ key = k, mods = {}, name = k },
+					{ key = k, mods = mods_with_shift, name = k },
+				}
+			end
+			return {
+				{ key = k, mods = {}, name = k },
+			}
+		end
+
 		return {
 			{ key = key, mods = mods, name = k },
 		}
 	end
 
 	assert(string.len(k) == 1, string.format("unable to parse unknown key: %s", k))
-
-	-- we assume it's a special character (e.g. $ or #)
-
-	-- HACK: awful.keygrabber requires for special keys to also specify shift as
-	-- mods. This is utterly broken, because for some layouts the
-	-- minus key is on the shift layer, but for others layouts not. Therefore we're just
-	-- ignoring the shift state by adding the key with and without shift to the
-	-- map.
-
-	if opts and not opts.ignore_shift_state_for_special_characters then
-		return {
-			{ key = k, mods = {}, name = k },
-		}
-	end
-
-	return {
-		{ key = k, mods = {}, name = k },
-		{ key = k, mods = { "Shift" }, name = k },
-	}
 end
 
 local function make_awful_key(prefix, parsed_key)
