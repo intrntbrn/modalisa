@@ -176,75 +176,6 @@ local function keygrabber_keys(t)
 	return all_keys
 end
 
-local function modmap_set(self, key, mods, only_overwrite)
-	if not self then
-		return
-	end
-
-	for _, mod in pairs(mods) do
-		if not only_overwrite or not (self[mod] == nil) then
-			self[mod] = true
-		end
-	end
-
-	---@diagnostic disable-next-line: need-check-nil
-	local converted_key = mod_conversion[key]
-
-	-- key is actually a mod (e.g. Super_L -> Mod4)
-	if converted_key then
-		if not only_overwrite or not (self[converted_key] == nil) then
-			self[converted_key] = true
-		end
-	end
-end
-
-local function modmap_press(self, key, mods)
-	-- do not set pressed for mods that we don't care about
-	return modmap_set(self, key, mods, false)
-end
-
-local function modmap_init(self, key, mods)
-	assert(self)
-	modmap_set(self, key, mods, false)
-end
-
-local function modmap_release(self, key)
-	if not self then
-		return
-	end
-
-	---@diagnostic disable-next-line: need-check-nil
-	local converted_key = mod_conversion[key]
-	-- key is actually a mod (e.g. Super_L -> Mod4)
-	if converted_key then
-		if not (self[converted_key] == nil) then
-			self[converted_key] = false
-		end
-	end
-end
-
-local function modmap_has_pressed_mods(self)
-	if not self then
-		return
-	end
-	for k, m in pairs(self) do
-		if m then
-			return true
-		end
-	end
-	return false
-end
-
-local function modmap_get_pressed_mods(self)
-	local pressed_mods = {}
-	for mod, is_pressed in pairs(self or {}) do
-		if is_pressed then
-			table.insert(pressed_mods, mod)
-		end
-	end
-	return pressed_mods
-end
-
 local function grab(t, keybind)
 	assert(mod_conversion)
 	local opts = t:opts()
@@ -259,9 +190,9 @@ local function grab(t, keybind)
 
 	local hold_mod_ran_once = false
 
-	local mm = {}
+	local mm
 	if hold_mod then
-		modmap_init(mm, root_key.key, root_key.mods)
+		mm = require("motion.modmap")(root_key.key, root_key.mods, mod_conversion)
 	end
 
 	local instance_keybinds
@@ -335,7 +266,7 @@ local function grab(t, keybind)
 			return
 		end
 
-		if not modmap_has_pressed_mods(mm) and not continue then
+		if not mm:has_pressed_mods() and not continue then
 			grabber:stop()
 			return
 		end
@@ -353,9 +284,9 @@ local function grab(t, keybind)
 		-- keyreleased_callback is only used for hold_mod detection
 		keyreleased_callback = hold_mod and function(self, _, key)
 			-- print("released callback: ", dump(key))
-			modmap_release(mm, key)
-			print("active mods: ", dump(modmap_get_pressed_mods(mm)))
-			if not modmap_has_pressed_mods(mm) then
+			mm:release(key)
+			-- print("active mods: ", dump(mm))
+			if not mm:has_pressed_mods() then
 				local mod_release = instance_tree:opts().mod_release_stop
 				if mod_release == "always" or hold_mod_ran_once and mod_release == "after" then
 					print("mm: all mods are released: ", mod_release)
@@ -380,7 +311,7 @@ local function grab(t, keybind)
 
 			local converted_key = mod_conversion[key]
 			if hold_mod then
-				modmap_press(mm, key, modifiers)
+				mm:press(key, modifiers)
 			end
 
 			local keys = instance_keybinds[key]
@@ -428,7 +359,7 @@ local function grab(t, keybind)
 
 				if hold_mod then
 					-- find the match with the least amount of ignored mods
-					local pressed_mods_list = modmap_get_pressed_mods(mm)
+					local pressed_mods_list = mm:get_pressed_mods()
 					local combinations = {}
 					for combo in util.unique_combinations(pressed_mods_list) do
 						table.insert(combinations, combo)
