@@ -15,9 +15,11 @@ local defaults = {
 
 	-- core
 	unique = { "key", "hidden", "fg" },
-	mod_hold_continue = true,
+	mode = "hold", -- "modal" | "hold" | "hybrid" | "forever"
+	continue_until_stop_key = false, -- TODO:
+	mod_hold_continue = true, -- TODO: these vars can be combined
 	mod_release_stop = "after", -- always | after
-	stop_on_unknown_key = true,
+	stop_on_unknown_key = true, -- regardless of mode
 	ignore_shift_state_for_special_characters = true,
 	timeout = 0,
 

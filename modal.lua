@@ -5,13 +5,18 @@ local M = {}
 -- add keybind support for each tree node
 -- keyname tester
 -- timestamp
--- move wm specific configs away from config?
+-- move wm specific configs away from config? predefined keys folder!
 -- fix default clienting floating resize
 -- tests for key parser
--- on_enter
--- pre(opts, t)
--- post(opts, t)
--- post_run hook
+-- stay_open -> continue (macht keinen wirklichen sinn, brauchen wir
+-- aber für mouseclick oder)
+-- modes: "once, mod_release, once_and_mod_release, until_stop"
+-- modes: "modal, hold, hybrid, forever, special_mouse"
+-- option picker ("pick a string")
+-- echo (fn, text, style)
+-- notify system
+-- color highlight links "bg or #ff00"
+-- group colors
 
 local awful = require("awful")
 local vim = require("motion.vim")
@@ -80,6 +85,7 @@ end
 
 -- @param t table A motion (sub)tree
 local function on_stop(t)
+	print("motion::stop")
 	global_keygrabber = nil
 	awesome.emit_signal("motion::stop", { tree = t })
 end
@@ -176,6 +182,77 @@ local function keygrabber_keys(t)
 	return all_keys
 end
 
+local trunner = {}
+function trunner:new(t, root_key)
+	local opts = t:opts()
+
+	self.mm = mmodmap(root_key.key or "", root_key.mods or {})
+	self.ran_once = false
+	self.tree = t
+
+	if vim.tbl_count(t:successors()) == 0 then
+		-- the tree is empty and there is nothing to do, except to wait for the
+		-- user to press the stop key.
+		-- running the node might populate itself (e.g. user calls run on an
+		-- dynamic node)
+		self:run(t)
+
+		if vim.tbl_count(t:successors()) == 0 then
+			-- still nothing to do
+			return nil
+		end
+	end
+
+	self:set_tree(t)
+
+	return self
+end
+
+function trunner:set_tree(t)
+	self.tree = t
+	self.keybinds = keygrabber_keys(t)
+	on_update(t)
+end
+
+function trunner:run(t)
+	local topts = t:opts()
+
+	-- run fn
+	local list = t:fn(topts, t) -- TODO tree param remove
+	if list then
+		-- dynamically created list
+		if type(list) ~= "table" or vim.tbl_count(list) == 0 then
+			return
+		end
+		t:add_successors(list)
+		return t
+	end
+
+	-- command did not return a new list
+
+	self.ran_once = true
+
+	return nil
+end
+
+function trunner:traverse(tree, key)
+	local next_tree = tree[key]
+
+	if not next_tree then
+		assert(false, "catch bug: tree is empty for accepted key: " .. key)
+		return
+	end
+
+	local succs = next_tree:successors()
+	if succs and vim.tbl_count(succs) > 0 then
+		-- wait for inputs
+		return next_tree
+	end
+
+	-- no successors, run the leaf node
+	return self:run(next_tree)
+end
+
 local function grab(t, keybind)
 	assert(mod_conversion)
 	local opts = t:opts()
@@ -185,7 +262,8 @@ local function grab(t, keybind)
 	local root_key = hold_mod and keybind
 
 	if hold_mod then
-		assert(root_key.key, "hold_mod is active but there is no root key")
+		-- TODO: send notification about how to setup keybinds
+		assert(root_key and root_key.key, "hold_mod is active but there is no root key")
 	end
 
 	local hold_mod_ran_once = false
@@ -303,18 +381,24 @@ local function grab(t, keybind)
 	local grabber = akeygrabber({
 		-- keyreleased_callback is only used for hold_mod detection
 		keyreleased_callback = hold_mod and function(self, _, key)
-			-- print("released callback: ", dump(key))
 			mm:release(key)
-			-- print("active mods: ", dump(mm))
-			if not mm:has_pressed_mods() then
-				local mod_release = t:opts().mod_release_stop
-				if mod_release == "always" or hold_mod_ran_once and mod_release == "after" then
-					print("mm: all mods are released: ", mod_release)
-					self:stop()
-					return
-				end
-				print("mm: all mods are released: ", mod_release)
+			if mm:has_pressed_mods() then
+				return
 			end
+
+			local topts = t:opts()
+
+			if topts.stay_open then
+				return
+			end
+
+			local mod_release = topts.mod_release_stop
+			if mod_release == "always" or hold_mod_ran_once and mod_release == "after" then
+				print("mm: all mods are released: ", mod_release)
+				self:stop()
+				return
+			end
+			print("mm: all mods are released: ", mod_release)
 		end,
 		keypressed_callback = function(self, modifiers, key)
 			-- filter mods that are ignored by default (capslock, numlock)
