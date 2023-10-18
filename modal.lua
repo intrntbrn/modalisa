@@ -110,7 +110,7 @@ end
 
 -- bypass the keygrabber
 function M.fake_input(key, force_continue)
-	trunner:press_key(key, force_continue)
+	trunner:input(key, force_continue)
 end
 
 -- @param m table Map of parsed keys
@@ -262,6 +262,60 @@ function trunner:run(t)
 	return nil
 end
 
+function trunner:input(key, force_continue)
+	print("press key: ", dump(key))
+	local tree = self.tree
+
+	-- special keys that have no actual function
+	if key == "back" then
+		local prev = tree:pred()
+		if prev then
+			self:set_tree(prev)
+		end
+		return
+	end
+
+	if key == "stop" then
+		self:stop()
+		return
+	end
+
+	-- traverse
+	local next_tree = tree[key]
+	if not next_tree then
+		print(tree)
+		assert(false, "catch bug: tree is empty for accepted key: " .. key)
+		return
+	end
+
+	-- check if next tree has successors
+
+	local succs = next_tree:successors()
+	if not succs or vim.tbl_count(succs) == 0 then
+		-- next tree is leaf -> run
+		next_tree = self:run(next_tree) -- return nil or dynamic created tree
+	end
+
+	if next_tree then
+		-- we have not reached a leaf yet
+		-- wait for the next input
+		self:set_tree(next_tree)
+		return
+	end
+
+	-- no next tree
+
+	if force_continue then
+		return
+	end
+
+	if self.mm:has_pressed_mods() then
+		return
+	end
+
+	self:stop()
+end
+
 function trunner:keypressed_callback()
 	return function(_, modifiers, key)
 		-- filter mods that are ignored by default (capslock, numlock)
@@ -276,18 +330,19 @@ function trunner:keypressed_callback()
 
 		print("pressed callback: ", dump(modifiers), dump(key))
 
-		local converted_key = mod_conversion[key]
+		---@diagnostic disable-next-line: need-check-nil
+		local modifier_key = mod_conversion[key]
 		self.mm:press(key, modifiers)
 
 		local keys = self.keybinds[key]
 		if keys then
-			local function _press_key(v)
-				self:press_key(v.stop and "stop" or v.back and "back" or v.name)
+			local function _input_key(v)
+				self:input(v.stop and "stop" or v.back and "back" or v.name)
 			end
 
 			for _, v in pairs(keys) do
 				if is_match(v.mods, modifiers) then
-					return _press_key(v)
+					return _input_key(v)
 				end
 			end
 
@@ -314,7 +369,7 @@ function trunner:keypressed_callback()
 						end
 						-- v.mods == modifiers - combi?
 						if is_match(v.mods, filtered) then
-							return _press_key(v)
+							return _input_key(v)
 						end
 					end
 				end
@@ -322,7 +377,7 @@ function trunner:keypressed_callback()
 		end
 		-- no match!
 
-		if converted_key then
+		if modifier_key then
 			-- user is pressing a mod key, we have to ignore it
 			return
 		end
@@ -375,62 +430,6 @@ function trunner:setup_keygrabber(t)
 		end,
 	})
 	return grabber
-end
-
-function trunner:traverse(key)
-	local tree = self.tree
-	local next_tree = tree[key]
-
-	if not next_tree then
-		print(tree)
-		assert(false, "catch bug: tree is empty for accepted key: " .. key)
-		return
-	end
-
-	local succs = next_tree:successors()
-	if succs and vim.tbl_count(succs) > 0 then
-		-- wait for inputs
-		return next_tree
-	end
-
-	-- no successors, run the leaf node
-	return self:run(next_tree)
-end
-
-function trunner:press_key(key, force_continue)
-	print("press key: ", dump(key))
-	-- special key hacks
-	if key == "back" then
-		local prev = self.tree:pred()
-		assert(prev, "no prev for back key")
-		if prev then
-			self:set_tree(prev)
-		end
-		return
-	end
-
-	if key == "stop" then
-		self:stop()
-		return
-	end
-
-	local next_tree = self:traverse(key)
-	if next_tree then
-		self:set_tree(next_tree)
-		return
-	end
-
-	-- no next tree
-
-	if force_continue then
-		return
-	end
-
-	if self.mm:has_pressed_mods() then
-		return
-	end
-
-	self:stop()
 end
 
 local function grab(t, keybind)
