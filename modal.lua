@@ -19,6 +19,8 @@ local M = {}
 -- group colors
 -- extra options for keybinds
 -- tree cache
+-- notify for duplicate keys
+-- fix shift_l map
 
 local awful = require("awful")
 local vim = require("motion.vim")
@@ -28,18 +30,18 @@ local mtree = require("motion.tree")
 local mmodmap = require("motion.modmap")
 local akeygrabber = require("awful.keygrabber")
 
--- global
-local global_keygrabber
-local mod_conversion = nil
-local ignore_mods = { "Lock2", "Mod2" }
+local trunner = {}
 
+local ignore_mods = { "Lock2", "Mod2" }
 local supported_mods = {
 	["S"] = "Shift_L",
 	["A"] = "Alt_L",
 	["C"] = "Control_L",
 	["M"] = "Super_L",
 }
+
 local mod_map
+local mod_conversion = nil
 
 local function generate_mod_conversion_maps()
 	if mod_conversion then
@@ -103,16 +105,12 @@ end
 -- @param t table A motion (sub)tree
 local function on_stop(t)
 	print("motion::stop")
-	global_keygrabber = nil
 	awesome.emit_signal("motion::stop", { tree = t })
 end
 
-local global_execute
 -- bypass the keygrabber
 function M.fake_input(key, force_continue)
-	if global_keygrabber and global_execute then
-		global_execute(key, global_keygrabber, force_continue)
-	end
+	trunner:press_key(key, force_continue)
 end
 
 -- @param m table Map of parsed keys
@@ -199,7 +197,6 @@ local function keygrabber_keys(t)
 	return all_keys
 end
 
-local trunner = {}
 function trunner:new(t, root_key)
 	if root_key then
 		self.mm = mmodmap(root_key.key, root_key.mods, mod_conversion)
@@ -225,14 +222,8 @@ function trunner:new(t, root_key)
 	end
 
 	self:set_tree(t)
-	local grabber = self:make_keygrabber(t)
+	local grabber = self:setup_keygrabber(t)
 	self.keygrabber = grabber
-
-	global_keygrabber = grabber
-	global_execute = function(...)
-		local ret = self:press_key(...)
-		return ret
-	end
 
 	grabber:start()
 
@@ -244,6 +235,10 @@ function trunner:set_tree(t)
 	self.tree = t
 	self.keybinds = keygrabber_keys(t)
 	on_update(t)
+end
+
+function trunner:stop()
+	self.keygrabber:stop()
 end
 
 function trunner:run(t)
@@ -286,27 +281,13 @@ function trunner:keypressed_callback()
 
 		local keys = self.keybinds[key]
 		if keys then
-			local function accept_key(v)
-				print("accept_key: ", dump(v))
-				-- stop key
-				if v.stop then
-					self.keygrabber:stop()
-					return
-				end
-
-				-- back key
-				if v.back then
-					self:press_key("back", self.keygrabber)
-					return
-				end
-
-				-- regular key
-				self:press_key(v.name, self.keygrabber)
+			local function _press_key(v)
+				self:press_key(v.stop and "stop" or v.back and "back" or v.name)
 			end
 
 			for _, v in pairs(keys) do
 				if is_match(v.mods, modifiers) then
-					return accept_key(v)
+					return _press_key(v)
 				end
 			end
 
@@ -333,7 +314,7 @@ function trunner:keypressed_callback()
 						end
 						-- v.mods == modifiers - combi?
 						if is_match(v.mods, filtered) then
-							return accept_key(v)
+							return _press_key(v)
 						end
 					end
 				end
@@ -349,7 +330,7 @@ function trunner:keypressed_callback()
 		-- key is not defined and not a mod
 		if self.tree:opts().stop_on_unknown_key then
 			print("unknown key: ", key)
-			self.keygrabber:stop()
+			self:stop()
 		end
 	end
 end
@@ -370,14 +351,14 @@ function trunner:keyreleased_callback()
 		local mod_release = opts.mod_release_stop
 		if mod_release == "always" or self.ran_once and mod_release == "after" then
 			print("mm: all mods are released: ", mod_release)
-			self.keygrabber:stop()
+			self:stop()
 			return
 		end
 		print("mm: all mods are released: ", mod_release)
 	end
 end
 
-function trunner:make_keygrabber(t)
+function trunner:setup_keygrabber(t)
 	local grabber = akeygrabber({
 		keyreleased_callback = self:keyreleased_callback(),
 		keypressed_callback = self:keypressed_callback(),
@@ -416,7 +397,7 @@ function trunner:traverse(key)
 	return self:run(next_tree)
 end
 
-function trunner:press_key(key, grabber, force_continue)
+function trunner:press_key(key, force_continue)
 	print("press key: ", dump(key))
 	-- special key hacks
 	if key == "back" then
@@ -429,10 +410,7 @@ function trunner:press_key(key, grabber, force_continue)
 	end
 
 	if key == "stop" then
-		grabber = grabber or global_keygrabber
-		if grabber then
-			grabber:stop()
-		end
+		self:stop()
 		return
 	end
 
@@ -452,16 +430,10 @@ function trunner:press_key(key, grabber, force_continue)
 		return
 	end
 
-	-- stop the grabber
-	grabber = grabber or global_keygrabber
-	if grabber then
-		grabber:stop()
-	end
+	self:stop()
 end
 
 local function grab(t, keybind)
-	assert(mod_conversion)
-
 	local opts = t:opts()
 
 	-- hold mod init
@@ -472,283 +444,6 @@ local function grab(t, keybind)
 	if true then
 		return
 	end
-	--
-	-- if hold_mod then
-	-- 	-- TODO: send notification about how to setup keybinds
-	-- 	assert(root_key and root_key.key, "hold_mod is active but there is no root key")
-	-- end
-	--
-	-- local hold_mod_ran_once = false
-	--
-	-- local mm
-	-- if hold_mod then
-	-- 	mm = mmodmap(root_key.key, root_key.mods, mod_conversion)
-	-- end
-	--
-	-- local keybinds
-	--
-	-- local function set_next_tree(tree)
-	-- 	t = tree
-	-- 	keybinds = keygrabber_keys(tree)
-	-- 	on_update(tree)
-	-- end
-	--
-	-- local function run(tree)
-	-- 	local topts = tree:opts()
-	--
-	-- 	local list = tree:fn(topts, t)
-	-- 	if list then
-	-- 		-- dynamically created list
-	-- 		if type(list) ~= "table" or vim.tbl_count(list) == 0 then
-	-- 			return
-	-- 		end
-	-- 		tree:add_successors(list)
-	-- 		return tree
-	-- 	end
-	--
-	-- 	-- command did not return a new list
-	-- 	hold_mod_ran_once = true
-	--
-	-- 	if topts.stay_open then
-	-- 		return tree:pred()
-	-- 	end
-	--
-	-- 	return nil
-	-- end
-	--
-	-- -- traverse the tree and return the next node
-	-- -- run if next node is leaf
-	-- local function traverse(tree, key)
-	-- 	local next_tree = tree[key]
-	--
-	-- 	if not next_tree then
-	-- 		assert(false, "catch bug: tree is empty for accepted key: " .. key)
-	-- 		return
-	-- 	end
-	--
-	-- 	local succs = next_tree:successors()
-	-- 	if succs and vim.tbl_count(succs) > 0 then
-	-- 		-- wait for inputs
-	-- 		return next_tree
-	-- 	end
-	--
-	-- 	-- no successors, run the leaf node
-	-- 	return run(next_tree)
-	-- end
-	--
-	-- -- key has been accepted by the grabber.
-	-- -- traverse the tree.
-	-- -- execute if the successor is a leaf.
-	-- -- stop the grabber if we're done.
-	-- local function press_key(key, grabber, force_continue)
-	-- 	-- special key hacks
-	-- 	if key == "back" then
-	-- 		local prev = t:pred()
-	-- 		if prev then
-	-- 			set_next_tree(prev)
-	-- 		end
-	-- 		return
-	-- 	end
-	-- 	if key == "stop" then
-	-- 		grabber = grabber or global_keygrabber
-	-- 		if grabber then
-	-- 			grabber:stop()
-	-- 		end
-	-- 		return
-	-- 	end
-	--
-	-- 	local next_tree = traverse(t, key)
-	-- 	if next_tree then
-	-- 		set_next_tree(next_tree)
-	-- 		return
-	-- 	end
-	--
-	-- 	-- no next tree
-	--
-	-- 	if force_continue then
-	-- 		return
-	-- 	end
-	--
-	-- 	if hold_mod and mm:has_pressed_mods() then
-	-- 		return
-	-- 	end
-	--
-	-- 	-- stop the grabber
-	-- 	grabber = grabber or global_keygrabber
-	-- 	if grabber then
-	-- 		grabber:stop()
-	-- 	end
-	-- end
-	--
-	-- if vim.tbl_count(t:successors()) == 0 then
-	-- 	-- the tree is empty and there is nothing to do, except to wait for the
-	-- 	-- user to press the stop key.
-	-- 	-- running the node might populate itself (e.g. user calls run on an
-	-- 	-- dynamic node)
-	-- 	run(t)
-	-- end
-	-- assert(vim.tbl_count(t:successors()) > 1, "tree is empty") -- there is nothing to do here
-	-- set_next_tree(t)
-	--
-	-- local grabber = akeygrabber({
-	-- 	-- keyreleased_callback is only used for hold_mod detection
-	-- 	keyreleased_callback = function(self, _, key)
-	-- 		mm:release(key)
-	-- 		if mm:has_pressed_mods() then
-	-- 			return
-	-- 		end
-	--
-	-- 		local topts = t:opts()
-	--
-	-- 		if topts.stay_open then
-	-- 			return
-	-- 		end
-	--
-	-- 		local mod_release = topts.mod_release_stop
-	-- 		if mod_release == "always" or hold_mod_ran_once and mod_release == "after" then
-	-- 			print("mm: all mods are released: ", mod_release)
-	-- 			self:stop()
-	-- 			return
-	-- 		end
-	-- 		print("mm: all mods are released: ", mod_release)
-	-- 	end,
-	-- 	keypressed_callback = function(self, modifiers, key)
-	-- 		-- filter mods that are ignored by default (capslock, numlock)
-	-- 		local filtered_modifiers = {}
-	-- 		for _, m in ipairs(modifiers) do
-	-- 			local ignore = vim.tbl_contains(ignore_mods, m)
-	-- 			if not ignore then
-	-- 				table.insert(filtered_modifiers, m)
-	-- 			end
-	-- 		end
-	-- 		modifiers = filtered_modifiers
-	--
-	-- 		print("pressed callback: ", dump(modifiers), dump(key))
-	--
-	-- 		local converted_key = mod_conversion[key]
-	-- 		if hold_mod then
-	-- 			mm:press(key, modifiers)
-	-- 		end
-	--
-	-- 		local keys = keybinds[key]
-	-- 		if keys then
-	-- 			local function accept_key(v)
-	-- 				-- stop key
-	-- 				if v.stop then
-	-- 					self:stop()
-	-- 					return
-	-- 				end
-	--
-	-- 				-- back key
-	-- 				if v.back then
-	-- 					press_key("back", self)
-	-- 					return
-	-- 				end
-	--
-	-- 				-- regular key
-	-- 				press_key(v.name, self)
-	-- 			end
-	--
-	-- 			local function is_match(v, comparator)
-	-- 				if not (#v == #comparator) then
-	-- 					return false
-	-- 				end
-	-- 				local mod = {}
-	-- 				for _, v2 in ipairs(v) do
-	-- 					mod[v2] = true
-	-- 				end
-	-- 				local match = true
-	-- 				for _, v2 in ipairs(comparator) do
-	-- 					match = match and mod[v2]
-	-- 				end
-	-- 				return match
-	-- 			end
-	--
-	-- 			-- check exact match first to skip combination calculations
-	-- 			for _, v in pairs(keys) do
-	-- 				if is_match(v.mods, modifiers) then
-	-- 					return accept_key(v)
-	-- 				end
-	-- 			end
-	--
-	-- 			if hold_mod then
-	-- 				-- find the match with the least amount of ignored mods
-	-- 				local pressed_mods_list = mm:get_pressed_mods()
-	-- 				local combinations = {}
-	-- 				for combo in util.unique_combinations(pressed_mods_list) do
-	-- 					table.insert(combinations, combo)
-	-- 				end
-	-- 				table.sort(combinations, function(a, b)
-	-- 					return #a < #b
-	-- 				end)
-	--
-	-- 				-- combinations are sorted by mod count ascending
-	-- 				for _, combi in ipairs(combinations) do
-	-- 					-- keys are sorted by mod count descending
-	-- 					for _, v in pairs(keys) do
-	-- 						local filtered = {} -- modifiers - combi
-	-- 						for _, mod in ipairs(modifiers) do
-	-- 							if not vim.tbl_contains(combi, mod) then
-	-- 								table.insert(filtered, mod)
-	-- 							end
-	-- 						end
-	-- 						-- v.mods == modifiers - combi?
-	-- 						if is_match(v.mods, filtered) then
-	-- 							return accept_key(v)
-	-- 						end
-	-- 					end
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 		-- no match!
-	--
-	-- 		if converted_key then
-	-- 			-- user is pressing a mod key, we have to ignore it
-	-- 			return
-	-- 		end
-	--
-	-- 		-- key is not defined and not a mod
-	-- 		if t:opts().stop_on_unknown_key then
-	-- 			print("unknown key: ", key)
-	-- 			self:stop()
-	-- 		end
-	-- 	end,
-	-- 	timeout = opts.timeout and opts.timeout > 0 and opts.timeout / 1000,
-	-- 	timeout_callback = function()
-	-- 		run(t)
-	-- 		on_stop(t)
-	-- 	end,
-	-- 	start_callback = function()
-	-- 		on_start(t)
-	-- 	end,
-	-- 	stop_callback = function()
-	-- 		on_stop(t)
-	-- 	end,
-	-- })
-	--
-	-- global_keygrabber = grabber
-	-- global_execute = function(...)
-	-- 	local ret = press_key(...)
-	--
-	-- 	-- HACK:
-	-- 	-- force update after clicks
-	-- 	require("gears").timer({
-	-- 		timeout = 0.05,
-	-- 		callback = function()
-	-- 			if global_keygrabber then
-	-- 				on_update(t)
-	-- 			end
-	-- 		end,
-	-- 		autostart = true,
-	-- 		single_shot = true,
-	-- 	})
-	--
-	-- 	return ret
-	-- end
-	--
-	-- grabber:start()
-	--
-	-- -- grabber.keyreleased_callback = nil
 end
 
 local function run(sequence, parsed_keybind)
