@@ -18,10 +18,10 @@ local vim = require("motion.vim")
 local util = require("motion.util")
 local dump = require("motion.vim").inspect
 local mtree = require("motion.tree")
+local mmodmap = require("motion.modmap")
 local akeygrabber = require("awful.keygrabber")
 
 -- global
-local global_tree
 local global_keygrabber
 local mod_conversion = nil
 local ignore_mods = { "Lock2", "Mod2" }
@@ -192,66 +192,73 @@ local function grab(t, keybind)
 
 	local mm
 	if hold_mod then
-		mm = require("motion.modmap")(root_key.key, root_key.mods, mod_conversion)
+		mm = mmodmap(root_key.key, root_key.mods, mod_conversion)
 	end
 
-	local instance_keybinds
-	local instance_tree = t
+	local keybinds
 
 	local function set_next_tree(tree)
-		instance_tree = tree
-		instance_keybinds = keygrabber_keys(tree)
-		global_tree = tree
+		t = tree
+		keybinds = keygrabber_keys(tree)
 		on_update(tree)
 	end
 
-	-- set the tree
-	local function execute_if_leaf(tree, force)
-		-- force is currently only true for timeout nodes
-		if not tree then
-			assert(false, "catch bug: tree is nil in run_tree")
-			return
-		end
+	local function run(tree)
+		local topts = tree:opts()
 
-		---@diagnostic disable-next-line: redefined-local
-		local opts = tree:opts()
-		local succs = tree:successors()
-
-		if succs and vim.tbl_count(succs) > 0 and not force then
-			-- wait for inputs
-			return tree
-		end
-
-		-- run!
-		local subtree = tree:fn(opts, instance_tree)
-		if subtree then
+		local list = tree:fn(topts, t)
+		if list then
 			-- dynamically created list
-			if type(subtree) ~= "table" or vim.tbl_count(subtree) == 0 then
+			if type(list) ~= "table" or vim.tbl_count(list) == 0 then
 				return
 			end
-			tree:add_successors(subtree)
+			tree:add_successors(list)
 			return tree
 		end
 
 		-- command did not return a new list
 		hold_mod_ran_once = true
 
-		if opts.stay_open then
+		if topts.stay_open then
 			return tree:pred()
 		end
 
 		return nil
 	end
 
-	local function execute(key, grabber, continue)
+	-- traverse the tree and return the next node
+	-- run if next node is leaf
+	local function traverse(tree, key)
+		local next_tree = tree[key]
+
+		if not next_tree then
+			assert(false, "catch bug: tree is empty for accepted key: " .. key)
+			return
+		end
+
+		local succs = next_tree:successors()
+		if succs and vim.tbl_count(succs) > 0 then
+			-- wait for inputs
+			return next_tree
+		end
+
+		-- no successors, run the leaf node
+		return run(next_tree)
+	end
+
+	-- key has been accepted by the grabber.
+	-- traverse the tree.
+	-- execute if the successor is a leaf.
+	-- stop the grabber if we're done.
+	local function press_key(key, grabber, force_continue)
+		-- special key hacks
 		if key == "back" then
-			local prev = instance_tree:pred()
+			local prev = t:pred()
 			if prev then
 				set_next_tree(prev)
 			end
 			return
 		end
-
 		if key == "stop" then
 			grabber = grabber or global_keygrabber
 			if grabber then
@@ -260,25 +267,38 @@ local function grab(t, keybind)
 			return
 		end
 
-		local next_tree = execute_if_leaf(instance_tree[key])
+		local next_tree = traverse(t, key)
 		if next_tree then
 			set_next_tree(next_tree)
 			return
 		end
 
-		if not mm:has_pressed_mods() and not continue then
-			grabber:stop()
+		-- no next tree
+
+		if force_continue then
 			return
 		end
 
-		-- the execution might cause some hinting labels to change
-		-- therefore we are emitting the signal again
-		-- on_start(t)
+		if hold_mod and mm:has_pressed_mods() then
+			return
+		end
+
+		-- stop the grabber
+		grabber = grabber or global_keygrabber
+		if grabber then
+			grabber:stop()
+		end
 	end
 
-	execute_if_leaf(instance_tree) -- we might have to populate the tree first
-	assert(vim.tbl_count(instance_tree:successors()) > 1, "emptry tree") -- there is nothing to do here
-	set_next_tree(instance_tree)
+	if vim.tbl_count(t:successors()) == 0 then
+		-- the tree is empty and there is nothing to do, except to wait for the
+		-- user to press the stop key.
+		-- running the node might populate itself (e.g. user calls run on an
+		-- dynamic node)
+		run(t)
+	end
+	assert(vim.tbl_count(t:successors()) > 1, "tree is empty") -- there is nothing to do here
+	set_next_tree(t)
 
 	local grabber = akeygrabber({
 		-- keyreleased_callback is only used for hold_mod detection
@@ -287,7 +307,7 @@ local function grab(t, keybind)
 			mm:release(key)
 			-- print("active mods: ", dump(mm))
 			if not mm:has_pressed_mods() then
-				local mod_release = instance_tree:opts().mod_release_stop
+				local mod_release = t:opts().mod_release_stop
 				if mod_release == "always" or hold_mod_ran_once and mod_release == "after" then
 					print("mm: all mods are released: ", mod_release)
 					self:stop()
@@ -314,9 +334,9 @@ local function grab(t, keybind)
 				mm:press(key, modifiers)
 			end
 
-			local keys = instance_keybinds[key]
+			local keys = keybinds[key]
 			if keys then
-				local function execute_key(v)
+				local function accept_key(v)
 					-- stop key
 					if v.stop then
 						self:stop()
@@ -325,14 +345,12 @@ local function grab(t, keybind)
 
 					-- back key
 					if v.back then
-						execute("back", self)
+						press_key("back", self)
 						return
 					end
 
 					-- regular key
-					local key_name = v.name
-					print("running key function: ", key_name, instance_tree[key_name]:desc())
-					execute(key_name, self)
+					press_key(v.name, self)
 				end
 
 				local function is_match(v, comparator)
@@ -353,7 +371,7 @@ local function grab(t, keybind)
 				-- check exact match first to skip combination calculations
 				for _, v in pairs(keys) do
 					if is_match(v.mods, modifiers) then
-						return execute_key(v)
+						return accept_key(v)
 					end
 				end
 
@@ -380,7 +398,7 @@ local function grab(t, keybind)
 							end
 							-- v.mods == modifiers - combi?
 							if is_match(v.mods, filtered) then
-								return execute_key(v)
+								return accept_key(v)
 							end
 						end
 					end
@@ -394,27 +412,27 @@ local function grab(t, keybind)
 			end
 
 			-- key is not defined and not a mod
-			if instance_tree:opts().stop_on_unknown_key then
+			if t:opts().stop_on_unknown_key then
 				print("unknown key: ", key)
 				self:stop()
 			end
 		end,
 		timeout = opts.timeout and opts.timeout > 0 and opts.timeout / 1000,
 		timeout_callback = function()
-			execute_if_leaf(instance_tree, true)
-			on_stop(instance_tree)
+			run(t)
+			on_stop(t)
 		end,
 		start_callback = function()
-			on_start(instance_tree)
+			on_start(t)
 		end,
 		stop_callback = function()
-			on_stop(instance_tree)
+			on_stop(t)
 		end,
 	})
 
 	global_keygrabber = grabber
 	global_execute = function(...)
-		local ret = execute(...)
+		local ret = press_key(...)
 
 		-- HACK:
 		-- force update after clicks
@@ -422,7 +440,7 @@ local function grab(t, keybind)
 			timeout = 0.05,
 			callback = function()
 				if global_keygrabber then
-					on_update(instance_tree)
+					on_update(t)
 				end
 			end,
 			autostart = true,
@@ -434,8 +452,6 @@ local function grab(t, keybind)
 
 	grabber:start()
 
-	print("grabber: pressed: ", dump(grabber.keyreleased_callback))
-
 	-- grabber.keyreleased_callback = nil
 end
 
@@ -446,7 +462,6 @@ local function run(sequence, parsed_keybind)
 end
 
 function M.parse_vim_key(k, opts)
-	print("parse: ", k)
 	-- upper alpha (e.g. "S")
 	if string.match(k, "^%u$") then
 		return {
