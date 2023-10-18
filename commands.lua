@@ -10,6 +10,11 @@ M.run = function(...)
 	return modal.run(...)
 end
 
+-- run benchmark
+M.benchmark = function()
+	return modal.benchmark()
+end
+
 -- add key to root
 M.add_key = function(key)
 	---@diagnostic disable-next-line: need-check-nil
