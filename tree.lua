@@ -17,7 +17,7 @@ end
 -- @param key string|table The key object to be parsed
 -- @param table_index string The key string if the key object does not contain the key string
 local function parse_key(key, table_index)
-	local sequence
+	local seq
 	local fn
 	local opts
 	local cond
@@ -28,7 +28,7 @@ local function parse_key(key, table_index)
 	local t = type(key)
 
 	if t == "string" then
-		sequence = key
+		seq = key
 	else
 		assert(t == "table")
 		for k, v in pairs(key) do
@@ -39,8 +39,8 @@ local function parse_key(key, table_index)
 					assert(not desc, "multiple descrptions")
 					desc = v
 				else
-					assert(not sequence, "multiple undeclared strings")
-					sequence = v
+					assert(not seq, "multiple undeclared strings")
+					seq = v
 				end
 			elseif t == "table" then
 				assert(not opts, "multiple tables")
@@ -64,11 +64,11 @@ local function parse_key(key, table_index)
 		end
 	end
 
-	if not sequence then
-		sequence = table_index
+	if not seq then
+		seq = table_index
 	end
 
-	return sequence, {
+	return seq, {
 		fn = fn,
 		opts = opts,
 		cond = cond,
@@ -152,18 +152,19 @@ local function get(seq, tree, prev_opts, prev_tree)
 
 	local key, next_seq = util.split_vim_key(seq)
 
+	local opts
 	-- node has data stored
 	if rawget(tree, "data") then
 		-- merge previous opts with current
 		local data = rawget(tree, "data")
-		prev_opts = util.merge_opts(prev_opts, rawget(data, "opts"))
+		opts = util.merge_opts(prev_opts, rawget(data, "opts"))
 	else
 		-- we have to merge anyways to get rid of unique opts from predecessor
-		prev_opts = util.merge_opts(prev_opts, {})
+		opts = util.merge_opts(prev_opts, {})
 	end
 
 	if key then
-		-- keep traversing until c is nil
+		-- keep traversing until key is nil
 		local next_tree
 		local succs = rawget(tree, "succs")
 		if succs then
@@ -172,13 +173,13 @@ local function get(seq, tree, prev_opts, prev_tree)
 
 		-- create prev tree copy for backtracking
 		local current_data = rawget(tree, "data") and vim.deepcopy(rawget(tree, "data")) or {}
-		rawset(current_data, "opts", prev_opts)
+		rawset(current_data, "opts", opts)
 
 		local current_succs = succs and vim.deepcopy(succs) or {}
-		local prev = rawget(tree, "prev") and vim.deepcopy(rawget(tree, "prev")) or prev_tree
-		prev_tree = M.mt({ prev = prev, data = current_data, succs = current_succs })
+		local current_prev = rawget(tree, "prev") and vim.deepcopy(rawget(tree, "prev")) or prev_tree
+		prev_tree = M.mt({ prev = current_prev, data = current_data, succs = current_succs })
 
-		return get(next_seq, next_tree, prev_opts, prev_tree)
+		return get(next_seq, next_tree, opts, prev_tree)
 	end
 
 	-- no more traversing
@@ -186,7 +187,7 @@ local function get(seq, tree, prev_opts, prev_tree)
 	local succs = rawget(tree, "succs") and vim.deepcopy(rawget(tree, "succs")) or {}
 
 	-- set opts to merged opts instead of node opts
-	rawset(data, "opts", prev_opts)
+	rawset(data, "opts", opts)
 
 	local ret = { data = data, succs = succs, prev = prev_tree }
 
