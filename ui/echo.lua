@@ -19,7 +19,14 @@ local function hide(_)
 	popup = nil
 end
 
-local function textbox(text, opts) end
+local function textbox(text, opts)
+	local tb = wibox.widget.base.make_widget_declarative({
+		markup = text,
+		font = opts.echo_font,
+		widget = wibox.widget.textbox,
+	})
+	return tb
+end
 
 local function create_popup(opts, widget)
 	local old_popup = popup
@@ -28,22 +35,27 @@ local function create_popup(opts, widget)
 
 	local base = wibox.widget.base.make_widget_declarative({
 		{
-			widget,
-			bg = "#1A1E2D",
-			-- forced_width = max_width,
-			-- forced_height = max_height,
+			{
+				widget,
+				valign = "center",
+				halign = "center",
+
+				widget = wibox.container.place,
+			},
+			bg = opts.echo_color_bg,
+			fg = opts.echo_color_fg,
+			-- forced_width = 200,
+			-- forced_height = 200,
 			shape = gears.shape.rounded_rect,
 			widget = wibox.container.background,
 		},
-		-- margins = opts.hints_placement_offset,
 		opacity = 1,
-		bg = "#ff00ff00",
 		widget = wibox.container.margin,
 	})
 
 	popup = awful.popup({
 		hide_on_rightclick = true,
-		screen = awful.screen.focused(),
+		screen = s,
 		visible = true,
 		ontop = true,
 		above = true,
@@ -66,20 +78,24 @@ local function create_popup(opts, widget)
 end
 
 local function handle(args)
+	print("handle", dump(args))
 	-- if enabled etc
-
 	local opts = args.opts
-	create_popup()
-end
 
-function M.show()
-	create_popup()
+	create_popup(opts, textbox("lololol", opts))
 end
 
 function M.setup(opts)
+	print("echo setup")
 	awesome.connect_signal("motion::echo", function(args)
 		handle(args)
 	end)
 end
+
+-- emit(name, value)
+-- boolean: checkbox, string: textbox, float 0-1: progressbar
+-- local types = "text, checkbox, progressbar"
+
+-- local types = { value,}
 
 return M

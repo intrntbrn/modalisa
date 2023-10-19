@@ -15,11 +15,7 @@ local defaults = {
 
 	-- core
 	unique = { "key", "hidden", "fg" },
-	mode = "modal", -- "modal" | "hold" | "hybrid" | "forever"
-	continue_until_stop_key = false, -- TODO:
-	mod_hold_continue = true, -- TODO: these vars can be combined
-	mod_release_stop = "after", -- always | after
-	stop_on_unknown_key = true, -- regardless of mode
+	mode = "hybrid", -- "modal" | "hold" | "hybrid" | "forever"
 	ignore_shift_state_for_special_characters = true,
 	timeout = 0,
 
@@ -69,6 +65,15 @@ local defaults = {
 	hints_color_entry_separator_fg = "#82AAFF",
 	hints_color_entry_bg = "#24283B",
 	hints_color_entry_odd_bg = "#383F5A",
+
+	-- echo
+	echo = true,
+	echo_timeout = 1,
+	echo_font = "Monospace Bold 16",
+
+	echo_border_width = dpi(2),
+	echo_color_bg = "#24283B",
+	echo_color_fg = "#eceffc",
 
 	-- awesome
 	auto_select_the_only_choice = false,

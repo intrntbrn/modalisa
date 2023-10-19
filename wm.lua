@@ -448,7 +448,7 @@ function M.client_kill()
 	return {
 		opts = { group = "client" },
 		desc = function()
-			return "kill"
+			return "client kill"
 		end,
 		cond = function()
 			return client.focus
