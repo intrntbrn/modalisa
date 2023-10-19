@@ -141,7 +141,7 @@ function M.mt(obj, tree, load_default_opts)
 
 	tree = tree or obj
 
-	obj.fn = function(_, opts, t)
+	obj.fn = function(_, opts)
 		local data = rawget(obj, "data")
 		if not data then
 			return nil
@@ -149,7 +149,7 @@ function M.mt(obj, tree, load_default_opts)
 		local fn = rawget(data, "fn")
 
 		if fn then
-			return fn(opts, t)
+			return fn(opts, obj)
 		end
 	end
 
@@ -274,8 +274,10 @@ function M.add_keys(keys, prefix)
 	end
 end
 
-function M.get_key(key)
-	return get(key, root_tree, config.get() or {})
+-- custom opts
+function M.get(key, opts)
+	key = key or ""
+	return get(key, root_tree, config.get(opts) or {})
 end
 
 -- create inline tree

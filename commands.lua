@@ -21,6 +21,12 @@ M.add_key = function(key)
 	return tree.add_key(key)
 end
 
+-- get key from root
+M.get_tree = function(key, opts)
+	---@diagnostic disable-next-line: need-check-nil
+	return tree.get_key(key, opts)
+end
+
 -- add keys to root
 M.add_keys = function(keys)
 	---@diagnostic disable-next-line: need-check-nil

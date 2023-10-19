@@ -10,11 +10,8 @@ local M = {}
 -- tests for key parser
 -- option picker ("pick a string")
 -- echo (fn, text, style)
--- notify system
 -- color highlight links "bg or #ff00"
 -- group colors
--- extra options for keybinds (extra keybind for modal mode etc)
--- tree cache
 -- notify for duplicate keys
 -- timeout can't be changed. implement own version.
 -- change opts dynamically by returning stuff?
@@ -106,12 +103,134 @@ local function on_stop(t)
 	awesome.emit_signal("motion::stop", { tree = t })
 end
 
--- bypass the keygrabber
-function M.fake_input(key, force_continue)
-	if force_continue then
-		trunner:set_force_continue(true)
+local function parse_vim_key(k, opts)
+	-- upper alpha (e.g. "S")
+	if string.match(k, "^%u$") then
+		return {
+			{ key = k, mods = { mod_map["S"] }, name = k },
+		}
 	end
-	trunner:input(key)
+
+	-- alphanumeric char and space (e.g. "s", "4", " ")
+	if string.match(k, "^[%w%s]$") then
+		return {
+			{ key = k, mods = {}, name = k },
+		}
+	end
+
+	-- punctuation char (e.g. ";")
+	if string.match(k, "^%p$") then
+		-- HACK: awful.keygrabber requires for special keys to also specify shift as
+		-- mods. This is utterly broken, because for some layouts the
+		-- minus key is on the shift layer, but for others layouts not. Therefore we're just
+		-- ignoring the shift state by adding the key with and without shift to the
+		-- map.
+		if opts and not opts.ignore_shift_state_for_special_characters then
+			return {
+				{ key = k, mods = {}, name = k },
+			}
+		end
+
+		return {
+			{ key = k, mods = {}, name = k },
+			{ key = k, mods = { mod_map["S"] }, name = k },
+		}
+	end
+
+	-- <keysym> (e.g. <BackSpace>, <F11>, <Alt_L>)
+	local _, _, keysym = string.find(k, "^<([%w_]+)>$")
+	if keysym then
+		return {
+			{ key = keysym, mods = {}, name = k },
+		}
+	end
+
+	-- <Mod-key> (e.g. <A-C-BackSpace>, <A- >, <A-*>)
+	local _, _, mod_and_key = string.find(k, "^<([%u%-]+.+)>$")
+	if mod_and_key then
+		local mods = {}
+		for mod in string.gmatch(mod_and_key, "%u%-") do
+			mod = string.gsub(mod, "%-$", "")
+			local modifier = mod_map[mod]
+			assert(modifier, string.format("unable to parse modifier: %s in key: %s", mod, k))
+			if not vim.tbl_contains(mods, modifier) then
+				-- ignore duplicate mods (e.g. <A-A-F1>)
+				table.insert(mods, modifier)
+			end
+		end
+
+		-- get the actual key
+		local _, _, key = string.find(mod_and_key, "[%u%-]+%-(.+)$")
+		assert(key, string.format("unable to parse key: %s", k))
+
+		-- user might not have defined Shift explicitly as mod when using an
+		-- upper alpha as key (<A-K> == <A-S-K>)
+		if string.match(key, "^%u$") then
+			local shift = mod_map["S"]
+			if not vim.tbl_contains(mods, shift) then
+				table.insert(mods, shift)
+			end
+		end
+
+		if string.match(k, "^%p$") and not vim.tbl_contains(mods, mod_map["S"]) then
+			if opts and not opts.ignore_shift_state_for_special_characters then
+				local mods_with_shift = vim.deepcopy(mods)
+				table.insert(mods_with_shift, mod_map["S"])
+				return {
+					{ key = k, mods = {}, name = k },
+					{ key = k, mods = mods_with_shift, name = k },
+				}
+			end
+			return {
+				{ key = k, mods = {}, name = k },
+			}
+		end
+
+		return {
+			{ key = key, mods = mods, name = k },
+		}
+	end
+
+	assert(string.len(k) == 1, string.format("unable to parse unknown key: %s", k))
+end
+
+function parse_key_all(key)
+	local t = type(key)
+
+	if t == "string" then
+		return parse_vim_key(key)
+	end
+
+	if t ~= "table" then
+		return nil
+	end
+
+	if key.key and key.mods then
+		-- already parsed
+		return key
+	end
+
+	if #key == 2 then
+		local k, m
+		for i = 1, 2 do
+			local p = key[i]
+			if type(p) == "table" then
+				assert(m == nil)
+				m = p
+				break
+			end
+			if type(p) == "string" then
+				assert(k == nil)
+				k = p
+				break
+			end
+		end
+		assert(m)
+		assert(k)
+		return { key = k, mods = m }
+	end
+
+	return nil
 end
 
 -- @param m table Map of parsed keys
@@ -140,7 +259,7 @@ local function keygrabber_keys(t)
 	-- regular keys (successors)
 	for k, v in pairs(succs) do
 		if v:cond() then
-			for _, key in pairs(M.parse_vim_key(k, opts)) do
+			for _, key in pairs(parse_vim_key(k, opts)) do
 				add_key_to_map(all_keys, key)
 			end
 		end
@@ -159,7 +278,7 @@ local function keygrabber_keys(t)
 	assert(stop_keys, "no stop keys found")
 
 	for _, sk in pairs(stop_keys) do
-		local parsed_keys = M.parse_vim_key(sk, opts)
+		local parsed_keys = parse_vim_key(sk, opts)
 		for _, parsed_key in pairs(parsed_keys) do
 			local key = {
 				mods = parsed_key.mods,
@@ -182,7 +301,7 @@ local function keygrabber_keys(t)
 
 		if back_keys then
 			for _, bk in pairs(back_keys) do
-				local parsed_keys = M.parse_vim_key(bk, opts)
+				local parsed_keys = parse_vim_key(bk, opts)
 				for _, parsed_key in pairs(parsed_keys) do
 					local key = {
 						mods = parsed_key.mods,
@@ -206,8 +325,8 @@ function trunner:new(t, root_key)
 	end
 
 	self.ran_once = false
-	self.continue_force = false
-	self.continue_explicit = false
+	self.continue_mouse = false
+	self.continue_key = false
 	self.keygrabber = nil
 
 	if vim.tbl_count(t:successors()) == 0 then
@@ -243,7 +362,7 @@ end
 
 function trunner:stop_maybe(reason)
 	-- force_continue is currently only set by mouse rightclick
-	if trunner.continue_force then
+	if trunner.continue_mouse then
 		return
 	end
 
@@ -261,7 +380,7 @@ function trunner:stop_maybe(reason)
 			return
 		end
 		if mode == "hybrid" then
-			if not self.ran_once or self.continue_explicit then
+			if not self.ran_once or self.continue_key then
 				return
 			end
 		end
@@ -272,7 +391,7 @@ function trunner:stop_maybe(reason)
 			end
 		end
 
-		if self.continue_explicit then
+		if self.continue_key then
 			if mode == "modal" or mode == "hybrid" then
 				return
 			end
@@ -294,7 +413,7 @@ function trunner:run(t)
 	local topts = t:opts()
 
 	-- run fn
-	local list = t:fn(topts, t) -- TODO: tree param remove
+	local list = t:fn(topts)
 	if list then
 		-- dynamically created list
 		if type(list) ~= "table" or vim.tbl_count(list) == 0 then
@@ -311,12 +430,12 @@ function trunner:run(t)
 end
 
 function trunner:set_force_continue(v)
-	print("force continue")
-	self.continue_force = v
+	self.continue_mouse = v
 end
 
 function trunner:input(key)
 	print("press key: ", dump(key))
+
 	local tree = self.tree
 
 	-- special keys that have no actual function
@@ -359,14 +478,14 @@ function trunner:input(key)
 	-- there is no next tree
 	-- determine if we should keep on running the current tree
 
-	self.continue_explicit = false
+	self.continue_key = false
 	if tree[key]:opts().continue then
-		self.continue_explicit = true
+		self.continue_key = true
 	end
 
 	self:stop_maybe("no_next_tree")
 
-	self.continue_force = false
+	self.continue_mouse = false
 end
 
 function trunner:keypressed_callback()
@@ -478,111 +597,45 @@ local function grab(t, keybind)
 	local root_key = hold_mod and keybind
 
 	trunner:new(t, root_key)
-	if true then
-		return
-	end
 end
 
-local function run(sequence, parsed_keybind)
+-- bypass the keygrabber
+function M.fake_input(key, force_continue)
+	if force_continue then
+		trunner:set_force_continue(true)
+	end
+	trunner:input(key)
+end
+
+local function run(sequence, parsed_keybind, extra_opts)
 	---@diagnostic disable-next-line: need-check-nil
-	local t = mtree[sequence or ""]
+	local t = mtree.get(sequence or "", extra_opts)
 	return grab(t, parsed_keybind)
 end
 
-function M.parse_vim_key(k, opts)
-	-- upper alpha (e.g. "S")
-	if string.match(k, "^%u$") then
-		return {
-			{ key = k, mods = { mod_map["S"] }, name = k },
-		}
+-- run inline table
+function M.run_tree(tree, opts, name)
+	---@diagnostic disable-next-line: need-check-nil
+	local t = mtree.create_tree(tree, opts, name)
+	if not t then
+		return
 	end
-
-	-- alphanumeric char and space (e.g. "s", "4", " ")
-	if string.match(k, "^[%w%s]$") then
-		return {
-			{ key = k, mods = {}, name = k },
-		}
-	end
-
-	-- punctuation char (e.g. ";")
-	if string.match(k, "^%p$") then
-		-- HACK: awful.keygrabber requires for special keys to also specify shift as
-		-- mods. This is utterly broken, because for some layouts the
-		-- minus key is on the shift layer, but for others layouts not. Therefore we're just
-		-- ignoring the shift state by adding the key with and without shift to the
-		-- map.
-		if opts and not opts.ignore_shift_state_for_special_characters then
-			return {
-				{ key = k, mods = {}, name = k },
-			}
-		end
-
-		return {
-			{ key = k, mods = {}, name = k },
-			{ key = k, mods = { mod_map["S"] }, name = k },
-		}
-	end
-
-	-- <keysym> (e.g. <BackSpace>, <F11>, <Alt_L>)
-	local _, _, keysym = string.find(k, "^<([%w_]+)>$")
-	if keysym then
-		return {
-			{ key = keysym, mods = {}, name = k },
-		}
-	end
-
-	-- <Mod-key> (e.g. <A-C-BackSpace>, <A- >, <A-*>)
-	local _, _, mod_and_key = string.find(k, "^<([%u%-]+.+)>$")
-	if mod_and_key then
-		local mods = {}
-		for mod in string.gmatch(mod_and_key, "%u%-") do
-			mod = string.gsub(mod, "%-$", "")
-			local modifier = mod_map[mod]
-			assert(modifier, string.format("unable to parse modifier: %s in key: %s", mod, k))
-			if not vim.tbl_contains(mods, modifier) then
-				-- ignore duplicate mods (e.g. <A-A-F1>)
-				table.insert(mods, modifier)
-			end
-		end
-
-		-- get the actual key
-		local _, _, key = string.find(mod_and_key, "[%u%-]+%-(.+)$")
-		assert(key, string.format("unable to parse key: %s", k))
-
-		-- user might not have defined Shift explicitly as mod when using an
-		-- upper alpha as key (<A-K> == <A-S-K>)
-		if string.match(key, "^%u$") then
-			local shift = mod_map["S"]
-			if not vim.tbl_contains(mods, shift) then
-				table.insert(mods, shift)
-			end
-		end
-
-		if string.match(k, "^%p$") and not vim.tbl_contains(mods, mod_map["S"]) then
-			if opts and not opts.ignore_shift_state_for_special_characters then
-				local mods_with_shift = vim.deepcopy(mods)
-				table.insert(mods_with_shift, mod_map["S"])
-				return {
-					{ key = k, mods = {}, name = k },
-					{ key = k, mods = mods_with_shift, name = k },
-				}
-			end
-			return {
-				{ key = k, mods = {}, name = k },
-			}
-		end
-
-		return {
-			{ key = key, mods = mods, name = k },
-		}
-	end
-
-	assert(string.len(k) == 1, string.format("unable to parse unknown key: %s", k))
+	return grab(t)
 end
 
-local function make_awful_key(prefix, parsed_key)
+-- run keyroot_tree with a keybind (opt)
+function M.run(sequence, keybind, extra_opts)
+	sequence = sequence or ""
+	if keybind then
+		keybind = parse_key_all(keybind)
+		assert(keybind)
+	end
+	run(sequence, keybind, extra_opts)
+end
+
+local function make_awful_key(prefix, parsed_key, extra_opts)
 	return awful.key(parsed_key.mods, parsed_key.key, function()
-		run(prefix, parsed_key)
+		run(prefix, parsed_key, extra_opts)
 	end)
 end
 
@@ -597,7 +650,9 @@ end
 -- "y"	{ "Mod4", "Control", "Shift" }
 -- "y"	{ "Mod4", "Shift" }
 
-function M.create_run_globalkey_combinations(prefix, key)
+function M.add_globalkey(prefix, key, extra_opts)
+	-- hook every possible mod combination
+	-- so we know exactly which mods are pressed down on start
 	assert(mod_map)
 	assert(mod_conversion)
 
@@ -610,11 +665,11 @@ function M.create_run_globalkey_combinations(prefix, key)
 	end
 
 	local keys = {}
-	local parsed_keys = M.parse_vim_key(key)
+	local parsed_keys = parse_vim_key(key)
 
 	for _, parsed_key in pairs(parsed_keys) do
 		-- the specified key
-		table.insert(keys, make_awful_key(prefix, parsed_key))
+		table.insert(keys, make_awful_key(prefix, parsed_key, extra_opts))
 
 		local map = vim.deepcopy(all_mods)
 
@@ -636,86 +691,20 @@ function M.create_run_globalkey_combinations(prefix, key)
 			keybind.mods = all
 
 			print("global keybind: ", dump(keybind.key), dump(keybind.mods))
-			table.insert(keys, make_awful_key(prefix, keybind))
+			table.insert(keys, make_awful_key(prefix, keybind, extra_opts))
 		end
 	end
 
 	awful.keyboard.append_global_keybindings(keys)
 end
 
-function M.parse_key_all(key)
-	local t = type(key)
-
-	if t == "string" then
-		return M.parse_vim_key(key)
-	end
-
-	if t ~= "table" then
-		return nil
-	end
-
-	if key.key and key.mods then
-		-- already parsed
-		return key
-	end
-
-	if #key == 2 then
-		local k, m
-		for _ = 1, 2 do
-			local p = key[1]
-			if type(p) == "table" then
-				assert(m == nil)
-				m = p
-				break
-			end
-			if type(p) == "string" then
-				assert(k == nil)
-				k = p
-				break
-			end
-		end
-		return { key = k, mods = m }
-	end
-
-	return nil
-end
-
-function M.create_run_globalkey_vim(prefix, vimkey)
-	local parsed_keys = M.parse_vim_key(vimkey)
+function M.add_globalkey_solo(prefix, vimkey, extra_opts)
+	local parsed_keys = parse_vim_key(vimkey)
 	for _, parsed_key in pairs(parsed_keys) do
 		awful.keyboard.append_global_keybindings({
-			make_awful_key(prefix, parsed_key),
+			make_awful_key(prefix, parsed_key, extra_opts),
 		})
 	end
-end
-
--- not used currently
-function M.add_globalkey(prefix, awmkey)
-	local parsed_key = util.parse_awesome_key(awmkey)
-	awful.keyboard.append_global_keybindings({
-		make_awful_key(prefix, parsed_key),
-	})
-end
-
--- TODO: rename
--- run inline table
-function M.run_tree(tree, opts, name)
-	---@diagnostic disable-next-line: need-check-nil
-	local t = mtree.create_tree(tree, opts, name)
-	if not t then
-		return
-	end
-	return grab(t)
-end
-
--- run keyroot_tree with a keybind (opt)
-function M.run(sequence, keybind)
-	sequence = sequence or ""
-	if keybind then
-		keybind = M.parse_key_all(keybind)
-		assert(keybind)
-	end
-	run(sequence, keybind)
 end
 
 local once
@@ -741,7 +730,7 @@ function M.setup(opts)
 	generate_mod_conversion_maps()
 
 	if opts.key then
-		M.create_run_globalkey_combinations("", opts.key)
+		M.add_globalkey("", opts.key)
 	end
 
 	print(dump(mod_conversion))
