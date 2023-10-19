@@ -187,58 +187,58 @@ local function get(seq, tree, prev_opts, prev_tree)
 	return M.mt(ret)
 end
 
-function M.mt(obj)
+function M.mt(self)
 	local merge_opts = {}
-	local tree = obj
+	local tree = self
 
 	-- inject root_tree methods and metatables on M
-	if obj == M then
+	if self == M then
 		merge_opts = config.get()
 		tree = root_tree
 	end
 
-	obj.fn = function(_, opts)
-		local data = rawget(obj, "_data")
+	self.fn = function(_, opts)
+		local data = rawget(self, "_data")
 		if not data then
 			return nil
 		end
 		local fn = rawget(data, "fn")
 
 		if fn then
-			return fn(opts, obj)
+			return fn(opts, self)
 		end
 	end
 
-	obj.pre = function(_, opts)
-		local data = rawget(obj, "_data")
+	self.pre = function(_, opts)
+		local data = rawget(self, "_data")
 		if not data then
 			return nil
 		end
 		local pre = rawget(data, "pre")
 
 		if pre then
-			return pre(opts, obj)
+			return pre(opts, self)
 		end
 	end
 
-	obj.post = function(_, opts)
-		local data = rawget(obj, "_data")
+	self.post = function(_, opts)
+		local data = rawget(self, "_data")
 		if not data then
 			return nil
 		end
 		local post = rawget(data, "post")
 
 		if post then
-			return post(opts, obj)
+			return post(opts, self)
 		end
 	end
 
-	obj.pred = function()
-		return rawget(obj, "_prev")
+	self.pred = function()
+		return rawget(self, "_prev")
 	end
 
-	obj.cond = function()
-		local data = rawget(obj, "_data")
+	self.cond = function()
+		local data = rawget(self, "_data")
 		if not data then
 			return true
 		end
@@ -255,8 +255,8 @@ function M.mt(obj)
 
 		return cond
 	end
-	obj.opts = function()
-		local data = rawget(obj, "_data")
+	self.opts = function()
+		local data = rawget(self, "_data")
 		if not data then
 			return nil
 		end
@@ -264,8 +264,8 @@ function M.mt(obj)
 		return rawget(data, "opts")
 	end
 
-	obj.desc = function()
-		local data = rawget(obj, "_data")
+	self.desc = function()
+		local data = rawget(self, "_data")
 		if not data then
 			return nil
 		end
@@ -279,8 +279,8 @@ function M.mt(obj)
 		return desc
 	end
 
-	obj.id = function()
-		local data = rawget(obj, "_data")
+	self.id = function()
+		local data = rawget(self, "_data")
 		if not data then
 			return nil
 		end
@@ -288,35 +288,35 @@ function M.mt(obj)
 		return rawget(data, "id")
 	end
 
-	obj.successors = function()
-		local rawsuccs = rawget(obj, "_succs")
-		if not rawsuccs or vim.tbl_count(obj) == 0 then
+	self.successors = function()
+		local rawsuccs = rawget(self, "_succs")
+		if not rawsuccs or vim.tbl_count(self) == 0 then
 			return rawsuccs
 		end
 		local succs = {}
 		for k in pairs(rawsuccs) do
-			succs[k] = obj[k]
+			succs[k] = self[k]
 		end
 		return succs
 	end
 
-	obj.remove_successors = function()
-		local succs = rawget(obj, "_succs")
+	self.remove_successors = function()
+		local succs = rawget(self, "_succs")
 		if not succs then
 			return
 		end
-		rawset(obj, "_succs", {})
+		rawset(self, "_succs", {})
 	end
 
-	obj.add_successors = function(self, succs)
+	self.add_successors = function(self, succs)
 		for k, succ in pairs(succs) do
 			local path, key = parse_key(succ, k)
 			add(key, self, path)
 		end
 	end
 
-	obj.is_leaf = function(self)
-		local succs = rawget(obj, "_succs")
+	self.is_leaf = function(self)
+		local succs = rawget(self, "_succs")
 		if not succs then
 			return true
 		end
@@ -324,18 +324,18 @@ function M.mt(obj)
 	end
 
 	-- aliases
-	obj.succs = obj.successors
-	obj.description = obj.desc
-	obj.condition = obj.cond
-	obj.predecessor = obj.pred
+	self.succs = self.successors
+	self.description = self.desc
+	self.condition = self.cond
+	self.predecessor = self.pred
 
-	return setmetatable(obj, {
+	return setmetatable(self, {
 		__index = function(_, k)
 			-- only get defaults opts on root_tree
 			return get(k, tree, merge_opts)
 		end,
 		__newindex = function(_, k, v)
-			if v == nil then
+			if v == nil or type(v) == "table" and vim.tbl_count(v) == 0 then
 				remove(k, tree)
 				return
 			end
