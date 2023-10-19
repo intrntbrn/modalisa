@@ -15,8 +15,8 @@ end
 
 -- parse a loosely defined key
 -- @param key string|table The key object to be parsed
--- @param index string The key string if the key object does not contain the key string
-local function parse_key(key, index)
+-- @param table_index string The key string if the key object does not contain the key string
+local function parse_key(key, table_index)
 	local sequence
 	local fn
 	local opts
@@ -65,7 +65,7 @@ local function parse_key(key, index)
 	end
 
 	if not sequence then
-		sequence = index
+		sequence = table_index
 	end
 
 	return sequence, {
@@ -80,22 +80,21 @@ end
 
 local function _remove(seq, tree)
 	-- tree has no children
-	local children = rawget(tree, "children")
-	if not children then
+	local succs = rawget(tree, "children")
+	if not succs then
 		return
 	end
 
-	local key, rest_seq = util.split_vim_key(seq)
+	local key, next_seq = util.split_vim_key(seq)
 
-	-- tree does not contain char
-	local children_char = rawget(children, key)
-	if not children_char then
+	local next_tree = rawget(succs, key)
+	if not next_tree then
 		return
 	end
 
-	if rest_seq then
+	if next_seq then
 		-- we're not yet done traversing the tree
-		return _remove(rest_seq, children_char)
+		return _remove(next_seq, next_tree)
 	end
 
 	-- we've reached the node
@@ -108,7 +107,7 @@ local function _remove(seq, tree)
 	-- end
 
 	-- node has children, therefore we can only delete data
-	rawset(children_char, "data", nil)
+	rawset(next_tree, "data", nil)
 end
 
 local function remove(seq, tree)
@@ -120,16 +119,16 @@ local function remove(seq, tree)
 end
 
 local function _add(value, tree, seq)
-	local key, rest_seq = util.split_vim_key(seq)
+	local key, next_seq = util.split_vim_key(seq)
 
 	if key then
 		-- init children
 		rawset(tree, "children", rawget(tree, "children") or {})
-		local children = rawget(tree, "children")
+		local succs = rawget(tree, "children")
 		-- init children[char]
-		rawset(children, key, rawget(children, key) or { data = { id = get_id() } })
-		local children_char = rawget(children, key)
-		return _add(value, children_char, rest_seq)
+		rawset(succs, key, rawget(succs, key) or { data = { id = get_id() } })
+		local next_tree = rawget(succs, key)
+		return _add(value, next_tree, next_seq)
 	end
 
 	rawset(value, "id", get_id())
@@ -151,7 +150,7 @@ local function get(seq, tree, prev_opts, prev_tree)
 		return nil
 	end
 
-	local key, rest_seq = util.split_vim_key(seq)
+	local key, next_seq = util.split_vim_key(seq)
 
 	-- node has data stored
 	if rawget(tree, "data") then
@@ -179,7 +178,7 @@ local function get(seq, tree, prev_opts, prev_tree)
 		local prev = rawget(tree, "prev") and vim.deepcopy(rawget(tree, "prev")) or prev_tree
 		prev_tree = M.mt({ prev = prev, data = tree_data, children = tree_children })
 
-		return get(rest_seq, next_tree, prev_opts, prev_tree)
+		return get(next_seq, next_tree, prev_opts, prev_tree)
 	end
 
 	-- no more traversing
