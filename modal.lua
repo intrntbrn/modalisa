@@ -384,7 +384,7 @@ function trunner:stop_maybe(reason)
 				return
 			end
 		end
-	elseif "no_next_tree" then
+	elseif reason == "no_next_tree" then
 		if mode == "hold" or mode == "hybrid" then
 			if self.mm:has_pressed_mods() then
 				return
@@ -400,7 +400,7 @@ function trunner:stop_maybe(reason)
 		if mode == "forever" then
 			return
 		end
-	elseif "unknown_key" then
+	elseif reason == "unknown_key" then
 		if not opts.stop_on_unknown_key then
 			return
 		end
