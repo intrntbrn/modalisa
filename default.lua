@@ -117,13 +117,6 @@ function M.setup(opts)
 		["c<Return>"] = wm.client_move_to_master(),
 	}
 
-	keys["<"].opts = { stay_open = true }
-	keys[">"].opts = { stay_open = true }
-	keys["+"].opts = { stay_open = true }
-	keys["-"].opts = { stay_open = true }
-	keys["["].opts = { stay_open = true }
-	keys["]"].opts = { stay_open = true }
-
 	keys["u"].opts.hints_delay = 0
 	keys[" "].opts.hints_delay = 0
 	keys["tt"].opts.hints_delay = 0

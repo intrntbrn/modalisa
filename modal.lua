@@ -8,8 +8,6 @@ local M = {}
 -- move wm specific configs away from config? predefined keys folder!
 -- fix default clienting floating resize
 -- tests for key parser
--- stay_open -> continue (macht keinen wirklichen sinn, brauchen wir
--- aber für mouseclick oder)
 -- modes: "once, mod_release, once_and_mod_release, until_stop"
 -- modes: "modal, hold, hybrid, forever, special_mouse"
 -- option picker ("pick a string")
@@ -21,6 +19,7 @@ local M = {}
 -- tree cache
 -- notify for duplicate keys
 -- fix shift_l map
+-- timeout can't be changed. implement own version.
 
 local awful = require("awful")
 local vim = require("motion.vim")
@@ -354,6 +353,7 @@ function trunner:input(key)
 	-- determine if we should keep on running the current tree
 
 	self:stop_maybe("no_next_tree")
+	self:set_force_continue(false) -- reset
 end
 
 function trunner:keypressed_callback()
