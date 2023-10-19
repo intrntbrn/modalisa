@@ -8,18 +8,16 @@ local M = {}
 -- move wm specific configs away from config? predefined keys folder!
 -- fix default clienting floating resize
 -- tests for key parser
--- modes: "once, mod_release, once_and_mod_release, until_stop"
--- modes: "modal, hold, hybrid, forever, special_mouse"
 -- option picker ("pick a string")
 -- echo (fn, text, style)
 -- notify system
 -- color highlight links "bg or #ff00"
 -- group colors
--- extra options for keybinds
+-- extra options for keybinds (extra keybind for modal mode etc)
 -- tree cache
 -- notify for duplicate keys
--- fix shift_l map
 -- timeout can't be changed. implement own version.
+-- change opts dynamically by returning stuff?
 
 local awful = require("awful")
 local vim = require("motion.vim")
@@ -208,7 +206,8 @@ function trunner:new(t, root_key)
 	end
 
 	self.ran_once = false
-	self.force_continue = false
+	self.continue_force = false
+	self.continue_explicit = false
 	self.keygrabber = nil
 
 	if vim.tbl_count(t:successors()) == 0 then
@@ -243,7 +242,8 @@ function trunner:stop()
 end
 
 function trunner:stop_maybe(reason)
-	if trunner.force_continue then
+	-- force_continue is currently only set by mouse rightclick
+	if trunner.continue_force then
 		return
 	end
 
@@ -261,18 +261,25 @@ function trunner:stop_maybe(reason)
 			return
 		end
 		if mode == "hybrid" then
-			if not self.ran_once then
+			if not self.ran_once or self.continue_explicit then
 				return
 			end
 		end
 	elseif "no_next_tree" then
-		if mode == "forever" then
-			return
-		end
 		if mode == "hold" or mode == "hybrid" then
 			if self.mm:has_pressed_mods() then
 				return
 			end
+		end
+
+		if self.continue_explicit then
+			if mode == "modal" or mode == "hybrid" then
+				return
+			end
+		end
+
+		if mode == "forever" then
+			return
 		end
 	elseif "unknown_key" then
 		if not opts.stop_on_unknown_key then
@@ -305,7 +312,7 @@ end
 
 function trunner:set_force_continue(v)
 	print("force continue")
-	self.force_continue = v
+	self.continue_force = v
 end
 
 function trunner:input(key)
@@ -352,8 +359,14 @@ function trunner:input(key)
 	-- there is no next tree
 	-- determine if we should keep on running the current tree
 
+	self.continue_explicit = false
+	if tree[key]:opts().continue then
+		self.continue_explicit = true
+	end
+
 	self:stop_maybe("no_next_tree")
-	self:set_force_continue(false) -- reset
+
+	self.continue_force = false
 end
 
 function trunner:keypressed_callback()
@@ -428,10 +441,10 @@ end
 
 function trunner:keyreleased_callback()
 	return function(_, _, key)
-		self.mm:release(key)
 		---@diagnostic disable-next-line: need-check-nil
 		local is_modifier = mod_conversion[key]
 		if is_modifier then
+			self.mm:release(key)
 			self:stop_maybe("release_mod")
 		end
 	end
