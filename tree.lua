@@ -79,7 +79,7 @@ local function parse_key(key, table_index)
 end
 
 local function _remove(seq, tree)
-	-- tree has no children
+	-- tree has no succs
 	local succs = rawget(tree, "_succs")
 	if not succs then
 		return
@@ -99,14 +99,7 @@ local function _remove(seq, tree)
 
 	-- we've reached the node
 
-	-- -- if there are no children, we can delete the whole node
-	-- local children_char_children = rawget(children_char, "_succs")
-	-- if not children_char_children or vim.tbl_count(children_char_children) == 0 then
-	-- 	rawset(children, char, nil)
-	-- 	return
-	-- end
-
-	-- node has children, therefore we can only delete data
+	-- node has succs, therefore we can only delete data
 	rawset(next_tree, "_data", nil)
 end
 
@@ -122,10 +115,10 @@ local function _add(value, tree, seq)
 	local key, next_seq = util.split_vim_key(seq)
 
 	if key then
-		-- init children
+		-- init succs
 		rawset(tree, "_succs", rawget(tree, "_succs") or {})
 		local succs = rawget(tree, "_succs")
-		-- init children[char]
+		-- init succs[char]
 		rawset(succs, key, rawget(succs, key) or { data = { id = get_id() } })
 		local next_tree = rawget(succs, key)
 		return _add(value, next_tree, next_seq)
@@ -133,7 +126,7 @@ local function _add(value, tree, seq)
 
 	rawset(value, "id", get_id())
 
-	-- add/overwrite only the data, keep children
+	-- add/overwrite only the data, keep succs
 	rawset(tree, "_data", value)
 end
 
@@ -296,20 +289,20 @@ function M.mt(obj)
 	end
 
 	obj.successors = function()
-		local children = rawget(obj, "_succs")
-		if not children or vim.tbl_count(obj) == 0 then
-			return children
+		local rawsuccs = rawget(obj, "_succs")
+		if not rawsuccs or vim.tbl_count(obj) == 0 then
+			return rawsuccs
 		end
 		local succs = {}
-		for k in pairs(children) do
+		for k in pairs(rawsuccs) do
 			succs[k] = obj[k]
 		end
 		return succs
 	end
 
 	obj.remove_successors = function()
-		local children = rawget(obj, "_succs")
-		if not children then
+		local succs = rawget(obj, "_succs")
+		if not succs then
 			return
 		end
 		rawset(obj, "_succs", {})
@@ -323,11 +316,11 @@ function M.mt(obj)
 	end
 
 	obj.is_leaf = function(self)
-		local children = rawget(obj, "_succs")
-		if not children then
+		local succs = rawget(obj, "_succs")
+		if not succs then
 			return true
 		end
-		return vim.tbl_count(children) == 0
+		return vim.tbl_count(succs) == 0
 	end
 
 	-- aliases
