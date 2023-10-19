@@ -416,8 +416,15 @@ end
 function trunner:run(t)
 	local topts = t:opts()
 
+	-- pre
+	t:pre(topts)
+
 	-- run fn
 	local list = t:fn(topts)
+
+	-- pre
+	t:post(topts)
+
 	if list then
 		-- dynamically created list
 		if type(list) ~= "table" or vim.tbl_count(list) == 0 then
@@ -462,13 +469,9 @@ function trunner:input(key)
 
 	local next_tree
 
-	-- check if next tree has successors
-
 	if node:is_leaf() then
-		-- node is leaf
 		next_tree = self:run(node)
 	else
-		-- node has successors
 		next_tree = node
 	end
 

@@ -13,6 +13,71 @@ local function get_id()
 	return id
 end
 
+-- parse a loosely defined key
+-- @param key string|table The key object to be parsed
+-- @param index string The key string if the key object does not contain the key string
+function parse_key(key, index)
+	local path
+	local fn
+	local opts
+	local cond
+	local desc
+	local pre
+	local post
+
+	local t = type(key)
+
+	if t == "string" then
+		path = key
+	else
+		assert(t == "table")
+		for k, v in pairs(key) do
+			t = type(v)
+			if t == "string" then
+				-- can be key, desc, without mods
+				if k == "desc" or k == "description" then
+					assert(not desc, "multiple desc")
+					desc = v
+				else
+					assert(not path, "multiple strings")
+					path = v
+				end
+			elseif t == "table" then
+				assert(not opts, "multiple tables")
+				opts = v
+			elseif t == "function" then
+				-- can be fn, condition, desc with mods
+				if k == "cond" or k == "condition" then
+					assert(not cond, "multiple conditions")
+					cond = v
+				elseif k == "desc" then
+					desc = v
+				elseif k == "pre" then
+					pre = v
+				elseif k == "post" then
+					post = v
+				else
+					assert(not fn, "multiple functions")
+					fn = v
+				end
+			end
+		end
+	end
+
+	if not path then
+		path = index
+	end
+
+	return path, {
+		fn = fn,
+		opts = opts,
+		cond = cond,
+		desc = desc,
+		pre = pre,
+		post = post,
+	}
+end
+
 local function _remove(index, tree)
 	-- tree has no children
 	local children = rawget(tree, "children")
@@ -76,7 +141,7 @@ end
 -- @param[opt=""] prefix
 local function add(succ, tree, path, prefix)
 	assert(tree)
-	path, succ = util.parse_key(succ, path)
+	path, succ = parse_key(succ, path)
 	assert(path)
 	assert(string.len(path) > 0)
 	if prefix then
@@ -150,6 +215,30 @@ function M.mt(obj, tree, load_default_opts)
 
 		if fn then
 			return fn(opts, obj)
+		end
+	end
+
+	obj.pre = function(_, opts)
+		local data = rawget(obj, "data")
+		if not data then
+			return nil
+		end
+		local pre = rawget(data, "pre")
+
+		if pre then
+			return pre(opts, obj)
+		end
+	end
+
+	obj.post = function(_, opts)
+		local data = rawget(obj, "data")
+		if not data then
+			return nil
+		end
+		local post = rawget(data, "post")
+
+		if post then
+			return post(opts, obj)
 		end
 	end
 
@@ -236,7 +325,7 @@ function M.mt(obj, tree, load_default_opts)
 
 	obj.add_successors = function(self, succs)
 		for k, succ in pairs(succs) do
-			local path, key = util.parse_key(succ, k)
+			local path, key = parse_key(succ, k)
 			add(key, self, path)
 		end
 	end
