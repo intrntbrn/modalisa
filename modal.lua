@@ -1,7 +1,12 @@
 local M = {}
 
+-- TODO: MAJOR:
+-- echo
+-- config menu
+-- exposed api
+-- echo keybinds rework
+
 -- TODO:
--- force stay open keybind
 -- add keybind support for each tree node
 -- keyname tester
 -- timestamp
@@ -361,7 +366,6 @@ function trunner:stop()
 end
 
 function trunner:stop_maybe(reason)
-	-- force_continue is currently only set by mouse rightclick
 	if trunner.continue_mouse then
 		return
 	end
@@ -427,10 +431,6 @@ function trunner:run(t)
 	self.ran_once = true
 
 	return nil
-end
-
-function trunner:set_force_continue(v)
-	self.continue_mouse = v
 end
 
 function trunner:input(key)
@@ -602,7 +602,7 @@ end
 -- bypass the keygrabber
 function M.fake_input(key, force_continue)
 	if force_continue then
-		trunner:set_force_continue(true)
+		trunner.continue_mouse = true
 	end
 	trunner:input(key)
 end

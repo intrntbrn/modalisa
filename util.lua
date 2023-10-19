@@ -370,6 +370,7 @@ function M.benchmark(f, n, ...)
 			["nanoseconds"] = 1000000000,
 		}
 
+		---@diagnostic disable-next-line: redefined-local
 		local function benchmark(unit, decPlaces, n, f, ...)
 			local elapsed = 0
 			local multiplier = units[unit]

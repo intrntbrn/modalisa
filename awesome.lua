@@ -3,7 +3,7 @@ local M = {}
 local awful = require("awful")
 local dpi = require("beautiful").xresources.apply_dpi
 local grect = require("gears.geometry").rectangle
-local clabel = require("motion.client_label")
+local clabel = require("motion.ui.label")
 local util = require("motion.util")
 
 local default_resize_delta = dpi(32)

@@ -11,8 +11,9 @@ function M.setup(opts)
 
 	require("motion.tree").setup(opts)
 	require("motion.modal").setup(opts)
-	require("motion.hints").setup(opts)
-	require("motion.client_label").setup(opts)
+
+	require("motion.ui.hints").setup(opts)
+	require("motion.ui.label").setup(opts)
 
 	if opts.default_keys then
 		require("motion.default").setup(opts)
