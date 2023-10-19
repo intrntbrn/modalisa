@@ -80,7 +80,7 @@ end
 
 local function _remove(seq, tree)
 	-- tree has no children
-	local succs = rawget(tree, "children")
+	local succs = rawget(tree, "succs")
 	if not succs then
 		return
 	end
@@ -100,7 +100,7 @@ local function _remove(seq, tree)
 	-- we've reached the node
 
 	-- -- if there are no children, we can delete the whole node
-	-- local children_char_children = rawget(children_char, "children")
+	-- local children_char_children = rawget(children_char, "succs")
 	-- if not children_char_children or vim.tbl_count(children_char_children) == 0 then
 	-- 	rawset(children, char, nil)
 	-- 	return
@@ -123,8 +123,8 @@ local function _add(value, tree, seq)
 
 	if key then
 		-- init children
-		rawset(tree, "children", rawget(tree, "children") or {})
-		local succs = rawget(tree, "children")
+		rawset(tree, "succs", rawget(tree, "succs") or {})
+		local succs = rawget(tree, "succs")
 		-- init children[char]
 		rawset(succs, key, rawget(succs, key) or { data = { id = get_id() } })
 		local next_tree = rawget(succs, key)
@@ -165,30 +165,30 @@ local function get(seq, tree, prev_opts, prev_tree)
 	if key then
 		-- keep traversing until c is nil
 		local next_tree
-		local children = rawget(tree, "children")
-		if children then
-			next_tree = rawget(children, key)
+		local succs = rawget(tree, "succs")
+		if succs then
+			next_tree = rawget(succs, key)
 		end
 
 		-- create prev tree copy for backtracking
-		local tree_data = rawget(tree, "data") and vim.deepcopy(rawget(tree, "data")) or {}
-		rawset(tree_data, "opts", prev_opts)
+		local current_data = rawget(tree, "data") and vim.deepcopy(rawget(tree, "data")) or {}
+		rawset(current_data, "opts", prev_opts)
 
-		local tree_children = children and vim.deepcopy(children) or {}
+		local current_succs = succs and vim.deepcopy(succs) or {}
 		local prev = rawget(tree, "prev") and vim.deepcopy(rawget(tree, "prev")) or prev_tree
-		prev_tree = M.mt({ prev = prev, data = tree_data, children = tree_children })
+		prev_tree = M.mt({ prev = prev, data = current_data, succs = current_succs })
 
 		return get(next_seq, next_tree, prev_opts, prev_tree)
 	end
 
 	-- no more traversing
 	local data = rawget(tree, "data") and vim.deepcopy(rawget(tree, "data")) or {}
-	local children = rawget(tree, "children") and vim.deepcopy(rawget(tree, "children")) or {}
+	local succs = rawget(tree, "succs") and vim.deepcopy(rawget(tree, "succs")) or {}
 
 	-- set opts to merged opts instead of node opts
 	rawset(data, "opts", prev_opts)
 
-	local ret = { data = data, children = children, prev = prev_tree }
+	local ret = { data = data, succs = succs, prev = prev_tree }
 
 	return M.mt(ret)
 end
@@ -297,7 +297,7 @@ function M.mt(obj, tree, load_default_opts)
 	obj.description = obj.desc
 
 	obj.successors = function()
-		local children = rawget(obj, "children")
+		local children = rawget(obj, "succs")
 		if not children or vim.tbl_count(obj) == 0 then
 			return children
 		end
@@ -307,14 +307,13 @@ function M.mt(obj, tree, load_default_opts)
 		end
 		return succs
 	end
-	obj.succs = obj.successors
 
 	obj.remove_successors = function()
-		local children = rawget(obj, "children")
+		local children = rawget(obj, "succs")
 		if not children then
 			return
 		end
-		rawset(obj, "children", {})
+		rawset(obj, "succs", {})
 	end
 
 	obj.add_successors = function(self, succs)
@@ -325,7 +324,7 @@ function M.mt(obj, tree, load_default_opts)
 	end
 
 	obj.is_leaf = function(self)
-		local children = rawget(obj, "children")
+		local children = rawget(obj, "succs")
 		if not children then
 			return true
 		end
@@ -373,7 +372,7 @@ end
 
 -- @param[opt=""] name
 -- @param[opt=config.get()] opts
-function M.create_tree(successors, opts, name)
+function M.create_tree(succs, opts, name)
 	local root = {
 		data = {
 			desc = name,
@@ -386,7 +385,7 @@ function M.create_tree(successors, opts, name)
 		return
 	end
 
-	t:add_successors(successors)
+	t:add_successors(succs)
 
 	return t
 end
