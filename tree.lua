@@ -194,12 +194,15 @@ local function get(seq, tree, prev_opts, prev_tree)
 	return M.mt(ret)
 end
 
-function M.mt(obj, tree, load_default_opts)
-	if not obj then
-		return
-	end
+function M.mt(obj)
+	local merge_opts = {}
+	local tree = obj
 
-	tree = tree or obj
+	-- inject root_tree methods and metatables on M
+	if obj == M then
+		merge_opts = config.get()
+		tree = root_tree
+	end
 
 	obj.fn = function(_, opts)
 		local data = rawget(obj, "_data")
@@ -336,7 +339,7 @@ function M.mt(obj, tree, load_default_opts)
 	return setmetatable(obj, {
 		__index = function(_, k)
 			-- only get defaults opts on root_tree
-			return get(k, tree, load_default_opts and config.get() or {})
+			return get(k, tree, merge_opts)
 		end,
 		__newindex = function(_, k, v)
 			if v == nil then
@@ -400,4 +403,4 @@ function M.setup(opts)
 	}
 end
 
-return M.mt(M, root_tree, true)
+return M.mt(M) -- add methods and metatables from root_tree
