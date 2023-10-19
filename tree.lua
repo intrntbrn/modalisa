@@ -80,7 +80,7 @@ end
 
 local function _remove(seq, tree)
 	-- tree has no children
-	local succs = rawget(tree, "succs")
+	local succs = rawget(tree, "_succs")
 	if not succs then
 		return
 	end
@@ -100,14 +100,14 @@ local function _remove(seq, tree)
 	-- we've reached the node
 
 	-- -- if there are no children, we can delete the whole node
-	-- local children_char_children = rawget(children_char, "succs")
+	-- local children_char_children = rawget(children_char, "_succs")
 	-- if not children_char_children or vim.tbl_count(children_char_children) == 0 then
 	-- 	rawset(children, char, nil)
 	-- 	return
 	-- end
 
 	-- node has children, therefore we can only delete data
-	rawset(next_tree, "data", nil)
+	rawset(next_tree, "_data", nil)
 end
 
 local function remove(seq, tree)
@@ -123,8 +123,8 @@ local function _add(value, tree, seq)
 
 	if key then
 		-- init children
-		rawset(tree, "succs", rawget(tree, "succs") or {})
-		local succs = rawget(tree, "succs")
+		rawset(tree, "_succs", rawget(tree, "_succs") or {})
+		local succs = rawget(tree, "_succs")
 		-- init children[char]
 		rawset(succs, key, rawget(succs, key) or { data = { id = get_id() } })
 		local next_tree = rawget(succs, key)
@@ -134,7 +134,7 @@ local function _add(value, tree, seq)
 	rawset(value, "id", get_id())
 
 	-- add/overwrite only the data, keep children
-	rawset(tree, "data", value)
+	rawset(tree, "_data", value)
 end
 
 local function add(value, tree, seq)
@@ -154,9 +154,9 @@ local function get(seq, tree, prev_opts, prev_tree)
 
 	local opts
 	-- node has data stored
-	if rawget(tree, "data") then
+	if rawget(tree, "_data") then
 		-- merge previous opts with current
-		local data = rawget(tree, "data")
+		local data = rawget(tree, "_data")
 		opts = util.merge_opts(prev_opts, rawget(data, "opts"))
 	else
 		-- we have to merge anyways to get rid of unique opts from predecessor
@@ -166,30 +166,30 @@ local function get(seq, tree, prev_opts, prev_tree)
 	if key then
 		-- keep traversing until key is nil
 		local next_tree
-		local succs = rawget(tree, "succs")
+		local succs = rawget(tree, "_succs")
 		if succs then
 			next_tree = rawget(succs, key)
 		end
 
 		-- create prev tree copy for backtracking
-		local current_data = rawget(tree, "data") and vim.deepcopy(rawget(tree, "data")) or {}
+		local current_data = rawget(tree, "_data") and vim.deepcopy(rawget(tree, "_data")) or {}
 		rawset(current_data, "opts", opts)
 
 		local current_succs = succs and vim.deepcopy(succs) or {}
-		local current_prev = rawget(tree, "prev") and vim.deepcopy(rawget(tree, "prev")) or prev_tree
-		prev_tree = M.mt({ prev = current_prev, data = current_data, succs = current_succs })
+		local current_prev = rawget(tree, "_prev") and vim.deepcopy(rawget(tree, "_prev")) or prev_tree
+		prev_tree = M.mt({ _data = current_data, _succs = current_succs, _prev = current_prev })
 
 		return get(next_seq, next_tree, opts, prev_tree)
 	end
 
 	-- no more traversing
-	local data = rawget(tree, "data") and vim.deepcopy(rawget(tree, "data")) or {}
-	local succs = rawget(tree, "succs") and vim.deepcopy(rawget(tree, "succs")) or {}
+	local data = rawget(tree, "_data") and vim.deepcopy(rawget(tree, "_data")) or {}
+	local succs = rawget(tree, "_succs") and vim.deepcopy(rawget(tree, "_succs")) or {}
 
 	-- set opts to merged opts instead of node opts
 	rawset(data, "opts", opts)
 
-	local ret = { data = data, succs = succs, prev = prev_tree }
+	local ret = { _data = data, _succs = succs, _prev = prev_tree }
 
 	return M.mt(ret)
 end
@@ -202,7 +202,7 @@ function M.mt(obj, tree, load_default_opts)
 	tree = tree or obj
 
 	obj.fn = function(_, opts)
-		local data = rawget(obj, "data")
+		local data = rawget(obj, "_data")
 		if not data then
 			return nil
 		end
@@ -214,7 +214,7 @@ function M.mt(obj, tree, load_default_opts)
 	end
 
 	obj.pre = function(_, opts)
-		local data = rawget(obj, "data")
+		local data = rawget(obj, "_data")
 		if not data then
 			return nil
 		end
@@ -226,7 +226,7 @@ function M.mt(obj, tree, load_default_opts)
 	end
 
 	obj.post = function(_, opts)
-		local data = rawget(obj, "data")
+		local data = rawget(obj, "_data")
 		if not data then
 			return nil
 		end
@@ -238,12 +238,11 @@ function M.mt(obj, tree, load_default_opts)
 	end
 
 	obj.pred = function()
-		return rawget(obj, "prev")
+		return rawget(obj, "_prev")
 	end
-	obj.predecessor = obj.pred
 
 	obj.cond = function()
-		local data = rawget(obj, "data")
+		local data = rawget(obj, "_data")
 		if not data then
 			return true
 		end
@@ -260,10 +259,8 @@ function M.mt(obj, tree, load_default_opts)
 
 		return cond
 	end
-	obj.condition = obj.cond
-
 	obj.opts = function()
-		local data = rawget(obj, "data")
+		local data = rawget(obj, "_data")
 		if not data then
 			return nil
 		end
@@ -272,7 +269,7 @@ function M.mt(obj, tree, load_default_opts)
 	end
 
 	obj.desc = function()
-		local data = rawget(obj, "data")
+		local data = rawget(obj, "_data")
 		if not data then
 			return nil
 		end
@@ -287,7 +284,7 @@ function M.mt(obj, tree, load_default_opts)
 	end
 
 	obj.id = function()
-		local data = rawget(obj, "data")
+		local data = rawget(obj, "_data")
 		if not data then
 			return nil
 		end
@@ -295,10 +292,8 @@ function M.mt(obj, tree, load_default_opts)
 		return rawget(data, "id")
 	end
 
-	obj.description = obj.desc
-
 	obj.successors = function()
-		local children = rawget(obj, "succs")
+		local children = rawget(obj, "_succs")
 		if not children or vim.tbl_count(obj) == 0 then
 			return children
 		end
@@ -310,11 +305,11 @@ function M.mt(obj, tree, load_default_opts)
 	end
 
 	obj.remove_successors = function()
-		local children = rawget(obj, "succs")
+		local children = rawget(obj, "_succs")
 		if not children then
 			return
 		end
-		rawset(obj, "succs", {})
+		rawset(obj, "_succs", {})
 	end
 
 	obj.add_successors = function(self, succs)
@@ -325,12 +320,18 @@ function M.mt(obj, tree, load_default_opts)
 	end
 
 	obj.is_leaf = function(self)
-		local children = rawget(obj, "succs")
+		local children = rawget(obj, "_succs")
 		if not children then
 			return true
 		end
 		return vim.tbl_count(children) == 0
 	end
+
+	-- aliases
+	obj.succs = obj.successors
+	obj.description = obj.desc
+	obj.condition = obj.cond
+	obj.predecessor = obj.pred
 
 	return setmetatable(obj, {
 		__index = function(_, k)
