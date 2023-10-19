@@ -29,6 +29,7 @@ local dump = require("motion.vim").inspect
 local mtree = require("motion.tree")
 local mmodmap = require("motion.modmap")
 local akeygrabber = require("awful.keygrabber")
+local notify = require("motion.notify")
 
 local trunner = {}
 
@@ -110,7 +111,10 @@ end
 
 -- bypass the keygrabber
 function M.fake_input(key, force_continue)
-	trunner:input(key, force_continue)
+	if force_continue then
+		trunner:set_force_continue(true)
+	end
+	trunner:input(key)
 end
 
 -- @param m table Map of parsed keys
@@ -205,18 +209,17 @@ function trunner:new(t, root_key)
 	end
 
 	self.ran_once = false
-	self.tree = t
+	self.force_continue = false
 	self.keygrabber = nil
 
 	if vim.tbl_count(t:successors()) == 0 then
-		-- the tree is empty and there is nothing to do, except to wait for the
-		-- user to press the stop key.
 		-- running the node might populate itself (e.g. user calls run on an
 		-- dynamic node)
 		self:run(t)
 
 		if vim.tbl_count(t:successors()) == 0 then
-			-- still nothing to do
+			-- there is no point in running an empty tree
+			notify.error("tree is empty")
 			return nil
 		end
 	end
@@ -231,7 +234,6 @@ function trunner:new(t, root_key)
 end
 
 function trunner:set_tree(t)
-	print("set tree: ", t:desc())
 	self.tree = t
 	self.keybinds = keygrabber_keys(t)
 	on_update(t)
@@ -241,11 +243,52 @@ function trunner:stop()
 	self.keygrabber:stop()
 end
 
+function trunner:stop_maybe(reason)
+	if trunner.force_continue then
+		return
+	end
+
+	local opts = trunner.tree:opts()
+	local mode = opts.mode
+
+	print("maybe_stop: ", reason)
+
+	if reason == "release_mod" then
+		-- only "hold" and "hybrid" depend on mod states
+		if not (mode == "hold" or mode == "hybrid") then
+			return
+		end
+		if self.mm:has_pressed_mods() then
+			return
+		end
+		if mode == "hybrid" then
+			if not self.ran_once then
+				return
+			end
+		end
+	elseif "no_next_tree" then
+		if mode == "forever" then
+			return
+		end
+		if mode == "hold" or mode == "hybrid" then
+			if self.mm:has_pressed_mods() then
+				return
+			end
+		end
+	elseif "unknown_key" then
+		if not opts.stop_on_unknown_key then
+			return
+		end
+	end
+
+	self:stop()
+end
+
 function trunner:run(t)
 	local topts = t:opts()
 
 	-- run fn
-	local list = t:fn(topts, t) -- TODO tree param remove
+	local list = t:fn(topts, t) -- TODO: tree param remove
 	if list then
 		-- dynamically created list
 		if type(list) ~= "table" or vim.tbl_count(list) == 0 then
@@ -256,13 +299,17 @@ function trunner:run(t)
 	end
 
 	-- command did not return a new list
-
 	self.ran_once = true
 
 	return nil
 end
 
-function trunner:input(key, force_continue)
+function trunner:set_force_continue(v)
+	print("force continue")
+	self.force_continue = v
+end
+
+function trunner:input(key)
 	print("press key: ", dump(key))
 	local tree = self.tree
 
@@ -303,17 +350,10 @@ function trunner:input(key, force_continue)
 		return
 	end
 
-	-- no next tree
+	-- there is no next tree
+	-- determine if we should keep on running the current tree
 
-	if force_continue then
-		return
-	end
-
-	if self.mm:has_pressed_mods() then
-		return
-	end
-
-	self:stop()
+	self:stop_maybe("no_next_tree")
 end
 
 function trunner:keypressed_callback()
@@ -382,34 +422,18 @@ function trunner:keypressed_callback()
 			return
 		end
 
-		-- key is not defined and not a mod
-		if self.tree:opts().stop_on_unknown_key then
-			print("unknown key: ", key)
-			self:stop()
-		end
+		self:stop_maybe("unknown_key")
 	end
 end
 
 function trunner:keyreleased_callback()
 	return function(_, _, key)
 		self.mm:release(key)
-		if self.mm:has_pressed_mods() then
-			return
+		---@diagnostic disable-next-line: need-check-nil
+		local is_modifier = mod_conversion[key]
+		if is_modifier then
+			self:stop_maybe("release_mod")
 		end
-
-		local opts = self.tree:opts()
-
-		if opts.stay_open then
-			return
-		end
-
-		local mod_release = opts.mod_release_stop
-		if mod_release == "always" or self.ran_once and mod_release == "after" then
-			print("mm: all mods are released: ", mod_release)
-			self:stop()
-			return
-		end
-		print("mm: all mods are released: ", mod_release)
 	end
 end
 

@@ -15,7 +15,7 @@ local defaults = {
 
 	-- core
 	unique = { "key", "hidden", "fg" },
-	mode = "hold", -- "modal" | "hold" | "hybrid" | "forever"
+	mode = "modal", -- "modal" | "hold" | "hybrid" | "forever"
 	continue_until_stop_key = false, -- TODO:
 	mod_hold_continue = true, -- TODO: these vars can be combined
 	mod_release_stop = "after", -- always | after
