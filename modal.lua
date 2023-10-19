@@ -736,13 +736,13 @@ function M.setup(opts)
 	print(dump(mod_conversion))
 end
 
-function M.benchmark()
-	local time = os.clock()
-	M.run("")
-	M.fake_input("stop")
-	local elapsed = os.clock() - time
-	print("benchmark: ", elapsed)
-	return elapsed
+function M.benchmark(n)
+	local f = function()
+		M.run("")
+		M.fake_input("stop")
+	end
+
+	util.benchmark(f, n or 100)
 end
 
 return setmetatable(M, {
