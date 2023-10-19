@@ -453,23 +453,26 @@ function trunner:input(key)
 	end
 
 	-- traverse
-	local next_tree = tree[key]
-	if not next_tree then
+	local node = tree[key]
+	if not node then
 		print(tree)
 		assert(false, "catch bug: tree is empty for accepted key: " .. key)
 		return
 	end
 
+	local next_tree
+
 	-- check if next tree has successors
 
-	local succs = next_tree:successors()
-	if not succs or vim.tbl_count(succs) == 0 then
-		-- next tree is leaf -> run
-		next_tree = self:run(next_tree) -- return nil or dynamic created tree
+	if node:is_leaf() then
+		-- node is leaf
+		next_tree = self:run(node)
+	else
+		-- node has successors
+		next_tree = node
 	end
 
 	if next_tree then
-		-- we have not reached a leaf yet
 		-- wait for the next input
 		self:set_tree(next_tree)
 		return

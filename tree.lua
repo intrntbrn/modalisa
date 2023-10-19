@@ -241,6 +241,14 @@ function M.mt(obj, tree, load_default_opts)
 		end
 	end
 
+	obj.is_leaf = function(self)
+		local children = rawget(obj, "children")
+		if not children then
+			return true
+		end
+		return vim.tbl_count(children) == 0
+	end
+
 	return setmetatable(obj, {
 		__index = function(_, k)
 			-- only get defaults opts on root_tree
