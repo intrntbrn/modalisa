@@ -199,7 +199,7 @@ local function parse_vim_key(k, opts)
 	assert(string.len(k) == 1, string.format("unable to parse unknown key: %s", k))
 end
 
-function parse_key_all(key)
+local function parse_key_all(key)
 	local t = type(key)
 
 	if t == "string" then
@@ -485,7 +485,7 @@ function trunner:input(key)
 	-- determine if we should keep on running the current tree
 
 	self.continue_key = false
-	if tree[key]:opts().continue then
+	if node:opts().continue then
 		self.continue_key = true
 	end
 
@@ -595,16 +595,6 @@ function trunner:setup_keygrabber(t)
 	return grabber
 end
 
-local function grab(t, keybind)
-	local opts = t:opts()
-
-	-- hold mod init
-	local hold_mod = opts.mod_hold_continue and keybind
-	local root_key = hold_mod and keybind
-
-	trunner:new(t, root_key)
-end
-
 -- bypass the keygrabber
 function M.fake_input(key, force_continue)
 	if force_continue then
@@ -616,7 +606,7 @@ end
 local function run(sequence, parsed_keybind, extra_opts)
 	---@diagnostic disable-next-line: need-check-nil
 	local t = mtree.get(sequence or "", extra_opts)
-	return grab(t, parsed_keybind)
+	return trunner:new(t, parsed_keybind)
 end
 
 -- run inline table
@@ -626,7 +616,7 @@ function M.run_tree(tree, opts, name)
 	if not t then
 		return
 	end
-	return grab(t)
+	return trunner:new(t)
 end
 
 -- run keyroot_tree with a keybind (opt)
