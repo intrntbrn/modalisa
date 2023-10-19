@@ -389,17 +389,18 @@ function trunner:keypressed_callback()
 
 		local keys = self.keybinds[key]
 		if keys then
-			local function _input_key(v)
-				self:input(v.stop and "stop" or v.back and "back" or v.name)
+			local function input_key(k)
+				self:input(k.stop and "stop" or k.back and "back" or k.name)
 			end
 
-			for _, v in pairs(keys) do
-				if is_match(v.mods, modifiers) then
-					return _input_key(v)
+			for _, k in pairs(keys) do
+				if is_match(k.mods, modifiers) then
+					return input_key(k)
 				end
 			end
 
-			if self.mm:has_pressed_mods() then -- TODO:
+			local mode = self.tree:opts().mode
+			if (mode == "hold" or mode == "hybrid") and self.mm:has_pressed_mods() then
 				-- find the match with the least amount of ignored mods
 				local pressed_mods_list = self.mm:get_pressed_mods()
 				local combinations = {}
@@ -422,7 +423,7 @@ function trunner:keypressed_callback()
 						end
 						-- v.mods == modifiers - combi?
 						if is_match(v.mods, filtered) then
-							return _input_key(v)
+							return input_key(v)
 						end
 					end
 				end
