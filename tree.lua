@@ -16,8 +16,8 @@ end
 -- parse a loosely defined key
 -- @param key string|table The key object to be parsed
 -- @param index string The key string if the key object does not contain the key string
-function parse_key(key, index)
-	local path
+local function parse_key(key, index)
+	local sequence
 	local fn
 	local opts
 	local cond
@@ -28,7 +28,7 @@ function parse_key(key, index)
 	local t = type(key)
 
 	if t == "string" then
-		path = key
+		sequence = key
 	else
 		assert(t == "table")
 		for k, v in pairs(key) do
@@ -36,11 +36,11 @@ function parse_key(key, index)
 			if t == "string" then
 				-- can be key, desc, without mods
 				if k == "desc" or k == "description" then
-					assert(not desc, "multiple desc")
+					assert(not desc, "multiple descrptions")
 					desc = v
 				else
-					assert(not path, "multiple strings")
-					path = v
+					assert(not sequence, "multiple undeclared strings")
+					sequence = v
 				end
 			elseif t == "table" then
 				assert(not opts, "multiple tables")
@@ -57,18 +57,18 @@ function parse_key(key, index)
 				elseif k == "post" then
 					post = v
 				else
-					assert(not fn, "multiple functions")
+					assert(not fn, "multiple undeclared functions")
 					fn = v
 				end
 			end
 		end
 	end
 
-	if not path then
-		path = index
+	if not sequence then
+		sequence = index
 	end
 
-	return path, {
+	return sequence, {
 		fn = fn,
 		opts = opts,
 		cond = cond,
@@ -78,24 +78,24 @@ function parse_key(key, index)
 	}
 end
 
-local function _remove(index, tree)
+local function _remove(seq, tree)
 	-- tree has no children
 	local children = rawget(tree, "children")
 	if not children then
 		return
 	end
 
-	local char, next = util.split_vim_key(index)
+	local key, rest_seq = util.split_vim_key(seq)
 
 	-- tree does not contain char
-	local children_char = rawget(children, char)
+	local children_char = rawget(children, key)
 	if not children_char then
 		return
 	end
 
-	if next then
+	if rest_seq then
 		-- we're not yet done traversing the tree
-		return _remove(next, children_char)
+		return _remove(rest_seq, children_char)
 	end
 
 	-- we've reached the node
@@ -111,52 +111,47 @@ local function _remove(index, tree)
 	rawset(children_char, "data", nil)
 end
 
-local function remove(index, tree)
+local function remove(seq, tree)
 	assert(tree)
-	assert(index)
-	assert(string.len(index) > 0)
+	assert(seq)
+	assert(string.len(seq) > 0)
 
-	_remove(index, tree)
+	_remove(seq, tree)
 end
 
-local function _add(succ, tree, index)
-	local char, next = util.split_vim_key(index)
+local function _add(value, tree, seq)
+	local key, rest_seq = util.split_vim_key(seq)
 
-	if char then
+	if key then
 		-- init children
 		rawset(tree, "children", rawget(tree, "children") or {})
 		local children = rawget(tree, "children")
 		-- init children[char]
-		rawset(children, char, rawget(children, char) or { data = { id = get_id() } })
-		local children_char = rawget(children, char)
-		return _add(succ, children_char, next)
+		rawset(children, key, rawget(children, key) or { data = { id = get_id() } })
+		local children_char = rawget(children, key)
+		return _add(value, children_char, rest_seq)
 	end
 
-	rawset(succ, "id", get_id())
+	rawset(value, "id", get_id())
 
 	-- add/overwrite only the data, keep children
-	rawset(tree, "data", succ)
+	rawset(tree, "data", value)
 end
 
--- @param[opt=""] prefix
-local function add(succ, tree, path, prefix)
+local function add(value, tree, seq)
 	assert(tree)
-	path, succ = parse_key(succ, path)
-	assert(path)
-	assert(string.len(path) > 0)
-	if prefix then
-		assert(type(prefix) == "string", "prefix is a not a string")
-		path = string.format("%s%s", prefix, path)
-	end
-	return _add(succ, tree, path)
+	seq, value = parse_key(value, seq)
+	assert(seq)
+	assert(string.len(seq) > 0)
+	return _add(value, tree, seq)
 end
 
-local function get(index, tree, prev_opts, prev_tree)
+local function get(seq, tree, prev_opts, prev_tree)
 	if not tree then
 		return nil
 	end
 
-	local c, suffix = util.split_vim_key(index)
+	local key, rest_seq = util.split_vim_key(seq)
 
 	-- node has data stored
 	if rawget(tree, "data") then
@@ -168,12 +163,12 @@ local function get(index, tree, prev_opts, prev_tree)
 		prev_opts = util.merge_opts(prev_opts, {})
 	end
 
-	if c then
+	if key then
 		-- keep traversing until c is nil
 		local next_tree
 		local children = rawget(tree, "children")
 		if children then
-			next_tree = rawget(children, c)
+			next_tree = rawget(children, key)
 		end
 
 		-- create prev tree copy for backtracking
@@ -184,7 +179,7 @@ local function get(index, tree, prev_opts, prev_tree)
 		local prev = rawget(tree, "prev") and vim.deepcopy(rawget(tree, "prev")) or prev_tree
 		prev_tree = M.mt({ prev = prev, data = tree_data, children = tree_children })
 
-		return get(suffix, next_tree, prev_opts, prev_tree)
+		return get(rest_seq, next_tree, prev_opts, prev_tree)
 	end
 
 	-- no more traversing
@@ -359,22 +354,20 @@ function M.mt(obj, tree, load_default_opts)
 	})
 end
 
--- @param[opt=""] prefix
-function M.add_key(key, prefix)
-	add(key, root_tree, nil, prefix)
+function M.add_key(key)
+	add(key, root_tree, nil)
 end
 
--- @param[opt=""] prefix
-function M.add_keys(keys, prefix)
+function M.add_keys(keys)
 	for k, v in pairs(keys) do
-		add(v, root_tree, k, prefix)
+		add(v, root_tree, k)
 	end
 end
 
 -- custom opts
-function M.get(key, opts)
-	key = key or ""
-	return get(key, root_tree, config.get(opts) or {})
+function M.get(seq, opts)
+	seq = seq or ""
+	return get(seq, root_tree, config.get(opts) or {})
 end
 
 -- create inline tree
