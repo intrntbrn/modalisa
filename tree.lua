@@ -119,7 +119,7 @@ local function _add(value, tree, seq)
 		rawset(tree, "_succs", rawget(tree, "_succs") or {})
 		local succs = rawget(tree, "_succs")
 		-- init succs[char]
-		rawset(succs, key, rawget(succs, key) or { data = { id = get_id() } })
+		rawset(succs, key, rawget(succs, key) or { ["_data"] = { id = get_id() } })
 		local next_tree = rawget(succs, key)
 		return _add(value, next_tree, next_seq)
 	end
@@ -170,7 +170,7 @@ local function get(seq, tree, prev_opts, prev_tree)
 
 		local current_succs = succs and vim.deepcopy(succs) or {}
 		local current_prev = rawget(tree, "_prev") and vim.deepcopy(rawget(tree, "_prev")) or prev_tree
-		prev_tree = M.mt({ _data = current_data, _succs = current_succs, _prev = current_prev })
+		prev_tree = M.mt({ ["_data"] = current_data, ["_succs"] = current_succs, ["_prev"] = current_prev })
 
 		return get(next_seq, next_tree, opts, prev_tree)
 	end
@@ -182,7 +182,7 @@ local function get(seq, tree, prev_opts, prev_tree)
 	-- set opts to merged opts instead of node opts
 	rawset(data, "opts", opts)
 
-	local ret = { _data = data, _succs = succs, _prev = prev_tree }
+	local ret = { ["_data"] = data, ["_succs"] = succs, ["_prev"] = prev_tree }
 
 	return M.mt(ret)
 end
