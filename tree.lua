@@ -3,6 +3,9 @@ local util = require("motion.util")
 local vim = require("motion.vim")
 local dump = require("motion.vim").inspect
 
+-- TODO:
+-- get_raw methods
+
 local M = {}
 
 local root_tree = {}
@@ -146,11 +149,12 @@ local function get(seq, tree, prev_opts, prev_tree)
 	local key, next_seq = util.split_vim_key(seq)
 
 	local opts
+
+	local data_raw = rawget(tree, "_data")
 	-- node has data stored
-	if rawget(tree, "_data") then
+	if data_raw then
 		-- merge previous opts with current
-		local data = rawget(tree, "_data")
-		opts = util.merge_opts(prev_opts, rawget(data, "opts"))
+		opts = util.merge_opts(prev_opts, rawget(data_raw, "opts"))
 	else
 		-- we have to merge anyways to get rid of unique opts from predecessor
 		opts = util.merge_opts(prev_opts, {})
@@ -308,14 +312,14 @@ function M.mt(self)
 		rawset(self, "_succs", {})
 	end
 
-	self.add_successors = function(self, succs)
+	self.add_successors = function(_, succs)
 		for k, succ in pairs(succs) do
 			local path, key = parse_key(succ, k)
 			add(key, self, path)
 		end
 	end
 
-	self.is_leaf = function(self)
+	self.is_leaf = function(_)
 		local succs = rawget(self, "_succs")
 		if not succs then
 			return true
