@@ -61,6 +61,7 @@ local defaults = {
 	hints_font_desc = "Monospace 12",
 
 	hints_color_entry_fg = "#eceffc",
+	hints_color_entry_disabled_fg = "#959cbc",
 	hints_color_entry_desc_fg = "#eceffc",
 	hints_color_entry_separator_fg = "#82AAFF",
 	hints_color_entry_bg = "#24283B",

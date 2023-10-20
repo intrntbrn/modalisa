@@ -20,6 +20,7 @@ local M = {}
 
 local popup
 local timer
+local global_entries_widget
 
 local function hide(_)
 	if popup then
@@ -61,33 +62,35 @@ local function make_entries(keys, opts)
 	local aliases = opts and opts.hints_key_aliases
 
 	for k, key in pairs(keys) do
-		if key:cond() then
-			local kopts = key:opts()
-			if not kopts or not kopts.hidden then
-				local group = ""
-				if kopts and kopts.group then
-					group = kopts.group
-				end
-
-				local keyname = util.keyname(k, aliases)
-
-				local separator = kopts.hints_key_separator
-
-				table.insert(entries, {
-					key_unescaped = k,
-					key = keyname,
-					group = group,
-					desc = key:desc() or "",
-					id = key:id(),
-					fg = kopts.fg,
-					bg = kopts.bg,
-					separator = separator,
-					run = function()
-						key:fn(kopts)
-					end,
-				})
+		-- if key:cond() then
+		local kopts = key:opts()
+		if not kopts or not kopts.hidden then
+			local group = ""
+			if kopts and kopts.group then
+				group = kopts.group
 			end
+
+			local keyname = util.keyname(k, aliases)
+
+			local separator = kopts.hints_key_separator
+
+			table.insert(entries, {
+				key_unescaped = k,
+				key = keyname,
+				group = group,
+				cond = key.cond,
+				desc = key:desc() or "",
+				desc_fn = key.desc,
+				id = key:id(),
+				fg = kopts.fg,
+				bg = kopts.bg,
+				separator = separator,
+				run = function()
+					key:fn(kopts)
+				end,
+			})
 		end
+		-- end
 	end
 
 	return entries
@@ -163,7 +166,7 @@ local function create_popup(t)
 
 	local layout_columns = wibox.layout.fixed.horizontal({})
 
-	layout_columns:connect_signal("button::press", function(_, _, _, button)
+	layout_columns:weak_connect_signal("button::press", function(_, _, _, button)
 		-- middle click
 		if button == 2 then
 			awesome.emit_signal("motion::fake_input", "stop")
@@ -176,6 +179,7 @@ local function create_popup(t)
 		end
 	end)
 
+	local entries_widget = {}
 	local i = 1
 	for c = 1, num_columns do
 		local column = wibox.layout.fixed.vertical({})
@@ -186,6 +190,7 @@ local function create_popup(t)
 			if not entry then
 				break -- no more entries
 			end
+
 			local odd_source = opts.hints_odd_style == "row" and r or c
 			if opts.hints_odd_style == "checkered" then
 				odd_source = r + c
@@ -193,11 +198,7 @@ local function create_popup(t)
 
 			local odd = (odd_source % 2) == 0
 			local bg = odd and opts.hints_color_entry_odd_bg or opts.hints_color_entry_bg
-			local bg_hover = util.lighten(bg, 20)
-
-			local fg = entry.fg or opts.hints_color_entry_fg
-			local fg_desc = opts.hints_color_entry_desc_fg or fg
-			local fg_separator = opts.hints_color_entry_separator_fg or fg
+			local bg_hover = util.lighten(opts.hints_color_entry_bg, 25)
 
 			local widget = wibox.widget.base.make_widget_declarative({
 				{
@@ -206,7 +207,6 @@ local function create_popup(t)
 							{
 								id = "textbox_key",
 								halign = "right",
-								markup = util.markup.fg(fg, entry.key),
 								font = font,
 								widget = wibox.widget.textbox,
 							},
@@ -217,56 +217,93 @@ local function create_popup(t)
 						{
 
 							id = "textbox_separator",
-							markup = util.markup.fg(fg_separator, entry.separator),
 							font = font_separator,
 							widget = wibox.widget.textbox,
 						},
 						{
 							id = "textbox_desc",
-							markup = util.markup.fg(fg_desc, entry.desc),
 							font = font_desc,
 							widget = wibox.widget.textbox,
 						},
 						layout = wibox.layout.fixed.horizontal(),
 					},
-					fg = fg,
+					-- fg = fg,
 					bg = bg,
 					id = "background_entry",
 					widget = wibox.container.background,
 				},
+				id = string.format("entry_%d", i),
 				strategy = "exact", -- TODO:
 				width = entry_width,
 				height = entry_height,
 				widget = wibox.container.constraint,
 			})
 
-			local background_entry = widget:get_children_by_id("background_entry")[1]
-			local textbox_key = widget:get_children_by_id("textbox_key")[1]
-			-- textbox_key:set_markup(util.markup.fg(entry.key, fg))
+			local update = function()
+				local tb_key = widget:get_children_by_id("textbox_key")[1]
+				local tb_desc = widget:get_children_by_id("textbox_desc")[1]
+				local tb_separator = widget:get_children_by_id("textbox_separator")[1]
+				local bg_entry = widget:get_children_by_id("background_entry")[1]
 
-			widget:connect_signal("button::press", function(_, _, _, button)
-				-- left click
-				if button == 1 then
+				local fg
+				local fg_desc
+				local fg_separator
+				if entry.cond() then
+					fg = entry.fg or opts.hints_color_entry_fg
+					fg_desc = opts.hints_color_entry_desc_fg or fg
+					fg_separator = opts.hints_color_entry_separator_fg or fg
+				else
+					fg = opts.hints_color_entry_disabled_fg
+					fg_desc = opts.hints_color_entry_disabled_fg
+					fg_separator = opts.hints_color_entry_disabled_fg
+				end
+				bg_entry.fg = fg
+
+				tb_key.markup = util.markup.fg(fg, entry.key)
+				tb_desc.markup = util.markup.fg(fg_desc, entry.desc_fn())
+				tb_separator.markup = util.markup.fg(fg_separator, entry.separator)
+			end
+
+			local function mouse_button_handler(_, _, _, button)
+				if button == 1 then -- left click
 					awesome.emit_signal("motion::fake_input", { key = entry.key_unescaped, continue = false })
 					return
 				end
-				-- right click
-				if button == 3 then
+				if button == 3 then -- rightclick
 					awesome.emit_signal("motion::fake_input", { key = entry.key_unescaped, continue = true })
 					return
 				end
-			end)
+			end
 
-			widget:connect_signal("mouse::enter", function()
+			local background_entry = widget:get_children_by_id("background_entry")[1]
+			local function mouse_enter_handler()
 				background_entry.bg = bg_hover
-			end)
-			widget:connect_signal("mouse::leave", function()
+			end
+			local function mouse_leave_handler()
 				background_entry.bg = bg
-			end)
+			end
+
+			widget:connect_signal("button::press", mouse_button_handler)
+			widget:connect_signal("mouse::enter", mouse_enter_handler)
+			widget:connect_signal("mouse::leave", mouse_leave_handler)
+
+			local teardown = function()
+				widget:disconnect_signal("button::press", mouse_button_handler)
+				widget:disconnect_signal("mouse::enter", mouse_enter_handler)
+				widget:disconnect_signal("mouse::leave", mouse_leave_handler)
+			end
+
+			update()
+
+			widget.update = update
+			widget.teardown = teardown
+
+			entries_widget[i] = widget
 
 			column:add(widget)
 			i = i + 1
 		end
+		global_entries_widget = entries_widget
 	end
 
 	-- compute size
@@ -342,7 +379,24 @@ local function handle(t)
 	end
 end
 
+local function update(t)
+	-- HACK: add a small delay to circumvent race conditions
+	timer = gears.timer({
+		timeout = 0.01,
+		callback = function()
+			for _, v in pairs(global_entries_widget) do
+				v:update()
+			end
+		end,
+		autostart = true,
+		single_shot = true,
+	})
+end
+
 function M.setup(_)
+	awesome.connect_signal("motion::execute", function(args)
+		update(args.tree)
+	end)
 	awesome.connect_signal("motion::update", function(args)
 		handle(args.tree)
 	end)
