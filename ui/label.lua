@@ -8,12 +8,6 @@ local M = {}
 
 local popups = {}
 
-function M.setup(_)
-	awesome.connect_signal("motion::stop", function()
-		M.hide_labels()
-	end)
-end
-
 function M.hide_labels()
 	if #popups == 0 then
 		return
@@ -65,6 +59,12 @@ function M.create_popup(c, text)
 	})
 
 	return popup
+end
+
+function M.setup(_)
+	awesome.connect_signal("motion::stop", function()
+		M.hide_labels()
+	end)
 end
 
 return M

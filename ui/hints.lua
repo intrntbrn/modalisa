@@ -106,7 +106,20 @@ function popup:update(t)
 	local keys = t:successors()
 
 	local entries = make_entries(keys, opts)
-	sort_entries_by_group(entries, opts)
+
+	local sort = opts.hints_sort
+	if sort then
+		local fn
+		if sort == "id" then
+			fn = sort_entries_by_id
+		elseif sort == "group" then
+			fn = sort_entries_by_group
+		end
+
+		if fn then
+			fn(entries, opts)
+		end
+	end
 
 	-- calculations
 	local geo = screen[s.index].geometry

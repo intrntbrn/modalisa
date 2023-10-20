@@ -24,6 +24,7 @@ local defaults = {
 	hints_show = true,
 	hints_delay = 0,
 	hints_show_disabled_keys = false,
+	hints_sort = "group", -- group | id | none
 	hints_key_aliases = {
 		-- ["(A%-)[%u%-]"] = "Alt",
 		-- ["S%-"] = "Shift",

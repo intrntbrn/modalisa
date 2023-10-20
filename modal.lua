@@ -21,6 +21,8 @@ local M = {}
 -- timeout can't be changed. implement own version.
 -- change opts dynamically by returning stuff?
 -- hold mods ignore
+-- call wm presets
+-- defualt keybind merge preset
 
 local awful = require("awful")
 local vim = require("motion.vim")
