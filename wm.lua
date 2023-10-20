@@ -680,7 +680,7 @@ function M.client_toggle_tag_menu()
 				table.insert(ret, {
 					util.index_to_label(i, opts.labels),
 					desc = function()
-						return helper.tagname(t)
+						return helper.tagname(t, i)
 					end,
 					fn = function()
 						awm.client_toggle_tag(c, t)
@@ -700,7 +700,7 @@ function M.tag_move_focused_client_to_tag(i)
 			return client.focus and awful.screen.focused().tags[i]
 		end,
 		desc = function()
-			return string.format("move client to tag %s", helper.tagname_by_index(i))
+			return string.format("move client to tag %s", helper.tagname_by_index(i) or i)
 		end,
 		fn = function()
 			local c = client.focus
@@ -801,7 +801,7 @@ function M.tag_view_only(i)
 	return {
 		opts = { group = "tag.view" },
 		desc = function()
-			return helper.tagname_by_index(i)
+			return "view tag " .. (helper.tagname_by_index(i) or i)
 		end,
 		cond = function()
 			return awful.screen.focused().tags[i]
@@ -907,7 +907,7 @@ function helper.tagname_by_index(i)
 	local s = awful.screen.focused()
 	local t = s.tags[i]
 	if not t then
-		return ""
+		return string.format("%s", i)
 	end
 
 	return helper.tagname(t)
