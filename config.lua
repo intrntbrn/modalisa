@@ -47,7 +47,7 @@ local defaults = {
 	},
 	hints_key_separator = " ➜ ",
 	hints_max_key_width = 5,
-	hints_min_entry_width = 30, -- chars
+	hints_min_entry_width = 30,
 	hints_width = 0.75,
 	hints_height = 0.4,
 	hints_fill_strategy = "width", -- width | height
@@ -73,14 +73,15 @@ local defaults = {
 	-- echo
 	echo = true,
 	echo_placement = "centered",
-	echo_timeout = 2000,
-	echo_font = "Monospace Bold 20",
+	echo_timeout = 1000,
+	echo_font = "Monospace Bold 22",
 	echo_width = 0.1,
 	echo_height = 0.1,
 
 	echo_border_width = dpi(2),
-	echo_color_bg = "#24283B",
-	echo_color_fg = "#eceffc",
+	echo_color_border = "#959cbc",
+	echo_color_bg = "#82AAFF",
+	echo_color_fg = "#24283B",
 
 	-- awesome
 	auto_select_the_only_choice = false,
@@ -100,16 +101,6 @@ local function on_update(key)
 	awesome.emit_signal(string.format("motion::property::%s", key), value)
 end
 
-function M.setup(opts)
-	assert(not options, "config setup once")
-	options = defaults
-	options = M.get(opts or {})
-
-	for k in pairs(options) do
-		on_update(k)
-	end
-end
-
 function M.get(...)
 	if options == nil then
 		M.setup()
@@ -127,6 +118,16 @@ function M.get(...)
 	local ret = vim.tbl_deep_extend("force", unpack(all))
 
 	return ret
+end
+
+function M.setup(opts)
+	assert(not options, "config setup once")
+	options = defaults
+	options = M.get(opts or {})
+
+	for k in pairs(options) do
+		on_update(k)
+	end
 end
 
 return setmetatable(M, {

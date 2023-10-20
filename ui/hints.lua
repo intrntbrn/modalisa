@@ -307,16 +307,26 @@ function popup:update(t)
 	local placement = type(opts.hints_placement) == "string" and awful.placement[opts.hints_placement]
 		or opts.hints_placement
 
+	local margin = dpi(3)
+
 	local widget = wibox.widget.base.make_widget_declarative({
 		{
-			layout_columns,
+			{
+				layout_columns,
+				margins = {
+					top = margin,
+					bottom = margin,
+					left = margin,
+					right = margin,
+				},
+				widget = wibox.container.margin,
+			},
 			bg = "#1A1E2D",
 			-- forced_width = max_width,
 			-- forced_height = max_height,
-			shape = gears.shape.rounded_rect,
+			-- shape = gears.shape.rounded_rect,
 			widget = wibox.container.background,
 		},
-		-- margins = opts.hints_placement_offset,
 		opacity = 1,
 		bg = "#ff00ff00",
 		widget = wibox.container.margin,

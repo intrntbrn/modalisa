@@ -27,6 +27,7 @@ local function parse_key(key, table_index)
 	local desc
 	local pre
 	local post
+	local echo
 
 	local t = type(key)
 
@@ -46,8 +47,16 @@ local function parse_key(key, table_index)
 					seq = v
 				end
 			elseif t == "table" then
-				assert(not opts, "multiple tables")
-				opts = v
+				if k == "opts" then
+					assert(not opts, "multiple opts")
+					opts = v
+				elseif k == "echo" then
+					assert(not echo, "multiple echo")
+					echo = v
+				else
+					assert(not opts, "multiple opts")
+					opts = v
+				end
 			elseif t == "function" then
 				-- can be fn, condition, desc with mods
 				if k == "cond" or k == "condition" then
@@ -78,6 +87,7 @@ local function parse_key(key, table_index)
 		desc = desc,
 		pre = pre,
 		post = post,
+		echo = echo,
 	}
 end
 
@@ -281,6 +291,16 @@ function M.mt(self)
 		end
 
 		return desc
+	end
+
+	self.echo = function()
+		local data = rawget(self, "_data")
+		if not data then
+			return nil
+		end
+
+		local echo = rawget(data, "echo")
+		return echo
 	end
 
 	self.id = function()

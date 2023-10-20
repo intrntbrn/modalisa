@@ -433,6 +433,11 @@ function trunner:run(t)
 		on_execute(t)
 	end
 
+	local echo = t:echo()
+	if echo then
+		awesome.emit_signal("motion::echo", { echo = echo, tree = t })
+	end
+
 	-- pre
 	t:post(opts)
 
@@ -657,7 +662,7 @@ end
 -- "y"	{ "Mod4", "Control", "Shift" }
 -- "y"	{ "Mod4", "Shift" }
 
-function M.add_globalkey(prefix, key, extra_opts)
+function M.add_globalkey(prefix, vimkey, extra_opts)
 	-- hook every possible mod combination
 	-- so we know exactly which mods are pressed down on start
 	assert(mod_map)
@@ -672,7 +677,7 @@ function M.add_globalkey(prefix, key, extra_opts)
 	end
 
 	local keys = {}
-	local parsed_keys = parse_vim_key(key)
+	local parsed_keys = parse_vim_key(vimkey)
 
 	for _, parsed_key in pairs(parsed_keys) do
 		-- the specified key
@@ -697,7 +702,6 @@ function M.add_globalkey(prefix, key, extra_opts)
 			local keybind = vim.deepcopy(parsed_key)
 			keybind.mods = all
 
-			print("global keybind: ", dump(keybind.key), dump(keybind.mods))
 			table.insert(keys, make_awful_key(prefix, keybind, extra_opts))
 		end
 	end
