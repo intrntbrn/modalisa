@@ -19,7 +19,6 @@ local M = {}
 -- group colors
 -- notify for duplicate keys
 -- timeout can't be changed. implement own version.
--- change opts dynamically by returning stuff?
 -- hold mods ignore
 -- call wm presets
 -- defualt keybind merge preset
@@ -751,6 +750,17 @@ function M.benchmark(n)
 	end
 
 	util.benchmark(f, n or 100)
+end
+
+function M.benchmark_input(n, key)
+	M.run("")
+	local f = function()
+		M.fake_input(key or "a", true)
+	end
+
+	util.benchmark(f, n or 100)
+
+	M.fake_input("stop")
 end
 
 return setmetatable(M, {

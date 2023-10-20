@@ -24,7 +24,7 @@ local defaults = {
 	hints_show = true,
 	hints_delay = 0,
 	hints_show_disabled_keys = false,
-	hints_sort = "group", -- group | id | none
+	hints_sort = "group", -- group | id | nil
 	hints_key_aliases = {
 		-- ["(A%-)[%u%-]"] = "Alt",
 		-- ["S%-"] = "Shift",
@@ -72,8 +72,11 @@ local defaults = {
 
 	-- echo
 	echo = true,
-	echo_timeout = 1,
-	echo_font = "Monospace Bold 16",
+	echo_placement = "centered",
+	echo_timeout = 2000,
+	echo_font = "Monospace Bold 20",
+	echo_width = 0.1,
+	echo_height = 0.1,
 
 	echo_border_width = dpi(2),
 	echo_color_bg = "#24283B",

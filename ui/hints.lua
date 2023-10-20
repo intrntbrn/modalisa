@@ -26,9 +26,8 @@ local function get_font_width(font)
 	return width or 10
 end
 
--- TODO: opt
 local function sort_entries_by_group(entries, opts)
-	-- sort by group and desc
+	-- sort by group, desc, id
 	table.sort(entries, function(a, b)
 		if a.group == b.group then
 			if a.desc() == b.desc() then
@@ -325,7 +324,9 @@ function popup:update(t)
 
 	-- update the popup
 	self.popup.widget = widget
-	self.popup.placement = placement
+	if placement then
+		self.popup.placement = placement
+	end
 	self.popup.screen = s
 	self.popup.visible = true
 end

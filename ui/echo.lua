@@ -9,15 +9,8 @@ local dpi = require("beautiful").xresources.apply_dpi
 
 local M = {}
 
-local popup
+local popup = {}
 local timer
-
-local function hide(_)
-	if popup then
-		popup.visible = false
-	end
-	popup = nil
-end
 
 local function textbox(text, opts)
 	local tb = wibox.widget.base.make_widget_declarative({
@@ -28,10 +21,9 @@ local function textbox(text, opts)
 	return tb
 end
 
-local function create_popup(opts, widget)
-	local old_popup = popup
-
-	local s = awful.screen.focused()
+local function create_widget(opts, key, value)
+	local kv = string.format("%s = %s", key, value)
+	local widget = textbox(kv, opts)
 
 	local base = wibox.widget.base.make_widget_declarative({
 		{
@@ -46,47 +38,83 @@ local function create_popup(opts, widget)
 			fg = opts.echo_color_fg,
 			-- forced_width = 200,
 			-- forced_height = 200,
-			shape = gears.shape.rounded_rect,
+			shape = nil,
 			widget = wibox.container.background,
 		},
 		opacity = 1,
 		widget = wibox.container.margin,
 	})
 
-	popup = awful.popup({
-		hide_on_rightclick = true,
-		screen = s,
-		visible = true,
+	return base
+end
+
+function popup:new(opts)
+	local pop = awful.popup({
+		visible = false,
 		ontop = true,
 		above = true,
-		placement = awful.placement.centered,
-		widget = base,
+		widget = wibox.widget.base.make_widget_declarative({}),
 	})
 
-	-- prevent flickering
-	if old_popup then
-		-- without delay there is still some occasional flickering
-		gears.timer({
-			timeout = 0.01,
-			callback = function()
-				old_popup.visible = false
-			end,
-			single_shot = true,
-			autostart = true,
-		})
+	self.popup = pop
+	return pop
+end
+
+function popup:set_visible(v)
+	self.popup.visible = v
+end
+
+function popup:is_visible()
+	return self.popup.visible
+end
+
+function popup:set_widget(widget, opts)
+	local s = awful.screen.focused()
+	local placement = type(opts.echo_placement) == "string" and awful.placement[opts.echo_placement]
+		or opts.echo_placement
+
+	self.popup.widget = widget
+	self.popup.screen = s
+	if placement then
+		self.popup.placement = placement
 	end
+	self.popup.visible = true
+end
+
+local function set_timer(opts)
+	if timer then
+		timer:stop()
+	end
+
+	local delay = opts.echo_timeout
+
+	timer = gears.timer({
+		timeout = delay / 1000,
+		callback = function()
+			popup:set_visible(false)
+		end,
+		autostart = true,
+		single_shot = true,
+	})
 end
 
 local function handle(args)
-	print("handle", dump(args))
-	-- if enabled etc
 	local opts = args.opts
+	local key = args.key
+	local value = args.value
+	print("handle", dump(args))
 
-	create_popup(opts, textbox("lololol", opts))
+	local widget = create_widget(opts, key, value)
+	popup:set_widget(widget, opts)
+	set_timer(opts)
 end
 
+local once
 function M.setup(opts)
-	print("echo setup")
+	assert(once == nil, "echo is already setup")
+	once = true
+
+	popup:new(opts)
 	awesome.connect_signal("motion::echo", function(args)
 		handle(args)
 	end)
