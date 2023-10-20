@@ -16,12 +16,14 @@ local defaults = {
 	-- core
 	unique = { "key", "hidden", "fg" },
 	mode = "hybrid", -- "modal" | "hold" | "hybrid" | "forever"
+	stop_on_unknown_key = false,
 	ignore_shift_state_for_special_characters = true,
 	timeout = 0,
 
 	-- hints
 	hints_show = true,
 	hints_delay = 0,
+	hints_show_disabled_keys = false,
 	hints_key_aliases = {
 		-- ["(A%-)[%u%-]"] = "Alt",
 		-- ["S%-"] = "Shift",

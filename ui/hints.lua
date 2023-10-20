@@ -52,33 +52,35 @@ local function make_entries(keys, opts)
 	local entries = {}
 
 	local aliases = opts and opts.hints_key_aliases
-
+	local show_disabled = opts.hints_show_disabled_keys
 	for k, key in pairs(keys) do
-		local kopts = key:opts()
-		if not kopts or not kopts.hidden then
-			local group = ""
-			if kopts and kopts.group then
-				group = kopts.group
+		if show_disabled or key:cond() then
+			local kopts = key:opts()
+			if not kopts or not kopts.hidden then
+				local group = ""
+				if kopts and kopts.group then
+					group = kopts.group
+				end
+
+				local keyname = util.keyname(k, aliases)
+
+				local separator = kopts.hints_key_separator
+
+				table.insert(entries, {
+					key_unescaped = k,
+					key = keyname,
+					group = group,
+					cond = key.cond,
+					desc = key.desc,
+					id = key:id(),
+					fg = kopts.fg,
+					bg = kopts.bg,
+					separator = separator,
+					run = function()
+						key:fn(kopts)
+					end,
+				})
 			end
-
-			local keyname = util.keyname(k, aliases)
-
-			local separator = kopts.hints_key_separator
-
-			table.insert(entries, {
-				key_unescaped = k,
-				key = keyname,
-				group = group,
-				cond = key.cond,
-				desc = key.desc,
-				id = key:id(),
-				fg = kopts.fg,
-				bg = kopts.bg,
-				separator = separator,
-				run = function()
-					key:fn(kopts)
-				end,
-			})
 		end
 	end
 
