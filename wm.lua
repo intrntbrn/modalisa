@@ -309,7 +309,11 @@ function M.client_toggle_fullscreen()
 	return {
 		opts = { group = "client.property" },
 		desc = function()
-			if client.focus.fullscreen then
+			local c = client.focus
+			if not c then
+				return "toggle fullscreen"
+			end
+			if c.fullscreen then
 				return "unfullscreen"
 			end
 			return "fullscreen"
@@ -327,7 +331,11 @@ function M.client_toggle_maximize()
 	return {
 		opts = { group = "client.property" },
 		desc = function()
-			if client.focus.maximized then
+			local c = client.focus
+			if not c then
+				return "toggle maximize"
+			end
+			if c.maximized then
 				return "unmaximize"
 			end
 			return "maximize"
@@ -345,7 +353,11 @@ function M.client_toggle_sticky()
 	return {
 		opts = { group = "client.property" },
 		desc = function()
-			if client.focus.sticky then
+			local c = client.focus
+			if not c then
+				return "toggle sticky"
+			end
+			if c.sticky then
 				return "unsticky"
 			end
 			return "sticky"
@@ -363,7 +375,11 @@ function M.client_toggle_maximize_horizontally()
 	return {
 		opts = { group = "client.property" },
 		desc = function()
-			if client.focus.maximized_horizontal then
+			local c = client.focus
+			if not c then
+				return "toggle maximize horizontally"
+			end
+			if c.maximized_horizontal then
 				return "unmaximize horizontally"
 			end
 			return "maximize horizontally"
@@ -381,7 +397,11 @@ function M.client_toggle_maximize_vertically()
 	return {
 		opts = { group = "client.property" },
 		desc = function()
-			if client.focus.maximized_vertical then
+			local c = client.focus
+			if not c then
+				return "toggle maximize vertically"
+			end
+			if c.maximized_vertical then
 				return "unmaximize vertically"
 			end
 			return "maximize vertically"
@@ -399,7 +419,11 @@ function M.client_toggle_floating()
 	return {
 		opts = { group = "client.property" },
 		desc = function()
-			if client.focus.floating then
+			local c = client.focus
+			if not c then
+				return "toggle floating"
+			end
+			if c.floating then
 				return "unfloating"
 			end
 			return "floating"
@@ -417,7 +441,11 @@ function M.client_toggle_ontop()
 	return {
 		opts = { group = "client.property" },
 		desc = function()
-			if client.focus.ontop then
+			local c = client.focus
+			if not c then
+				return "toggle ontop"
+			end
+			if c.ontop then
 				return "ontop disable"
 			end
 			return "ontop"

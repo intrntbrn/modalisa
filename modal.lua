@@ -20,6 +20,7 @@ local M = {}
 -- notify for duplicate keys
 -- timeout can't be changed. implement own version.
 -- change opts dynamically by returning stuff?
+-- hold mods ignore
 
 local awful = require("awful")
 local vim = require("motion.vim")
@@ -100,6 +101,11 @@ end
 -- @param t table A motion (sub)tree
 local function on_update(t)
 	awesome.emit_signal("motion::update", { tree = t })
+end
+
+-- @param t table A motion (sub)tree
+local function on_execute(t)
+	awesome.emit_signal("motion::execute", { tree = t })
 end
 
 -- @param t table A motion (sub)tree
@@ -263,10 +269,8 @@ local function keygrabber_keys(t)
 
 	-- regular keys (successors)
 	for k, v in pairs(succs) do
-		if v:cond() then
-			for _, key in pairs(parse_vim_key(k, opts)) do
-				add_key_to_map(all_keys, key)
-			end
+		for _, key in pairs(parse_vim_key(k, opts)) do
+			add_key_to_map(all_keys, key)
 		end
 	end
 
@@ -414,16 +418,22 @@ function trunner:stop_maybe(reason)
 end
 
 function trunner:run(t)
-	local topts = t:opts()
+	local opts = t:opts()
 
 	-- pre
-	t:pre(topts)
+	t:pre(opts)
 
 	-- run fn
-	local list = t:fn(topts)
+	local list
+
+	-- TODO:
+	if t:cond() then
+		list = t:fn(opts)
+		on_execute(t)
+	end
 
 	-- pre
-	t:post(topts)
+	t:post(opts)
 
 	if list then
 		-- dynamically created list

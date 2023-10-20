@@ -91,7 +91,6 @@ function M.setup(opts)
 		["r "] = wm.layout_select_menu(),
 		["r<Left>"] = wm.layout_prev(),
 		["r<Right>"] = wm.layout_next(),
-
 		["rk"] = wm.layout_master_width_increase(),
 		["rj"] = wm.layout_master_width_decrease(),
 		["rl"] = wm.layout_master_count_increase(),
