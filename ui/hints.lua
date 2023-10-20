@@ -1,4 +1,3 @@
-local config = require("motion.config")
 local util = require("motion.util")
 local gears = require("gears")
 local wibox = require("wibox")
@@ -18,16 +17,8 @@ local M = {}
 -- opts:
 -- height %, width %, placement, cell_size, overlap_wibox
 
-local popup
+local popup = {}
 local timer
-local global_entries_widget
-
-local function hide(_)
-	if popup then
-		popup.visible = false
-	end
-	popup = nil
-end
 
 local function get_font_width(font)
 	local _, _, width = string.find(font, "[%s]+([0-9]+)")
@@ -36,7 +27,7 @@ local function get_font_width(font)
 end
 
 -- TODO: opt
-local function sort_entries(entries, opts)
+local function sort_entries_by_group(entries, opts)
 	-- sort by group and desc
 	table.sort(entries, function(a, b)
 		if a.group == b.group then
@@ -49,20 +40,20 @@ local function sort_entries(entries, opts)
 			return a.group < b.group
 		end
 	end)
-
-	-- --sort by id
-	-- table.sort(elements, function(a, b)
-	-- 	return a.id < b.id
-	-- end)
-	--
 end
+
+local function sort_entries_by_id(entries, opts)
+	table.sort(entries, function(a, b)
+		return a.id < b.id
+	end)
+end
+
 local function make_entries(keys, opts)
 	local entries = {}
 
 	local aliases = opts and opts.hints_key_aliases
 
 	for k, key in pairs(keys) do
-		-- if key:cond() then
 		local kopts = key:opts()
 		if not kopts or not kopts.hidden then
 			local group = ""
@@ -79,8 +70,7 @@ local function make_entries(keys, opts)
 				key = keyname,
 				group = group,
 				cond = key.cond,
-				desc = key:desc() or "",
-				desc_fn = key.desc,
+				desc = key.desc,
 				id = key:id(),
 				fg = kopts.fg,
 				bg = kopts.bg,
@@ -90,16 +80,23 @@ local function make_entries(keys, opts)
 				end,
 			})
 		end
-		-- end
 	end
 
 	return entries
 end
 
--- colum size
+function popup:teardown()
+	local entries = self.entries_widget
+	if not entries then
+		return
+	end
+	for _, v in pairs(entries) do
+		v:teardown()
+	end
+end
 
-local function create_popup(t)
-	local old_popup = popup
+function popup:update(t)
+	self:teardown() -- cleanup old entries
 
 	local s = awful.screen.focused()
 
@@ -107,7 +104,7 @@ local function create_popup(t)
 	local keys = t:successors()
 
 	local entries = make_entries(keys, opts)
-	sort_entries(entries, opts)
+	sort_entries_by_group(entries, opts)
 
 	-- calculations
 	local geo = screen[s.index].geometry
@@ -166,19 +163,6 @@ local function create_popup(t)
 
 	local layout_columns = wibox.layout.fixed.horizontal({})
 
-	layout_columns:weak_connect_signal("button::press", function(_, _, _, button)
-		-- middle click
-		if button == 2 then
-			awesome.emit_signal("motion::fake_input", "stop")
-			return
-		end
-		-- back click
-		if button == 8 then
-			awesome.emit_signal("motion::fake_input", "back")
-			return
-		end
-	end)
-
 	local entries_widget = {}
 	local i = 1
 	for c = 1, num_columns do
@@ -227,7 +211,6 @@ local function create_popup(t)
 						},
 						layout = wibox.layout.fixed.horizontal(),
 					},
-					-- fg = fg,
 					bg = bg,
 					id = "background_entry",
 					widget = wibox.container.background,
@@ -260,7 +243,7 @@ local function create_popup(t)
 				bg_entry.fg = fg
 
 				tb_key.markup = util.markup.fg(fg, entry.key)
-				tb_desc.markup = util.markup.fg(fg_desc, entry.desc_fn())
+				tb_desc.markup = util.markup.fg(fg_desc, entry.desc())
 				tb_separator.markup = util.markup.fg(fg_separator, entry.separator)
 			end
 
@@ -303,7 +286,7 @@ local function create_popup(t)
 			column:add(widget)
 			i = i + 1
 		end
-		global_entries_widget = entries_widget
+		self.entries_widget = entries_widget
 	end
 
 	-- compute size
@@ -325,66 +308,57 @@ local function create_popup(t)
 		widget = wibox.container.margin,
 	})
 
-	popup = awful.popup({
-		hide_on_rightclick = true,
-		screen = awful.screen.focused(),
-		visible = true,
+	-- update the popup
+	self.popup.widget = widget
+	self.popup.placement = placement
+	self.popup.screen = s
+	self.popup.visible = true
+end
+
+function popup:new(opts)
+	local pop = awful.popup({
+		visible = false,
 		ontop = true,
 		above = true,
-		placement = placement,
-		widget = widget,
+		widget = wibox.widget.base.make_widget_declarative({}),
 	})
 
-	-- prevent flickering
-	if old_popup then
-		-- without delay there is still some occasional flickering
-		gears.timer({
-			timeout = 0.01,
-			callback = function()
-				old_popup.visible = false
-			end,
-			single_shot = true,
-			autostart = true,
-		})
-	end
+	pop:connect_signal("button::press", function(_, _, _, button)
+		if button == 2 then -- middle click
+			awesome.emit_signal("motion::fake_input", "stop")
+			return
+		end
+		if button == 8 then -- back click
+			awesome.emit_signal("motion::fake_input", "back")
+			return
+		end
+	end)
+
+	self.popup = pop
+	return pop
 end
 
-local function handle(t)
-	local opts = t:opts()
-
-	if timer then
-		timer:stop()
-	end
-
-	if not opts.hints_show then
-		hide()
-		return
-	end
-
-	local delay = opts.hints_delay
-
-	-- do not delay if hints are already displayed
-	if not popup and delay and delay > 0 then
-		timer = gears.timer({
-			timeout = delay / 1000,
-			callback = function()
-				create_popup(t)
-				return false
-			end,
-			autostart = true,
-			single_shot = true,
-		})
-	else
-		create_popup(t)
-	end
+function popup:is_visible()
+	return self.popup.visible
 end
 
-local function update(t)
-	-- HACK: add a small delay to circumvent race conditions
-	timer = gears.timer({
-		timeout = 0.01,
+function popup:set_visible(value)
+	self.popup.visible = value
+end
+
+-- update entries (desc, cond, etc.)
+function popup:refresh_entries()
+	-- after execution some important global vars in awesome aren't defined yet
+	-- (e.g. client.focus), resulting in incorrect cond() of entries.
+	-- therefore we add a small delay to circumvent race conditions
+	gears.timer({
+		timeout = 0.025, -- 25ms
 		callback = function()
-			for _, v in pairs(global_entries_widget) do
+			local entries = self.entries_widget
+			if not entries then
+				return
+			end
+			for _, v in pairs(entries) do
 				v:update()
 			end
 		end,
@@ -393,18 +367,52 @@ local function update(t)
 	})
 end
 
-function M.setup(_)
+local function handle_tree_changed(t)
+	local opts = t:opts()
+
+	if timer then
+		timer:stop()
+	end
+
+	if not opts.hints_show then
+		popup:set_visible(false)
+		return
+	end
+
+	local delay = opts.hints_delay
+
+	-- do not delay if hints are already displayed
+	if not popup:is_visible() and delay and delay > 0 then
+		timer = gears.timer({
+			timeout = delay / 1000,
+			callback = function()
+				popup:update(t)
+				return false
+			end,
+			autostart = true,
+			single_shot = true,
+		})
+	else
+		popup:update(t)
+	end
+end
+
+local once
+function M.setup(opts)
+	assert(once == nil, "hints are already setup")
+	once = popup:new(opts)
+
 	awesome.connect_signal("motion::execute", function(args)
-		update(args.tree)
+		popup:refresh_entries()
 	end)
 	awesome.connect_signal("motion::update", function(args)
-		handle(args.tree)
+		handle_tree_changed(args.tree)
 	end)
 	awesome.connect_signal("motion::stop", function(args)
 		if timer then
 			timer:stop()
 		end
-		hide(args.tree)
+		popup:set_visible(false)
 	end)
 end
 

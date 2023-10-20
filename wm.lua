@@ -700,7 +700,7 @@ function M.tag_move_focused_client_to_tag(i)
 			return client.focus and awful.screen.focused().tags[i]
 		end,
 		desc = function()
-			return string.format("move client to tag %s", helper.tagname_by_index(i) or i)
+			return string.format("move client to tag %s", helper.tagname_by_index(i))
 		end,
 		fn = function()
 			local c = client.focus
