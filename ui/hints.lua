@@ -31,10 +31,10 @@ local function sort_entries_by_group(entries, opts)
 	-- sort by group and desc
 	table.sort(entries, function(a, b)
 		if a.group == b.group then
-			if a.text == b.text then
+			if a.desc() == b.desc() then
 				return a.id < b.id
 			else
-				return a.text < b.text
+				return a.desc() < b.desc()
 			end
 		else
 			return a.group < b.group
