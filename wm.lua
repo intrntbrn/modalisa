@@ -1,6 +1,6 @@
 local awful = require("awful")
 local util = require("motion.util")
-local dump = require("motion.vim").inspect
+local dump = require("motion.lib.vim").inspect
 local awm = require("motion.awesome")
 
 local M = {}

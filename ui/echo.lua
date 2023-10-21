@@ -3,7 +3,7 @@ local util = require("motion.util")
 local gears = require("gears")
 local wibox = require("wibox")
 local awful = require("awful")
-local dump = require("motion.vim").inspect
+local dump = require("motion.lib.vim").inspect
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
 

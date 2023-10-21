@@ -1,7 +1,7 @@
 local config = require("motion.config")
 local util = require("motion.util")
-local vim = require("motion.vim")
-local dump = require("motion.vim").inspect
+local vim = require("motion.lib.vim")
+local dump = require("motion.lib.vim").inspect
 
 -- TODO:
 -- get_raw methods

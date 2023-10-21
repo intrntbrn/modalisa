@@ -2,7 +2,8 @@ local M = {}
 
 local unpack = unpack or table.unpack
 
-local dump = require("motion.vim").inspect
+local vim = require("motion.lib.vim")
+local dump = require("motion.lib.vim").inspect
 local beautiful = require("beautiful")
 local gstring = require("gears.string")
 

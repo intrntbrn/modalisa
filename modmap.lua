@@ -1,7 +1,7 @@
 -- the mod map keeps track of all root modifier states
 local M = {}
 
-local dump = require("motion.vim").inspect
+local dump = require("motion.lib.vim").inspect
 
 local function set(self, key, mods, overwrite_only)
 	for _, mod in pairs(mods) do

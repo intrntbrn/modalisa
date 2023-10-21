@@ -1,6 +1,6 @@
 local M = {}
 
-local dump = require("motion.vim").inspect
+local dump = require("motion.lib.vim").inspect
 
 function M.setup(opts)
 	local config = require("motion.config")

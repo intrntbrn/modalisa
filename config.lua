@@ -1,6 +1,6 @@
 local M = {}
-local vim = require("motion.vim")
-local dump = require("motion.vim").inspect
+local vim = require("motion.lib.vim")
+local dump = vim.inspect
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
 

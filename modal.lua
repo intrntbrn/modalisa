@@ -24,9 +24,9 @@ local M = {}
 -- defualt keybind merge preset
 
 local awful = require("awful")
-local vim = require("motion.vim")
+local vim = require("motion.lib.vim")
 local util = require("motion.util")
-local dump = require("motion.vim").inspect
+local dump = require("motion.lib.vim").inspect
 local mtree = require("motion.tree")
 local mmodmap = require("motion.modmap")
 local akeygrabber = require("awful.keygrabber")
