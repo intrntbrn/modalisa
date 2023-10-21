@@ -1,5 +1,5 @@
 local motion = require("motion")
-local wm = require("motion.wm")
+local wm = require("motion.presets.awesome")
 
 local M = {}
 
