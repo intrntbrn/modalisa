@@ -24,9 +24,9 @@ local M = {}
 -- defualt keybind merge preset
 
 local awful = require("awful")
+local lib = require("motion.lib")
 local vim = require("motion.lib.vim")
-local util = require("motion.util")
-local dump = require("motion.lib.vim").inspect
+local dump = require("motion.lib").inspect
 local mtree = require("motion.tree")
 local mmodmap = require("motion.modmap")
 local akeygrabber = require("awful.keygrabber")
@@ -545,7 +545,7 @@ function trunner:keypressed_callback()
 				-- find the match with the least amount of ignored mods
 				local pressed_mods_list = self.mm:get_pressed_mods()
 				local combinations = {}
-				for combo in util.unique_combinations(pressed_mods_list) do
+				for combo in lib.unique_combinations(pressed_mods_list) do
 					table.insert(combinations, combo)
 				end
 				table.sort(combinations, function(a, b)
@@ -694,7 +694,7 @@ function M.add_globalkey(prefix, vimkey, extra_opts)
 			table.insert(list, k)
 		end
 
-		for combo in util.unique_combinations(list) do
+		for combo in lib.unique_combinations(list) do
 			local all = {}
 			vim.list_extend(all, parsed_key.mods)
 			vim.list_extend(all, combo)
@@ -753,7 +753,7 @@ function M.benchmark(n)
 		M.fake_input("stop")
 	end
 
-	util.benchmark(f, n or 100)
+	lib.benchmark(f, n or 100)
 end
 
 function M.benchmark_input(n, key)
@@ -762,7 +762,7 @@ function M.benchmark_input(n, key)
 		M.fake_input(key or "a", true)
 	end
 
-	util.benchmark(f, n or 100)
+	lib.benchmark(f, n or 100)
 
 	M.fake_input("stop")
 end

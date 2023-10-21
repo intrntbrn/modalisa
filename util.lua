@@ -2,47 +2,12 @@ local M = {}
 
 local unpack = unpack or table.unpack
 
-local vim = require("motion.lib.vim")
-local dump = require("motion.lib.vim").inspect
 local beautiful = require("beautiful")
 local gstring = require("gears.string")
+local vim = require("motion.lib.vim")
 
 M.labels_qwerty = "asdfghjklwertyuiozxcvbnmpqASDFGHJKLQWERTYUIOPZXCVBNM1234567890"
 M.labels_numericalpha = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-local wrap, yield = coroutine.wrap, coroutine.yield
--- This function clones the array t and appends the item new to it.
-local function _append(t, new)
-	local clone = {}
-	for _, item in ipairs(t) do
-		clone[#clone + 1] = item
-	end
-	clone[#clone + 1] = new
-	return clone
-end
-
---[[
-    Yields combinations of non-repeating items of tbl.
-    tbl is the source of items,
-    sub is a combination of items that all yielded combination ought to contain,
-    min it the minimum key of items that can be added to yielded combinations.
---]]
-function M.unique_combinations(tbl, sub, min)
-	sub = sub or {}
-	min = min or 1
-	return wrap(function()
-		if #sub > 0 then
-			yield(sub) -- yield short combination.
-		end
-		if #sub < #tbl then
-			for i = min, #tbl do -- iterate over longer combinations.
-				for combo in M.unique_combinations(tbl, _append(sub, tbl[i]), i + 1) do
-					yield(combo)
-				end
-			end
-		end
-	end)
-end
 
 function M.merge_opts(a, b)
 	a = a or {}
@@ -164,183 +129,15 @@ function M.confirmation_menu(fn, desc_yes, desc_no)
 	}
 end
 
--- https://gist.github.com/basaran/28b0f6c33e619ef481a097fdec480e38
--- Converts hexadecimal color to HSL
--- Lightness (L) is changed based on amt
--- Converts HSL back to hex
--- amt (0-100) can be negative to darken or positive to lighten
--- The amt specified is added to the color's existing Lightness
--- e.g., (#000000, 25) L = 25 but (#404040, 25) L = 50
-
-function M.lighten(hex_color, amt)
-	-- Rounds to whole number
-	local function round(num)
-		return math.floor(num + 0.5)
-	end
-	-- Rounds to hundredths
-	local function roundH(num)
-		return math.floor((num * 100) + 0.5) / 100
-	end
-
-	local r, g, b, a
-	local hex = hex_color:gsub("#", "")
-	if #hex < 6 then
-		local t = {}
-		for i = 1, #hex do
-			local char = hex:sub(i, i)
-			t[i] = char .. char
-		end
-		hex = table.concat(t)
-	end
-	r = tonumber(hex:sub(1, 2), 16) / 255
-	g = tonumber(hex:sub(3, 4), 16) / 255
-	b = tonumber(hex:sub(5, 6), 16) / 255
-	if #hex ~= 6 then
-		a = roundH(tonumber(hex:sub(7, 8), 16) / 255)
-	end
-
-	local max = math.max(r, g, b)
-	local min = math.min(r, g, b)
-	local c = max - min
-	-----------------------------
-	-- Hue
-	local h
-	if c == 0 then
-		h = 0
-	elseif max == r then
-		h = ((g - b) / c) % 6
-	elseif max == g then
-		h = ((b - r) / c) + 2
-	elseif max == b then
-		h = ((r - g) / c) + 4
-	end
-	h = h * 60
-	-----------------------------
-	-- Luminance
-	local l = (max + min) * 0.5
-	-----------------------------
-	-- Saturation
-	local s
-	if l <= 0.5 then
-		s = c / (l * 2)
-	elseif l > 0.5 then
-		s = c / (2 - (l * 2))
-	end
-	-----------------------------
-	local H, S, L, A
-	H = round(h) / 360
-	S = round(s * 100) / 100
-	L = round(l * 100) / 100
-
-	amt = amt / 100
-	if L + amt > 1 then
-		L = 1
-	elseif L + amt < 0 then
-		L = 0
-	else
-		L = L + amt
-	end
-
-	local R, G, B
-	if S == 0 then
-		R, G, B = round(L * 255), round(L * 255), round(L * 255)
-	else
-		local function hue2rgb(p, q, t)
-			if t < 0 then
-				t = t + 1
-			end
-			if t > 1 then
-				t = t - 1
-			end
-			if t < 1 / 6 then
-				return p + (q - p) * (6 * t)
-			end
-			if t < 1 / 2 then
-				return q
-			end
-			if t < 2 / 3 then
-				return p + (q - p) * (2 / 3 - t) * 6
-			end
-			return p
-		end
-		local q
-		if L < 0.5 then
-			q = L * (1 + S)
-		else
-			q = L + S - (L * S)
-		end
-		local p = 2 * L - q
-		R = round(hue2rgb(p, q, (H + 1 / 3)) * 255)
-		G = round(hue2rgb(p, q, H) * 255)
-		B = round(hue2rgb(p, q, (H - 1 / 3)) * 255)
-	end
-
-	if a ~= nil then
-		A = round(a * 255)
-		return string.format("#" .. "%.2x%.2x%.2x%.2x", R, G, B, A)
-	else
-		return string.format("#" .. "%.2x%.2x%.2x", R, G, B)
-	end
-end
-
--- Stripped copy of this module https://github.com/copycat-killer/lain/blob/master/util/markup.lua:
-local rgba = require("gears.color").to_rgba_string
 M.markup = {}
--- Set the font.
-function M.markup.font(font, text)
-	return '<span font="' .. tostring(font) .. '">' .. tostring(text) .. "</span>"
-end
--- Set the foreground.
 function M.markup.fg(color, text)
 	return string.format("<span foreground='%s'>%s</span>", color, text)
-end
--- Set the background.
-function M.markup.bg(color, text)
-	return '<span background="' .. rgba(color, beautiful.bg_normal) .. '">' .. tostring(text) .. "</span>"
 end
 
 -- https://stackoverflow.com/questions/9790688/escaping-strings-for-gsub/20778724#20778724
 local quotepattern = "([" .. ("%^$().[]*+-?"):gsub("(.)", "%%%1") .. "])"
 M.quote = function(str)
 	return str:gsub(quotepattern, "%%%1")
-end
-
-function M.benchmark(f, n, ...)
-	do
-		local units = {
-			["seconds"] = 1,
-			["milliseconds"] = 1000,
-			["microseconds"] = 1000000,
-			["nanoseconds"] = 1000000000,
-		}
-
-		---@diagnostic disable-next-line: redefined-local
-		local function benchmark(unit, decPlaces, n, f, ...)
-			local elapsed = 0
-			local multiplier = units[unit]
-			for i = 1, n do
-				local now = os.clock()
-				f(...)
-				elapsed = elapsed + (os.clock() - now)
-			end
-			print(
-				string.format(
-					"Benchmark results: %d function calls | %."
-						.. decPlaces
-						.. "f %s elapsed | %."
-						.. decPlaces
-						.. "f %s avg execution time.",
-					n,
-					elapsed * multiplier,
-					unit,
-					(elapsed / n) * multiplier,
-					unit
-				)
-			)
-		end
-
-		benchmark("milliseconds", 1, n, f, ...)
-	end
 end
 
 return M

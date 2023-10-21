@@ -1,4 +1,5 @@
 local util = require("motion.util")
+local lib = require("motion.lib")
 local gears = require("gears")
 local wibox = require("wibox")
 local awful = require("awful")
@@ -196,7 +197,7 @@ function popup:update(t)
 
 			local odd = (odd_source % 2) == 0
 			local bg = odd and opts.hints_color_entry_odd_bg or opts.hints_color_entry_bg
-			local bg_hover = util.lighten(opts.hints_color_entry_bg, 25) -- TODO params
+			local bg_hover = lib.lighten(opts.hints_color_entry_bg, 25) -- TODO params
 
 			local widget = wibox.widget.base.make_widget_declarative({
 				{
