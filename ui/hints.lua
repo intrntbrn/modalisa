@@ -34,7 +34,7 @@ local function sort_entries_by_group(entries, opts)
 			if a.desc() == b.desc() then
 				return a.id < b.id
 			else
-				return a.desc() < b.desc()
+				return (a.desc() or "") < (b.desc() or "")
 			end
 		else
 			return a.group < b.group
