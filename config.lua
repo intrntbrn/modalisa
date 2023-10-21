@@ -74,14 +74,17 @@ local defaults = {
 	echo = true,
 	echo_placement = "centered",
 	echo_timeout = 1000,
-	echo_font = "Monospace Bold 22",
 	echo_width = 0.1,
 	echo_height = 0.1,
 
-	echo_border_width = dpi(2),
-	echo_color_border = "#959cbc",
-	echo_color_bg = "#82AAFF",
-	echo_color_fg = "#24283B",
+	echo_font_header = "Monospace Bold 22",
+	echo_font = "Monospace Bold 22",
+	echo_border_width = dpi(1),
+
+	echo_color_border = "#1A1E2D",
+	echo_color_bg = "#383F5A",
+	echo_color_fg = "#eceffc",
+	echo_color_header_fg = "#82AAFF",
 
 	-- awesome
 	auto_select_the_only_choice = false,
@@ -89,7 +92,7 @@ local defaults = {
 	resize_delta = dpi(32),
 	resize_factor = 0.025,
 	browser = "firefox || chromium || google-chrome-stable || qutebrowser",
-	terminal = "alacritty || kitty || wezterm || st || urxvt || xterm",
+	terminal = terminal or "alacritty || kitty || wezterm || st || urxvt || xterm",
 	app_menu = "rofi -show drun || dmenu_run",
 }
 

@@ -196,7 +196,7 @@ function popup:update(t)
 
 			local odd = (odd_source % 2) == 0
 			local bg = odd and opts.hints_color_entry_odd_bg or opts.hints_color_entry_bg
-			local bg_hover = util.lighten(opts.hints_color_entry_bg, 25)
+			local bg_hover = util.lighten(opts.hints_color_entry_bg, 25) -- TODO params
 
 			local widget = wibox.widget.base.make_widget_declarative({
 				{
@@ -307,7 +307,7 @@ function popup:update(t)
 	local placement = type(opts.hints_placement) == "string" and awful.placement[opts.hints_placement]
 		or opts.hints_placement
 
-	local margin = dpi(3)
+	local margin = dpi(1)
 
 	local widget = wibox.widget.base.make_widget_declarative({
 		{
