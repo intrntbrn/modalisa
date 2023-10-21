@@ -219,6 +219,7 @@ function M.mt(self)
 		local fn = rawget(data, "fn")
 
 		if fn then
+			opts = opts or rawget(data, "opts")
 			return fn(opts, self)
 		end
 	end
@@ -251,7 +252,7 @@ function M.mt(self)
 		return rawget(self, "_prev")
 	end
 
-	self.cond = function()
+	self.cond = function(_, opts)
 		local data = rawget(self, "_data")
 		if not data then
 			return true
@@ -264,7 +265,8 @@ function M.mt(self)
 		end
 
 		if type(cond) == "function" then
-			return cond()
+			opts = opts or rawget(data, "opts")
+			return cond(opts)
 		end
 
 		return cond
@@ -278,7 +280,7 @@ function M.mt(self)
 		return rawget(data, "opts")
 	end
 
-	self.desc = function()
+	self.desc = function(_, opts)
 		local data = rawget(self, "_data")
 		if not data then
 			return nil
@@ -287,7 +289,8 @@ function M.mt(self)
 		local desc = rawget(data, "desc")
 
 		if desc and type(desc) == "function" then
-			return desc()
+			opts = opts or rawget(data, "opts")
+			return desc(opts)
 		end
 
 		return desc
