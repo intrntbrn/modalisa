@@ -1,89 +1,13 @@
-local M = {}
-
 local awful = require("awful")
 local dpi = require("beautiful").xresources.apply_dpi
 local grect = require("gears.geometry").rectangle
 local clabel = require("motion.ui.label")
 local util = require("motion.util")
 
+local M = {}
+
 local default_resize_delta = dpi(32)
 local default_resize_factor = 0.05
-
-function M.awesome_help()
-	local hotkeys_popup = require("awful.hotkeys_popup")
-	if hotkeys_popup then
-		hotkeys_popup.show_help()
-	end
-end
-
-function M.awesome_menubar()
-	require("menubar").show()
-end
-
-function M.awesome_quit()
-	awesome.quit()
-end
-
-function M.awesome_restart()
-	awesome.restart()
-end
-
-function M.awesome_lua_prompt()
-	if awful.screen.focused().mypromptbox then
-		awful.prompt.run({
-			prompt = "Run Lua code: ",
-			textbox = awful.screen.focused().mypromptbox.widget,
-			exe_callback = awful.util.eval,
-			history_path = awful.util.get_cache_dir() .. "/history_eval",
-		})
-	end
-end
-
-function M.awesome_run_prompt()
-	if awful.screen.focused().mypromptbox then
-		awful.screen.focused().mypromptbox:run()
-	end
-end
-
-function M.layout_master_width_decrease(factor)
-	local f = factor or default_resize_factor
-	f = math.abs(f) * -1
-	awful.tag.incmwfact(f)
-end
-
-function M.layout_master_width_increase(factor)
-	local f = factor or default_resize_factor
-	f = math.abs(f)
-	awful.tag.incmwfact(f)
-end
-
-function M.layout_master_count_increase()
-	awful.tag.incnmaster(1, nil, true)
-end
-
-function M.layout_master_count_decrease()
-	awful.tag.incnmaster(-1, nil, true)
-end
-
-function M.layout_column_count_decrease()
-	awful.tag.incncol(-1, nil, true)
-end
-
-function M.layout_column_count_increase()
-	awful.tag.incncol(1, nil, true)
-end
-
-function M.layout_next()
-	awful.layout.inc(1)
-end
-
-function M.layout_prev()
-	awful.layout.inc(-1)
-end
-
-function M.layout_set(t, l)
-	awful.layout.set(l, t)
-end
 
 function M.client_create_filter(multi_screen, include_focused_client)
 	return function(c)
@@ -630,70 +554,6 @@ function M.client_move_to_tag(c, t)
 		return
 	end
 	c:move_to_tag(t)
-end
-
-function M.tag_toggle_index(i)
-	local s = awful.screen.focused()
-	if not s then
-		return
-	end
-	local t = s.tags[i]
-	if not t then
-		return
-	end
-	awful.tag.viewtoggle(t)
-end
-
-function M.tag_toggle_fill_policy(t)
-	if not t then
-		return
-	end
-	awful.tag.togglemfpol(t)
-end
-
-function M.tag_view_only_index(i)
-	local s = awful.screen.focused()
-	if not s then
-		return
-	end
-	local t = s.tags[i]
-	if not t then
-		return
-	end
-
-	-- restore instead of noop
-	if t.selected then
-		awful.tag.history.restore()
-	else
-		t:view_only()
-	end
-end
-
-function M.tag_view_only(t)
-	if not t then
-		return
-	end
-	t:view_only()
-end
-
-function M.tag_delete(t)
-	t = t
-	if not t then
-		return
-	end
-	t:delete()
-end
-
-function M.tag_next()
-	awful.tag.viewnext()
-end
-
-function M.tag_prev()
-	awful.tag.viewprev()
-end
-
-function M.tag_last()
-	awful.tag.history.restore()
 end
 
 return M
