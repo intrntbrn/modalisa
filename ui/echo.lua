@@ -13,7 +13,7 @@ local M = {}
 local popup = {}
 local timer
 
-local function make_center_textbox(opts, text, font, fg)
+local function make_center_textbox(opts, text, font, fg, width)
 	local tb = wibox.widget.base.make_widget_declarative({
 		{
 			markup = util.markup.fg(fg, text),
@@ -23,7 +23,7 @@ local function make_center_textbox(opts, text, font, fg)
 			widget = wibox.widget.textbox,
 		},
 		forced_height = beautiful.get_font_height(font),
-		width = opts.echo_entry_width,
+		width = width,
 		strategy = opts.echo_entry_width_strategy,
 		widget = wibox.container.constraint,
 	})
@@ -36,8 +36,11 @@ local function make_key_value_textbox(opts, key, value)
 	local font_header = opts.echo_font_header
 	local fg_header = opts.echo_color_header_fg
 
-	local tb_key = make_center_textbox(opts, key, font_header, fg_header)
-	local tb_value = make_center_textbox(opts, value, font, fg)
+	local font_width = dpi(math.max(util.get_font_width(font), util.get_font_width(font_header)))
+	local width = font_width * opts.echo_entry_width
+
+	local tb_key = make_center_textbox(opts, key, font_header, fg_header, width)
+	local tb_value = make_center_textbox(opts, value, font, fg, width)
 
 	local layout
 	local orientation = opts.echo_orientation
@@ -64,7 +67,12 @@ local function create_widget(opts, kvs)
 		local bg = opts.echo_color_bg
 		local is_odd = (i % 2) == 0
 		if is_odd then
-			bg = lib.lighten(bg, -7)
+			local odd = opts.echo_odd
+			if type(odd) == "number" then
+				bg = lib.lighten(bg, odd)
+			elseif type(odd) == "string" then
+				bg = odd
+			end
 		end
 
 		local tb = make_key_value_textbox(opts, k, v)

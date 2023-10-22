@@ -75,24 +75,22 @@ local defaults = {
 	echo_placement = "centered",
 	echo_timeout = 1000,
 
-	echo_width = 0.1,
-	echo_height = 0.1,
-	echo_orientation = "vertical", -- vertical | horizontal
-	echo_entry_width = 500,
+	echo_orientation = "horizontal", -- vertical | horizontal
+	echo_entry_width = 12,
 	echo_entry_width_strategy = "exact", -- min | max | exact
 	echo_padding = {
-		top = dpi(10),
-		bottom = dpi(10),
-		left = dpi(10),
-		right = dpi(10),
+		top = dpi(5),
+		bottom = dpi(5),
+		left = dpi(5),
+		right = dpi(5),
 	},
-	echo_odd = true,
 	echo_spacing = 0,
 
 	echo_font_header = "Monospace Bold 22",
 	echo_font = "Monospace Bold 22",
 	echo_border_width = dpi(1),
 
+	echo_odd = -10,
 	echo_shape = nil,
 	echo_opacity = 1,
 	echo_color_border = "#1A1E2D",
