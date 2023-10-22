@@ -116,10 +116,8 @@ function popup:update(t)
 	end
 
 	-- calculations
-	local geo = screen[s.index].geometry
-	assert(geo)
-	local max_width = math.floor(opts.hints_width * geo.width)
-	local max_height = math.floor(opts.hints_height * geo.height)
+	local max_width = util.get_pixel_width(opts.hints_width, s)
+	local max_height = util.get_pixel_height(opts.hints_height, s)
 
 	local font = opts.hints_font or opts.hints_font_desc or opts.hints_font_separator
 	local font_desc = opts.hints_font_desc or font

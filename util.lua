@@ -4,6 +4,7 @@ local unpack = unpack or table.unpack
 
 local beautiful = require("beautiful")
 local gstring = require("gears.string")
+local awful = require("awful")
 local vim = require("motion.lib.vim")
 
 M.labels_qwerty = "asdfghjklwertyuiozxcvbnmpqASDFGHJKLQWERTYUIOPZXCVBNM1234567890"
@@ -144,6 +145,23 @@ function M.get_font_width(font)
 	local _, _, width = string.find(font, "[%s]+([0-9]+)")
 	-- TODO: figure out the default font size that awesome uses
 	return width or 10
+end
+
+local function calc_pixel_count(property, v, s)
+	if v >= 0 and v <= 1 then
+		s = s or awful.screen.focused()
+		local geo = screen[s.index].geometry[property]
+		return math.floor(v * geo)
+	end
+	return v
+end
+
+function M.get_pixel_width(v, s)
+	return calc_pixel_count("width", v, s)
+end
+
+function M.get_pixel_height(v, s)
+	return calc_pixel_count("width", v, s)
 end
 
 return M

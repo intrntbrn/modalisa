@@ -13,7 +13,6 @@ local M = {}
 -- fix default clienting floating resize
 -- tests for key parser
 -- option picker ("pick a string")
--- echo (fn, text, style)
 -- color highlight links "bg or #ff00" opts["color"]
 -- group colors
 -- notify for duplicate keys
