@@ -5,6 +5,19 @@ local util = require("motion.util")
 local M = {}
 
 local keys = {
+	["."] = nil,
+	[","] = nil,
+	[";"] = nil,
+	["y"] = nil,
+	["q"] = nil,
+	["z"] = nil,
+	["g"] = nil,
+	["p"] = nil,
+	["v"] = nil,
+	["d"] = nil,
+	["i"] = nil,
+	["'"] = nil,
+
 	-- spawn menu example
 	["x"] = { desc = "execute", opts = { group = "menu.execute" } },
 	-- terminals

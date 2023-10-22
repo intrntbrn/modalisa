@@ -10,15 +10,13 @@ local M = {}
 -- TODO:
 -- add keybind support for each tree node
 -- keyname tester
--- move wm specific configs away from config? predefined keys folder!
 -- fix default clienting floating resize
 -- tests for key parser
 -- option picker ("pick a string")
 -- color highlight links "bg or #ff00" opts["color"]
+-- group sollte attribut und nicht opt sein
 -- group colors
 -- notify for duplicate keys
--- timeout can't be changed. implement own version.
--- defualt keybind merge preset
 -- global keybinds (e.g. brightness, volume)
 
 local awful = require("awful")

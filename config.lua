@@ -14,7 +14,7 @@ local defaults = {
 	default_keys = true,
 
 	-- core
-	unique = { "key", "hidden", "fg" },
+	unique = { "key", "hidden", "fg", "continue" },
 	mode = "hybrid", -- "modal" | "hold" | "hybrid" | "forever"
 	ignore_modifiers = true,
 	stop_on_unknown_key = false,
