@@ -130,7 +130,7 @@ end
 
 function M.spawn_with_shell(cmd)
 	return mt({
-		opts = { group = "spawn" },
+		opts = { group = string.format("spawn.%s", cmd) },
 		desc = cmd,
 		fn = function(_)
 			awful.spawn.with_shell(cmd)
