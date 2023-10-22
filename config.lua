@@ -16,6 +16,7 @@ local defaults = {
 	-- core
 	unique = { "key", "hidden", "fg" },
 	mode = "hybrid", -- "modal" | "hold" | "hybrid" | "forever"
+	ignore_modifiers = true,
 	stop_on_unknown_key = false,
 	ignore_shift_state_for_special_characters = true,
 	timeout = 0,
@@ -75,7 +76,7 @@ local defaults = {
 	echo_placement = "centered",
 	echo_timeout = 1000,
 
-	echo_orientation = "horizontal", -- vertical | horizontal
+	echo_orientation = "vertical", -- vertical | horizontal
 	echo_entry_width = 12,
 	echo_entry_width_strategy = "exact", -- min | max | exact
 	echo_padding = {

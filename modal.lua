@@ -1,26 +1,23 @@
 local M = {}
 
 -- TODO: MAJOR:
--- echo
 -- config menu
 -- exposed api
 -- echo keybinds rework
+-- renamer
 
 -- TODO:
 -- add keybind support for each tree node
 -- keyname tester
--- timestamp
 -- move wm specific configs away from config? predefined keys folder!
 -- fix default clienting floating resize
 -- tests for key parser
 -- option picker ("pick a string")
 -- echo (fn, text, style)
--- color highlight links "bg or #ff00"
+-- color highlight links "bg or #ff00" opts["color"]
 -- group colors
 -- notify for duplicate keys
 -- timeout can't be changed. implement own version.
--- hold mods ignore
--- call wm presets
 -- defualt keybind merge preset
 
 local awful = require("awful")
@@ -548,8 +545,8 @@ function trunner:keypressed_callback()
 				end
 			end
 
-			local mode = self.tree:opts().mode
-			if (mode == "hold" or mode == "hybrid") and self.mm:has_pressed_mods() then
+			local opts = self.tree:opts()
+			if opts.ignore_modifiers and self.mm:has_pressed_mods() then
 				-- find the match with the least amount of ignored mods
 				local pressed_mods_list = self.mm:get_pressed_mods()
 				local combinations = {}
