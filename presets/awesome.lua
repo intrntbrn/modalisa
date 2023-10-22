@@ -745,7 +745,7 @@ function M.tag_move_focused_client_to_tag(i)
 end
 
 function M.tag_move_all_clients_to_tag_menu()
-	return {
+	return mt({
 		opts = { group = "tag.client" },
 		cond = function()
 			return client.focus
@@ -780,11 +780,11 @@ function M.tag_move_all_clients_to_tag_menu()
 
 			return ret
 		end,
-	}
+	})
 end
 
 function M.tag_toggle_menu()
-	return {
+	return mt({
 		opts = { group = "tag.toggle" },
 		cond = function()
 			return client.focus
@@ -807,11 +807,11 @@ function M.tag_toggle_menu()
 
 			return ret
 		end,
-	}
+	})
 end
 
 function M.tag_toggle_policy()
-	return {
+	return mt({
 		opts = { group = "tag.policy" },
 		desc = "toggle tag fill policy",
 		fn = function()
@@ -822,11 +822,11 @@ function M.tag_toggle_policy()
 			end
 			awm.tag_toggle_fill_policy(t)
 		end,
-	}
+	})
 end
 
 function M.tag_view_only(i)
-	return {
+	return mt({
 		opts = { group = "tag.view" },
 		desc = function()
 			return "view tag " .. (helper.tagname_by_index(i) or i)
@@ -837,11 +837,11 @@ function M.tag_view_only(i)
 		fn = function()
 			awm.tag_view_only_index(i)
 		end,
-	}
+	})
 end
 
 function M.tag_view_only_menu()
-	return {
+	return mt({
 		opts = { group = "tag.view" },
 		desc = "view only tag",
 		fn = function(opts)
@@ -860,11 +860,11 @@ function M.tag_view_only_menu()
 			end
 			return ret
 		end,
-	}
+	})
 end
 
 function M.tag_delete()
-	return {
+	return mt({
 		opts = { group = "tag.action" },
 		desc = "delete selected tag",
 		cond = function()
@@ -877,11 +877,11 @@ function M.tag_delete()
 			end
 			awm.tag_delete(t)
 		end,
-	}
+	})
 end
 
 function M.tag_toggle_index(i)
-	return {
+	return mt({
 		opts = { group = "tag.toggle" },
 		desc = function()
 			helper.tagname_by_index(i)
@@ -892,11 +892,11 @@ function M.tag_toggle_index(i)
 		fn = function()
 			awm.tag_toggle_index(i)
 		end,
-	}
+	})
 end
 
 function M.tag_next()
-	return {
+	return mt({
 		opts = { group = "tag.cycle" },
 		desc = function()
 			return "view next tag"
@@ -904,11 +904,11 @@ function M.tag_next()
 		fn = function()
 			awm.tag_next()
 		end,
-	}
+	})
 end
 
 function M.tag_previous()
-	return {
+	return mt({
 		opts = { group = "tag.cycle" },
 		desc = function()
 			return "view previous tag"
@@ -916,11 +916,11 @@ function M.tag_previous()
 		fn = function()
 			awm.tag_prev()
 		end,
-	}
+	})
 end
 
 function M.tag_last()
-	return {
+	return mt({
 		opts = { group = "tag.cycle" },
 		desc = function()
 			return "view last tag"
@@ -928,7 +928,7 @@ function M.tag_last()
 		fn = function()
 			awful.tag.history.restore()
 		end,
-	}
+	})
 end
 
 function helper.tagname_by_index(i)

@@ -5,6 +5,7 @@ local M = {}
 -- exposed api
 -- echo keybinds rework
 -- renamer
+-- beautiful menu
 
 -- TODO:
 -- add keybind support for each tree node
@@ -18,6 +19,7 @@ local M = {}
 -- notify for duplicate keys
 -- timeout can't be changed. implement own version.
 -- defualt keybind merge preset
+-- require my_keybinds.lua
 
 local awful = require("awful")
 local lib = require("motion.lib")

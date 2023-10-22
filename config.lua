@@ -77,6 +77,10 @@ local defaults = {
 	-- echo
 	echo = true,
 	echo_placement = "centered",
+	echo_timeout = 1000,
+	echo_orientation = "vertical", -- vertical | horizontal
+
+	echo_entry_width = 20,
 	echo_entry_width_strategy = "exact", -- min | max | exact
 	echo_padding = {
 		top = dpi(5),
@@ -90,7 +94,7 @@ local defaults = {
 	echo_font = "Monospace Bold 22",
 	echo_border_width = dpi(1),
 
-	echo_odd = -10,
+	echo_odd = -10, -- luminosity or color
 	echo_shape = nil,
 	echo_opacity = 1,
 	echo_color_border = "#1A1E2D",
