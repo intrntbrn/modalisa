@@ -263,8 +263,9 @@ end
 -- @param t table A motion (sub)tree
 -- @return table Table with tables of keys
 local function keygrabber_keys(t)
-	local succs = t:successors()
 	local opts = t:opts()
+
+	local succs = t:successors()
 
 	local all_keys = {}
 
@@ -328,6 +329,7 @@ local function keygrabber_keys(t)
 end
 
 function trunner:new(t, root_key)
+	assert(not vim.tbl_isempty(t:opts()), "trunner:new t opts are mpty")
 	if root_key then
 		self.mm = mmodmap(root_key.key, root_key.mods, mod_conversion)
 	else
@@ -356,6 +358,8 @@ function trunner:new(t, root_key)
 	self.keygrabber = grabber
 
 	grabber:start()
+
+	print("grabber start")
 
 	return self
 end
@@ -419,6 +423,7 @@ function trunner:stop_maybe(reason)
 end
 
 function trunner:run(t)
+	assert(t, "run: tree is nil")
 	local opts = t:opts()
 
 	-- run fn
@@ -488,6 +493,8 @@ function trunner:input(key)
 	end
 
 	local next_tree
+
+	print(node)
 
 	if node:is_leaf() then
 		print("is_leaf: ", node:desc())
@@ -627,6 +634,10 @@ end
 local function run(sequence, parsed_keybind, extra_opts)
 	---@diagnostic disable-next-line: need-check-nil
 	local t = mtree.get(sequence or "", extra_opts)
+
+	print("get tree: ", t)
+	print("get tree: opts(): ", dump(t:opts()))
+
 	return trunner:new(t, parsed_keybind)
 end
 

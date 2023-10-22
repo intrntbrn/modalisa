@@ -76,7 +76,7 @@ local function parse_key(key, table_index)
 
 	return seq, {
 		fn = fn,
-		opts = opts,
+		opts_raw = opts,
 		cond = cond,
 		desc = desc,
 		result = result,
@@ -120,13 +120,18 @@ local function _add(value, tree, seq)
 	local key, next_seq = util.split_vim_key(seq)
 
 	if key then
-		-- init succs
-		rawset(tree, "_succs", rawget(tree, "_succs") or {})
 		local succs = rawget(tree, "_succs")
-		-- init succs[char]
-		rawset(succs, key, rawget(succs, key) or { ["_data"] = { id = get_id() } })
-		local next_tree = rawget(succs, key)
-		return _add(value, next_tree, next_seq)
+		if not succs then
+			rawset(tree, "_succs", {})
+			succs = rawget(tree, "_succs")
+		end
+
+		local succ = rawget(succs, key)
+		if not succ then
+			rawset(succs, key, { id = get_id() })
+			succ = rawget(succs, key)
+		end
+		return _add(value, succ, next_seq)
 	end
 
 	rawset(value, "id", get_id())
@@ -150,17 +155,25 @@ local function get(seq, tree, prev_opts, prev_tree)
 
 	local key, next_seq = util.split_vim_key(seq)
 
-	local opts
+	local merged_opts
 
 	local data_raw = rawget(tree, "_data")
-	-- node has data stored
-	if data_raw then
-		-- merge previous opts with current
-		opts = util.merge_opts(prev_opts, rawget(data_raw, "opts"))
-	else
-		-- we have to merge anyways to get rid of unique opts from predecessor
-		opts = util.merge_opts(prev_opts, {})
+	if not data_raw then
+		rawset(tree, "_data", {})
+		data_raw = rawget(tree, "_data")
 	end
+
+	if not prev_opts then
+		local prev = tree:pred()
+		if prev then
+			prev_opts = prev:opts()
+		end
+	end
+
+	-- node has data stored
+	local mopts = util.merge_opts(prev_opts, rawget(data_raw, "opts_raw"))
+	merged_opts = vim.deepcopy(mopts)
+	-- assert(not vim.tbl_isempty(merged_opts), string.format("merged is empty: seq: %s, prev: %s", seq, dump(prev_opts)))
 
 	if key then
 		-- keep traversing until key is nil
@@ -170,38 +183,31 @@ local function get(seq, tree, prev_opts, prev_tree)
 			next_tree = rawget(succs, key)
 		end
 
-		-- create prev tree copy for backtracking
-		local current_data = rawget(tree, "_data") and rawget(tree, "_data") or {}
-		rawset(current_data, "opts", opts)
+		rawset(data_raw, "opts", merged_opts)
+		rawset(data_raw, "_prev", prev_tree)
 
-		local current_succs = succs or {}
-		local current_prev = rawget(tree, "_prev") and rawget(tree, "_prev") or prev_tree
-		prev_tree = M.mt({ ["_data"] = current_data, ["_succs"] = current_succs, ["_prev"] = current_prev })
+		-- local current_succs = succs or {}
+		-- local current_prev = rawget(tree, "_prev") and rawget(tree, "_prev") or prev_tree
+		-- prev_tree = M.mt({ ["_data"] = current_data, ["_succs"] = current_succs, ["_prev"] = current_prev })
 
-		return get(next_seq, next_tree, opts, prev_tree)
+		return get(next_seq, next_tree, merged_opts, tree)
 	end
 
 	-- no more traversing
-	local data = rawget(tree, "_data") and rawget(tree, "_data") or {}
-	local succs = rawget(tree, "_succs") and rawget(tree, "_succs") or {}
 
 	-- set opts to merged opts instead of node opts
-	rawset(data, "opts", opts)
+	rawset(data_raw, "opts", merged_opts)
 
-	local ret = { ["_data"] = data, ["_succs"] = succs, ["_prev"] = prev_tree }
+	-- local ret = { ["_data"] = data, ["_succs"] = succs, ["_prev"] = prev_tree }
 
-	return M.mt(ret)
+	return M.mt(tree)
 end
 
 function M.mt(self)
 	local merge_opts = {}
 	local tree = self
 
-	-- inject root_tree methods and metatables on M
-	if self == M then
-		merge_opts = config.get()
-		tree = root_tree
-	end
+	-- local prev = tree:pred()
 
 	self.exec = function(_, opts)
 		local data = rawget(self, "_data")
@@ -262,8 +268,9 @@ function M.mt(self)
 		rawset(result, key, value)
 	end
 
-	self.opts = function()
-		local data = rawget(self, "_data")
+	self.opts = function(test)
+		local data = rawget(test, "_data")
+		assert(data, "data is nil in opts")
 		if not data then
 			return nil
 		end
@@ -271,16 +278,25 @@ function M.mt(self)
 		return rawget(data, "opts")
 	end
 
+	self.opts_raw = function()
+		local data = rawget(self, "_data")
+		if not data then
+			return nil
+		end
+
+		return rawget(data, "opts_raw")
+	end
+
 	self.set_opt = function(_, key, value)
 		local data = rawget(self, "_data")
 		if not data then
 			return nil
 		end
-		if not rawget(data, "opts") then
-			rawset(data, "opts", {})
+		if not rawget(data, "opts_raw") then
+			rawset(data, "opts_raw", {})
 		end
 
-		local result = rawget(data, "opts")
+		local result = rawget(data, "opts_raw")
 		rawset(result, key, value)
 	end
 
@@ -358,6 +374,14 @@ function M.mt(self)
 	self.condition = self.cond
 	self.predecessor = self.pred
 
+	-- inject root_tree methods and metatables on M
+	if self == M then
+		merge_opts = config.get()
+		tree = root_tree
+	else
+		merge_opts = tree:opts()
+	end
+
 	return setmetatable(self, {
 		__index = function(_, k)
 			-- only get defaults opts on root_tree
@@ -372,9 +396,6 @@ function M.mt(self)
 		end,
 		__tostring = function(t)
 			return dump(t)
-		end,
-		___add = function(k, v)
-			print("add")
 		end,
 		__call = function(_, _)
 			assert(false, "not implemented")
@@ -421,10 +442,12 @@ function M.create_tree(succs, opts, name)
 end
 
 function M.setup(opts)
-	root_tree.data = {
+	root_tree["_data"] = {
 		id = get_id(),
 		desc = "motion",
 		name = opts.key,
+		opts_raw = {},
+		opts = opts,
 	}
 end
 
