@@ -171,19 +171,19 @@ local function get(seq, tree, prev_opts, prev_tree)
 		end
 
 		-- create prev tree copy for backtracking
-		local current_data = rawget(tree, "_data") and vim.deepcopy(rawget(tree, "_data")) or {}
+		local current_data = rawget(tree, "_data") and rawget(tree, "_data") or {}
 		rawset(current_data, "opts", opts)
 
-		local current_succs = succs and vim.deepcopy(succs) or {}
-		local current_prev = rawget(tree, "_prev") and vim.deepcopy(rawget(tree, "_prev")) or prev_tree
+		local current_succs = succs or {}
+		local current_prev = rawget(tree, "_prev") and rawget(tree, "_prev") or prev_tree
 		prev_tree = M.mt({ ["_data"] = current_data, ["_succs"] = current_succs, ["_prev"] = current_prev })
 
 		return get(next_seq, next_tree, opts, prev_tree)
 	end
 
 	-- no more traversing
-	local data = rawget(tree, "_data") and vim.deepcopy(rawget(tree, "_data")) or {}
-	local succs = rawget(tree, "_succs") and vim.deepcopy(rawget(tree, "_succs")) or {}
+	local data = rawget(tree, "_data") and rawget(tree, "_data") or {}
+	local succs = rawget(tree, "_succs") and rawget(tree, "_succs") or {}
 
 	-- set opts to merged opts instead of node opts
 	rawset(data, "opts", opts)
@@ -301,7 +301,6 @@ function M.mt(self)
 	end
 
 	self.set_desc = function(_, value)
-		print("set desc")
 		local data = rawget(self, "_data")
 		if not data then
 			return nil
