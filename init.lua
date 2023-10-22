@@ -16,8 +16,14 @@ function M.setup(opts)
 	require("motion.ui.label").setup(opts)
 	require("motion.ui.echo").setup(opts)
 
+	-- default keys
 	if opts.default_keys then
-		require("motion.default").setup(opts)
+		require("motion.keys").setup(opts)
+	end
+
+	-- user defined keys
+	if pcall(require, "motion_keys") then
+		require("motion_keys").setup(opts)
 	end
 
 	return require("motion.commands")

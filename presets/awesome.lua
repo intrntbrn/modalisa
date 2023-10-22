@@ -13,7 +13,6 @@ local helper = {}
 -- wallpaper example
 -- client: border_width, skip taskbar, hidden, hide bar
 -- urgent
--- menu clickable
 -- resume menu
 -- resize modes
 -- run(true is hotkey)
@@ -121,7 +120,7 @@ end
 
 function M.spawn(cmd)
 	return mt({
-		opts = { group = "spawn" },
+		opts = { group = string.format("spawn.%s", cmd) },
 		desc = cmd,
 		fn = function(_)
 			awful.spawn(cmd)
@@ -633,7 +632,7 @@ end
 
 function M.client_unminimize_menu()
 	return mt({
-		opts = { group = "client.property", hints_delay = 0, hints_show = true },
+		opts = { group = "client.property.unminimize" },
 		cond = function()
 			local s = awful.screen.focused()
 			for _, t in ipairs(s.tags) do
@@ -682,7 +681,7 @@ end
 
 function M.client_toggle_tag_menu()
 	return mt({
-		opts = { group = "client.tags" },
+		opts = { group = "client.tags.toggle" },
 		cond = function()
 			return client.focus
 		end,
@@ -710,7 +709,7 @@ end
 
 function M.tag_move_focused_client_to_tag(i)
 	return mt({
-		opts = { group = "tag.client" },
+		opts = { group = "tag.client.move" },
 		cond = function()
 			local c = client.focus
 			if not c then
@@ -746,7 +745,7 @@ end
 
 function M.tag_move_all_clients_to_tag_menu()
 	return mt({
-		opts = { group = "tag.client" },
+		opts = { group = "tag.client.move.all" },
 		cond = function()
 			return client.focus
 		end,

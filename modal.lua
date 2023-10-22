@@ -19,7 +19,7 @@ local M = {}
 -- notify for duplicate keys
 -- timeout can't be changed. implement own version.
 -- defualt keybind merge preset
--- require my_keybinds.lua
+-- global keybinds (e.g. brightness, volume)
 
 local awful = require("awful")
 local lib = require("motion.lib")

@@ -5,6 +5,12 @@ local util = require("motion.util")
 local M = {}
 
 local keys = {
+	-- spawn menu
+	["x"] = { desc = "execute", opts = { group = "menu.execute" } },
+	["xd"] = ps.spawn("discord"),
+	["xt"] = ps.spawn("thunar"),
+	["xs"] = ps.spawn("steam"),
+
 	-- root
 	["h"] = ps.client_focus("left"),
 	["j"] = ps.client_focus("down"),
@@ -57,7 +63,7 @@ local keys = {
 	["o"] = ps.spawn_appmenu(),
 
 	-- awesome
-	["a"] = { desc = "awesome", opts = { group = "awesome" } },
+	["a"] = { desc = "awesome", opts = { group = "menu.awesome" } },
 	["aQ"] = ps.awesome_quit(),
 	["aR"] = ps.awesome_restart(),
 	["ax"] = ps.awesome_execute(),
@@ -66,7 +72,7 @@ local keys = {
 	["ap"] = ps.awesome_menubar(),
 
 	-- tag
-	["t"] = { desc = "tag", opts = { group = "tag" } },
+	["t"] = { desc = "tag", opts = { group = "menu.tag" } },
 	["tD"] = ps.tag_delete(),
 	["tr"] = { desc = "rename tag" }, -- TODO
 	["tn"] = { desc = "new tag" }, -- TODO
@@ -88,7 +94,7 @@ local keys = {
 	["t0"] = ps.tag_move_focused_client_to_tag(10),
 
 	-- layout
-	["r"] = { desc = "layout", opts = { group = "layout" } },
+	["r"] = { desc = "layout", opts = { group = "menu.layout" } },
 	["r "] = ps.layout_select_menu() + { opts = { labels = util.labels_qwerty } },
 	["r<Left>"] = ps.layout_prev(),
 	["r<Right>"] = ps.layout_next(),
@@ -100,7 +106,7 @@ local keys = {
 	["rH"] = ps.layout_column_count_decrease(),
 
 	-- client
-	["c"] = { desc = "client", opts = { group = "client" } },
+	["c"] = { desc = "client", opts = { group = "menu.client" } },
 	["ct"] = ps.client_toggle_tag_menu(),
 	["cf"] = ps.client_toggle_fullscreen(),
 	["cm"] = ps.client_toggle_maximize(),
