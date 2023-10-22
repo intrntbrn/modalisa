@@ -27,6 +27,7 @@ local dump = require("motion.lib").inspect
 local mtree = require("motion.tree")
 local mmodmap = require("motion.modmap")
 local akeygrabber = require("awful.keygrabber")
+local gears = require("gears")
 local notify = require("motion.notify")
 
 local trunner = {}
@@ -338,6 +339,15 @@ function trunner:new(t, root_key)
 	self.continue_key = false
 	self.keygrabber = nil
 
+	self.timer = gears.timer({
+		timeout = 0,
+		callback = function()
+			self:stop()
+		end,
+		autostart = false,
+		single_shot = true,
+	})
+
 	if vim.tbl_count(t:successors()) == 0 then
 		-- running the node might populate itself (e.g. user calls run on an
 		-- dynamic node)
@@ -356,14 +366,23 @@ function trunner:new(t, root_key)
 
 	grabber:start()
 
-	print("grabber start")
-
 	return self
+end
+
+function trunner:start_timer()
+	local timeout = self.tree:opts().timeout
+	self.timer:stop()
+
+	if timeout and timeout > 0 then
+		self.timer.data.timeout = timeout / 1000
+		self.timer:start()
+	end
 end
 
 function trunner:set_tree(t)
 	self.tree = t
 	self.keybinds = keygrabber_keys(t)
+	self:start_timer()
 	on_update(t)
 end
 
@@ -528,6 +547,8 @@ function trunner:keypressed_callback()
 		modifiers = filtered_modifiers
 
 		print("pressed callback: ", dump(modifiers), dump(key))
+
+		self:start_timer()
 
 		---@diagnostic disable-next-line: need-check-nil
 		local modifier_key = mod_conversion[key]

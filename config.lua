@@ -19,11 +19,11 @@ local defaults = {
 	ignore_modifiers = true,
 	stop_on_unknown_key = false,
 	ignore_shift_state_for_special_characters = true,
-	timeout = 0,
+	timeout = 0, -- ms
 
 	-- hints
 	hints_show = true,
-	hints_delay = 0,
+	hints_delay = 0, -- ms
 	hints_show_disabled_keys = false,
 	hints_sort = "group", -- group | id | nil
 	hints_key_aliases = {
@@ -74,10 +74,6 @@ local defaults = {
 	-- echo
 	echo = true,
 	echo_placement = "centered",
-	echo_timeout = 1000,
-
-	echo_orientation = "vertical", -- vertical | horizontal
-	echo_entry_width = 12,
 	echo_entry_width_strategy = "exact", -- min | max | exact
 	echo_padding = {
 		top = dpi(5),
