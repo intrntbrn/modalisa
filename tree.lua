@@ -25,9 +25,7 @@ local function parse_key(key, table_index)
 	local opts
 	local cond
 	local desc
-	local pre
-	local post
-	local echo
+	local result
 
 	local t = type(key)
 
@@ -50,9 +48,9 @@ local function parse_key(key, table_index)
 				if k == "opts" then
 					assert(not opts, "multiple opts")
 					opts = v
-				elseif k == "echo" then
-					assert(not echo, "multiple echo")
-					echo = v
+				elseif k == "result" then
+					assert(not result, "multiple result")
+					result = v
 				else
 					assert(not opts, "multiple opts")
 					opts = v
@@ -64,10 +62,6 @@ local function parse_key(key, table_index)
 					cond = v
 				elseif k == "desc" then
 					desc = v
-				elseif k == "pre" then
-					pre = v
-				elseif k == "post" then
-					post = v
 				else
 					assert(not fn, "multiple undeclared functions")
 					fn = v
@@ -85,9 +79,7 @@ local function parse_key(key, table_index)
 		opts = opts,
 		cond = cond,
 		desc = desc,
-		pre = pre,
-		post = post,
-		echo = echo,
+		result = result,
 	}
 end
 
@@ -224,30 +216,6 @@ function M.mt(self)
 		end
 	end
 
-	self.pre = function(_, opts)
-		local data = rawget(self, "_data")
-		if not data then
-			return nil
-		end
-		local pre = rawget(data, "pre")
-
-		if pre then
-			return pre(opts, self)
-		end
-	end
-
-	self.post = function(_, opts)
-		local data = rawget(self, "_data")
-		if not data then
-			return nil
-		end
-		local post = rawget(data, "post")
-
-		if post then
-			return post(opts, self)
-		end
-	end
-
 	self.pred = function()
 		return rawget(self, "_prev")
 	end
@@ -271,6 +239,29 @@ function M.mt(self)
 
 		return cond
 	end
+
+	self.result = function(_)
+		local data = rawget(self, "_data")
+		if not data then
+			return
+		end
+
+		return rawget(data, "result")
+	end
+
+	self.set_result = function(_, key, value)
+		local data = rawget(self, "_data")
+		if not data then
+			return nil
+		end
+		if not rawget(data, "result") then
+			rawset(data, "result", {})
+		end
+
+		local result = rawget(data, "result")
+		rawset(result, key, value)
+	end
+
 	self.opts = function()
 		local data = rawget(self, "_data")
 		if not data then
@@ -278,6 +269,19 @@ function M.mt(self)
 		end
 
 		return rawget(data, "opts")
+	end
+
+	self.set_opt = function(_, key, value)
+		local data = rawget(self, "_data")
+		if not data then
+			return nil
+		end
+		if not rawget(data, "opts") then
+			rawset(data, "opts", {})
+		end
+
+		local result = rawget(data, "opts")
+		rawset(result, key, value)
 	end
 
 	self.desc = function(_, opts)
@@ -296,14 +300,13 @@ function M.mt(self)
 		return desc
 	end
 
-	self.echo = function()
+	self.set_desc = function(_, value)
+		print("set desc")
 		local data = rawget(self, "_data")
 		if not data then
 			return nil
 		end
-
-		local echo = rawget(data, "echo")
-		return echo
+		rawset(data, "desc", value)
 	end
 
 	self.id = function()
@@ -370,6 +373,9 @@ function M.mt(self)
 		end,
 		__tostring = function(t)
 			return dump(t)
+		end,
+		___add = function(k, v)
+			print("add")
 		end,
 		__call = function(_, _)
 			assert(false, "not implemented")

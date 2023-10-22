@@ -248,7 +248,7 @@ function popup:update(t)
 				local fg_separator
 				if entry.cond() then
 					fg = entry.fg or opts.hints_color_entry_fg
-					fg_desc = opts.hints_color_entry_desc_fg or fg
+					fg_desc = entry.fg or opts.hints_color_entry_desc_fg or fg
 					fg_separator = opts.hints_color_entry_separator_fg or fg
 				else
 					fg = opts.hints_color_entry_disabled_fg

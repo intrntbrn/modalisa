@@ -155,27 +155,31 @@ local function parse(e)
 end
 
 local function handle(args)
-	local t = args.tree
-	local opts = t:opts()
-	local e = args.echo
-
-	local k
-	local v
-	if type(e) == "table" then
-		k = e.key
-		v = e.value
-		if type(k) == "function" then
-			k = k()
-		end
-		if type(v) == "function" then
-			v = v()
-		end
+	local result = args.result
+	if not result then
+		print("no result")
+		return
 	end
 
-	assert(k)
-	assert(v)
+	local t = args.tree
+	if not t then
+		return
+	end
 
-	local widget = create_widget(opts, k, v)
+	local opts = t:opts()
+	if not opts then
+		return
+	end
+
+	local rk
+	local rv
+
+	for k, v in pairs(result) do
+		rk = k
+		rv = v
+	end
+
+	local widget = create_widget(opts, rk, rv)
 	popup:set_widget(widget, opts)
 	set_timer(opts)
 end
@@ -186,7 +190,7 @@ function M.setup(opts)
 	once = true
 
 	popup:new(opts)
-	awesome.connect_signal("motion::echo", function(args)
+	awesome.connect_signal("motion::execute", function(args)
 		handle(args)
 	end)
 end

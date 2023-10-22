@@ -105,8 +105,8 @@ local function on_update(t)
 end
 
 -- @param t table A motion (sub)tree
-local function on_execute(t)
-	awesome.emit_signal("motion::execute", { tree = t })
+local function on_execute(t, result)
+	awesome.emit_signal("motion::execute", { tree = t, result = result })
 end
 
 -- @param t table A motion (sub)tree
@@ -421,25 +421,29 @@ end
 function trunner:run(t)
 	local opts = t:opts()
 
-	-- pre
-	t:pre(opts)
-
 	-- run fn
 	local list
 
-	-- TODO:
 	if t:cond() then
 		list = t:fn(opts)
-		on_execute(t)
-	end
 
-	local echo = t:echo()
-	if echo then
-		awesome.emit_signal("motion::echo", { echo = echo, tree = t })
-	end
+		-- make results
+		local result = t:result()
+		if result then
+			local eval = {}
+			for k, v in pairs(result) do
+				if type(v) == "function" then
+					eval[k] = v()
+				else
+					eval[k] = v
+				end
+			end
+			print("eval result")
+			result = eval
+		end
 
-	-- pre
-	t:post(opts)
+		on_execute(t, result)
+	end
 
 	if list then
 		-- dynamically created list

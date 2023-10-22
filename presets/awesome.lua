@@ -157,6 +157,7 @@ function M.layout_master_width_increase(factor)
 		desc = "master width increase",
 		fn = function()
 			awm.layout_master_width_increase(factor)
+			return "master_width", helper.get_current_tag_master_width_factor()
 		end,
 	}
 end
@@ -167,6 +168,7 @@ function M.layout_master_width_decrease(factor)
 		desc = "master width decrease",
 		fn = function()
 			awm.layout_master_width_decrease(factor)
+			return "master_width", helper.get_current_tag_master_width_factor()
 		end,
 	}
 end
@@ -175,8 +177,11 @@ function M.layout_master_count_decrease()
 	return {
 		opts = { group = "layout.master.count" },
 		desc = "master count decrease",
-		fn = function()
+		-- result = { master_count = helper.get_current_tag_master_count },
+		fn = function(opts, self)
 			awm.layout_master_count_decrease()
+			self:set_desc("rofl mao")
+			self:set_result("test", 1337)
 		end,
 	}
 end
@@ -185,6 +190,7 @@ function M.layout_master_count_increase()
 	return {
 		opts = { group = "layout.master.count" },
 		desc = "master count increase",
+		result = { master_count = helper.get_current_tag_master_count },
 		fn = function()
 			awm.layout_master_count_increase()
 		end,
@@ -197,6 +203,7 @@ function M.layout_column_count_decrease()
 		desc = "column count decrease",
 		fn = function()
 			awm.layout_master_count_decrease()
+			return "column_count", helper.get_current_tag_column_count()
 		end,
 	}
 end
@@ -207,6 +214,7 @@ function M.layout_column_count_increase()
 		desc = "column count increase",
 		fn = function()
 			awm.layout_master_count_increase()
+			return "column_count", helper.get_current_tag_column_count()
 		end,
 	}
 end
@@ -217,6 +225,7 @@ function M.layout_next()
 		desc = "next layout",
 		fn = function()
 			awm.layout_next()
+			return "layout", helper.get_current_layout_name()
 		end,
 	}
 end
@@ -227,6 +236,38 @@ function M.layout_prev()
 		desc = "prev layout",
 		fn = function()
 			awm.layout_prev()
+			return "layout", helper.get_current_layout_name()
+		end,
+	}
+end
+
+function M.layout_select_menu()
+	return {
+		opts = { group = "layout.menu.select" },
+		desc = "select a layout",
+		fn = function(opts)
+			local s = awful.screen.focused()
+			local t = s.selected_tag
+
+			if not t then
+				return
+			end
+
+			local layouts = t.layouts or {}
+
+			local ret = {}
+			for i, l in pairs(layouts) do
+				table.insert(ret, {
+					util.index_to_label(i, opts.labels),
+					desc = l.name,
+					fn = function()
+						awm.layout_set(t, l)
+						return "layout", l.name
+					end,
+				})
+			end
+
+			return ret
 		end,
 	}
 end
@@ -234,9 +275,9 @@ end
 function M.client_select_picker(multi_window, include_focused_client)
 	return {
 		opts = {
-			group = "client.focus",
+			group = "client.menu.focus",
 			hints_show = false,
-			labels = "asdfertgcvjkluionmb",
+			labels = util.labels_qwerty,
 		},
 		cond = function()
 			return client.focus
@@ -275,36 +316,6 @@ function M.client_swap_picker()
 	}
 end
 
-function M.layout_select_menu()
-	return {
-		opts = { group = "layout" },
-		desc = "select a layout",
-		fn = function(opts)
-			local s = awful.screen.focused()
-			local t = s.selected_tag
-
-			if not t then
-				return
-			end
-
-			local layouts = t.layouts or {}
-
-			local ret = {}
-			for i, l in pairs(layouts) do
-				table.insert(ret, {
-					util.index_to_label(i, opts.labels),
-					desc = l.name,
-					fn = function()
-						awm.layout_set(t, l)
-					end,
-				})
-			end
-
-			return ret
-		end,
-	}
-end
-
 function M.client_toggle_fullscreen()
 	return {
 		opts = { group = "client.property" },
@@ -323,6 +334,7 @@ function M.client_toggle_fullscreen()
 		end,
 		fn = function()
 			awm.client_toggle_fullscreen()
+			return "fullscreen", client.focus.fullscreen
 		end,
 	}
 end
@@ -795,8 +807,6 @@ function M.tag_toggle_menu()
 	}
 end
 
--- TAG
-
 function M.tag_toggle_policy()
 	return {
 		opts = { group = "tag.policy" },
@@ -948,6 +958,30 @@ function helper.clientname(c, i)
 		txt = string.format("[%s] %s", txt, c.name)
 	end
 	return txt
+end
+
+function helper.get_current_layout_name()
+	return awful.screen.focused().selected_tag.name
+end
+
+function helper.get_current_tag_master_width_factor()
+	return awful.screen.focused().selected_tag.master_width_factor
+end
+
+function helper.get_current_tag_column_count()
+	return awful.screen.focused().selected_tag.column_count
+end
+
+function helper.get_current_tag_master_count()
+	return awful.screen.focused().selected_tag.master_count
+end
+
+function helper.get_current_tag_master_fill_policy()
+	return awful.screen.focused().selected_tag.master_fill_policy
+end
+
+function helper.get_current_tag_gap()
+	return awful.screen.focused().selected_tag.gap
 end
 
 M.util = helper
