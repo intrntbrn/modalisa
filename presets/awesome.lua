@@ -2,6 +2,7 @@ local awful = require("awful")
 local util = require("motion.util")
 local dump = require("motion.lib.vim").inspect
 local awm = require("motion.awesome")
+local mt = require("motion.presets.metatable")
 
 local M = {}
 local helper = {}
@@ -18,7 +19,7 @@ local helper = {}
 -- run(true is hotkey)
 
 function M.awesome_help()
-	return {
+	return mt({
 		opts = { group = "awesome.menu" },
 		desc = "show help",
 		cond = function()
@@ -27,11 +28,11 @@ function M.awesome_help()
 		fn = function()
 			awm.awesome_help()
 		end,
-	}
+	})
 end
 
 function M.awesome_menubar()
-	return {
+	return mt({
 		opts = { group = "awesome.menu" },
 		desc = "show the menubar",
 		cond = function()
@@ -40,11 +41,11 @@ function M.awesome_menubar()
 		fn = function()
 			awm.awesome_menubar()
 		end,
-	}
+	})
 end
 
 function M.awesome_quit()
-	return {
+	return mt({
 		opts = { group = "awesome.stop" },
 		desc = "quit awesome",
 		fn = function()
@@ -53,21 +54,21 @@ function M.awesome_quit()
 			end
 			return util.confirmation_menu(fn, "yes, quit awesome", "no, cancel")
 		end,
-	}
+	})
 end
 
 function M.awesome_restart()
-	return {
+	return mt({
 		opts = { group = "awesome.stop" },
 		desc = "restart awesome",
 		fn = function()
 			awm.awesome_restart()
 		end,
-	}
+	})
 end
 
 function M.awesome_execute()
-	return {
+	return mt({
 		opts = { group = "awesome.execute" },
 		desc = "lua code prompt",
 		cond = function()
@@ -76,11 +77,11 @@ function M.awesome_execute()
 		fn = function()
 			awm.awesome_lua_prompt()
 		end,
-	}
+	})
 end
 
 function M.awesome_run_prompt()
-	return {
+	return mt({
 		opts = { group = "awesome.execute" },
 		desc = "run prompt",
 		cond = function()
@@ -89,11 +90,11 @@ function M.awesome_run_prompt()
 		fn = function()
 			awm.awesome_run_prompt()
 		end,
-	}
+	})
 end
 
 function M.spawn_terminal()
-	return {
+	return mt({
 		opts = { group = "spawn" },
 		desc = "terminal",
 		fn = function(opts)
@@ -102,11 +103,11 @@ function M.spawn_terminal()
 			end
 			awful.spawn.with_shell(opts.terminal)
 		end,
-	}
+	})
 end
 
 function M.spawn_browser()
-	return {
+	return mt({
 		opts = { group = "spawn" },
 		desc = "browser",
 		fn = function(opts)
@@ -115,31 +116,31 @@ function M.spawn_browser()
 			end
 			awful.spawn.with_shell(opts.browser)
 		end,
-	}
+	})
 end
 
 function M.spawn(cmd)
-	return {
+	return mt({
 		opts = { group = "spawn" },
 		desc = cmd,
 		fn = function(_)
 			awful.spawn(cmd)
 		end,
-	}
+	})
 end
 
 function M.spawn_with_shell(cmd)
-	return {
+	return mt({
 		opts = { group = "spawn" },
 		desc = cmd,
 		fn = function(_)
 			awful.spawn.with_shell(cmd)
 		end,
-	}
+	})
 end
 
 function M.spawn_appmenu()
-	return {
+	return mt({
 		opts = { group = "spawn" },
 		desc = "open app menu",
 		fn = function(opts)
@@ -148,98 +149,97 @@ function M.spawn_appmenu()
 			end
 			awful.spawn.with_shell(opts.app_menu)
 		end,
-	}
+	})
 end
 
 function M.layout_master_width_increase(factor)
-	return {
+	return mt({
 		opts = { group = "layout.master.width" },
 		desc = "master width increase",
 		fn = function()
 			awm.layout_master_width_increase(factor)
 			return "master_width", helper.get_current_tag_master_width_factor()
 		end,
-	}
+	})
 end
 
 function M.layout_master_width_decrease(factor)
-	return {
+	return mt({
 		opts = { group = "layout.master.width" },
 		desc = "master width decrease",
 		fn = function()
 			awm.layout_master_width_decrease(factor)
 		end,
-	}
+	})
 end
 
 function M.layout_master_count_decrease()
-	return {
+	return mt({
 		opts = { group = "layout.master.count" },
 		desc = "master count decrease",
-		-- result = { master_count = helper.get_current_tag_master_count },
+		result = { master_count = helper.get_current_tag_master_count },
 		fn = function(opts, self)
 			awm.layout_master_count_decrease()
 		end,
-	}
+	})
 end
 
 function M.layout_master_count_increase()
-	return {
+	return mt({
 		opts = { group = "layout.master.count" },
 		desc = "master count increase",
-		result = { master_count = helper.get_current_tag_master_count, test = "lol" },
+		result = { master_count = helper.get_current_tag_master_count },
 		fn = function()
 			awm.layout_master_count_increase()
 		end,
-	}
+	})
 end
 
 function M.layout_column_count_decrease()
-	return {
+	return mt({
 		opts = { group = "layout.column.count" },
 		desc = "column count decrease",
 		fn = function()
 			awm.layout_master_count_decrease()
-			return "column_count", helper.get_current_tag_column_count()
 		end,
-	}
+	})
 end
 
 function M.layout_column_count_increase()
-	return {
+	return mt({
 		opts = { group = "layout.column.count" },
 		desc = "column count increase",
 		fn = function()
 			awm.layout_master_count_increase()
 			return "column_count", helper.get_current_tag_column_count()
 		end,
-	}
+	})
 end
 
 function M.layout_next()
-	return {
+	return mt({
 		opts = { group = "layout.inc" },
 		desc = "next layout",
 		fn = function()
 			awm.layout_next()
 			return "layout", helper.get_current_layout_name()
 		end,
-	}
+	})
 end
 
 function M.layout_prev()
-	return {
+	return mt({
 		opts = { group = "layout.inc" },
 		desc = "prev layout",
 		fn = function()
 			awm.layout_prev()
 			return "layout", helper.get_current_layout_name()
 		end,
-	}
+	})
 end
 
 function M.layout_select_menu()
-	return {
+	return mt({
 		opts = { group = "layout.menu.select" },
 		desc = "select a layout",
 		fn = function(opts)
@@ -266,11 +266,11 @@ function M.layout_select_menu()
 
 			return ret
 		end,
-	}
+	})
 end
 
 function M.client_select_picker(multi_window, include_focused_client)
-	return {
+	return mt({
 		opts = {
 			group = "client.menu.focus",
 			hints_show = false,
@@ -287,11 +287,11 @@ function M.client_select_picker(multi_window, include_focused_client)
 			end
 			return awm.client_picker(opts, fn, filter)
 		end,
-	}
+	})
 end
 
 function M.client_swap_picker()
-	return {
+	return mt({
 		opts = {
 			group = "client.swap",
 			hints_show = false,
@@ -310,11 +310,11 @@ function M.client_swap_picker()
 			end
 			return awm.client_picker(opts, fn, filter)
 		end,
-	}
+	})
 end
 
 function M.client_toggle_fullscreen()
-	return {
+	return mt({
 		opts = { group = "client.property" },
 		desc = function()
 			local c = client.focus
@@ -333,11 +333,11 @@ function M.client_toggle_fullscreen()
 			awm.client_toggle_fullscreen()
 			return "fullscreen", client.focus.fullscreen
 		end,
-	}
+	})
 end
 
 function M.client_toggle_maximize()
-	return {
+	return mt({
 		opts = { group = "client.property" },
 		desc = function()
 			local c = client.focus
@@ -355,11 +355,11 @@ function M.client_toggle_maximize()
 		fn = function()
 			awm.client_toggle_maximize()
 		end,
-	}
+	})
 end
 
 function M.client_toggle_sticky()
-	return {
+	return mt({
 		opts = { group = "client.property" },
 		desc = function()
 			local c = client.focus
@@ -377,11 +377,11 @@ function M.client_toggle_sticky()
 		fn = function()
 			awm.client_toggle_sticky()
 		end,
-	}
+	})
 end
 
 function M.client_toggle_maximize_horizontally()
-	return {
+	return mt({
 		opts = { group = "client.property" },
 		desc = function()
 			local c = client.focus
@@ -399,11 +399,11 @@ function M.client_toggle_maximize_horizontally()
 		fn = function()
 			awm.client_toggle_maximize_horizontally()
 		end,
-	}
+	})
 end
 
 function M.client_toggle_maximize_vertically()
-	return {
+	return mt({
 		opts = { group = "client.property" },
 		desc = function()
 			local c = client.focus
@@ -421,11 +421,11 @@ function M.client_toggle_maximize_vertically()
 		fn = function()
 			awm.client_toggle_maximize_vertically()
 		end,
-	}
+	})
 end
 
 function M.client_toggle_floating()
-	return {
+	return mt({
 		opts = { group = "client.property" },
 		desc = function()
 			local c = client.focus
@@ -443,11 +443,11 @@ function M.client_toggle_floating()
 		fn = function()
 			awm.client_toggle_floating()
 		end,
-	}
+	})
 end
 
 function M.client_toggle_ontop()
-	return {
+	return mt({
 		opts = { group = "client.property" },
 		desc = function()
 			local c = client.focus
@@ -465,11 +465,11 @@ function M.client_toggle_ontop()
 		fn = function()
 			awm.client_toggle_ontop()
 		end,
-	}
+	})
 end
 
 function M.client_minimize()
-	return {
+	return mt({
 		opts = { group = "client.property" },
 		desc = "minimize",
 		cond = function()
@@ -478,11 +478,11 @@ function M.client_minimize()
 		fn = function()
 			awm.client_minmize()
 		end,
-	}
+	})
 end
 
 function M.client_kill()
-	return {
+	return mt({
 		opts = { group = "client" },
 		desc = function()
 			return "client kill"
@@ -493,11 +493,11 @@ function M.client_kill()
 		fn = function()
 			awm.client_kill()
 		end,
-	}
+	})
 end
 
 function M.client_swap_master_smart()
-	return {
+	return mt({
 		opts = { group = "client" },
 		desc = "master swap smart",
 		cond = function()
@@ -506,11 +506,11 @@ function M.client_swap_master_smart()
 		fn = function()
 			awm.client_master_swap()
 		end,
-	}
+	})
 end
 
 function M.client_move_to_master()
-	return {
+	return mt({
 		opts = { group = "client.layout.move.master" },
 		desc = "move to master",
 		cond = function()
@@ -521,41 +521,41 @@ function M.client_move_to_master()
 		fn = function()
 			awm.client_move_to_master()
 		end,
-	}
+	})
 end
 
 function M.client_focus(dir)
-	return {
+	return mt({
 		opts = { group = "client.focus" },
 		desc = string.format("focus %s client", dir),
 		fn = function()
 			awm.client_focus_bydirection(dir)
 		end,
-	}
+	})
 end
 
 function M.client_focus_navigator(dir)
-	return {
+	return mt({
 		opts = { group = "client.navigate" },
 		desc = string.format("navigate %s", dir),
 		fn = function()
 			awm.client_navigate(dir)
 		end,
-	}
+	})
 end
 
 function M.client_focus_prev()
-	return {
+	return mt({
 		opts = { group = "client.focus" },
 		desc = "focus previous client",
 		fn = function()
 			awm.client_focus_prev()
 		end,
-	}
+	})
 end
 
 function M.client_move_smart(dir)
-	return {
+	return mt({
 		opts = { group = "client.layout.move" },
 		cond = function()
 			return client.focus
@@ -564,11 +564,11 @@ function M.client_move_smart(dir)
 		fn = function(opts)
 			awm.client_move_smart(client.focus, dir, opts.resize_delta)
 		end,
-	}
+	})
 end
 
 function M.client_resize_smart(dir)
-	return {
+	return mt({
 		opts = { group = "client.layout.resize" },
 		cond = function()
 			return client.focus
@@ -590,11 +590,11 @@ function M.client_resize_smart(dir)
 		fn = function(opts)
 			awm.client_resize_smart(client.focus, dir, opts.resize_delta, opts.resize_factor)
 		end,
-	}
+	})
 end
 
 function M.client_floating_size_increase(dir)
-	return {
+	return mt({
 		opts = { group = "client.layout.resize" },
 		cond = function()
 			local layout = awful.layout.get(awful.screen.focused()).name
@@ -609,11 +609,11 @@ function M.client_floating_size_increase(dir)
 			resize_delta = math.abs(resize_delta)
 			awm.client_floating_resize(c, dir, resize_delta)
 		end,
-	}
+	})
 end
 
 function M.client_floating_size_decrease(dir)
-	return {
+	return mt({
 		opts = { group = "client.layout.resize" },
 		cond = function()
 			local layout = awful.layout.get(awful.screen.focused()).name
@@ -628,11 +628,11 @@ function M.client_floating_size_decrease(dir)
 			resize_delta = math.abs(resize_delta) * -1
 			awm.client_floating_resize(c, dir, resize_delta)
 		end,
-	}
+	})
 end
 
 function M.client_unminimize_menu()
-	return {
+	return mt({
 		opts = { group = "client.property", hints_delay = 0, hints_show = true },
 		cond = function()
 			local s = awful.screen.focused()
@@ -677,11 +677,11 @@ function M.client_unminimize_menu()
 
 			return ret
 		end,
-	}
+	})
 end
 
 function M.client_toggle_tag_menu()
-	return {
+	return mt({
 		opts = { group = "client.tags" },
 		cond = function()
 			return client.focus
@@ -705,11 +705,11 @@ function M.client_toggle_tag_menu()
 
 			return ret
 		end,
-	}
+	})
 end
 
 function M.tag_move_focused_client_to_tag(i)
-	return {
+	return mt({
 		opts = { group = "tag.client" },
 		cond = function()
 			local c = client.focus
@@ -741,7 +741,7 @@ function M.tag_move_focused_client_to_tag(i)
 				end
 			end
 		end,
-	}
+	})
 end
 
 function M.tag_move_all_clients_to_tag_menu()
