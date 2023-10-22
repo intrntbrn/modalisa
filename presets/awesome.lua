@@ -168,7 +168,6 @@ function M.layout_master_width_decrease(factor)
 		desc = "master width decrease",
 		fn = function()
 			awm.layout_master_width_decrease(factor)
-			return "master_width", helper.get_current_tag_master_width_factor()
 		end,
 	}
 end
@@ -180,8 +179,6 @@ function M.layout_master_count_decrease()
 		-- result = { master_count = helper.get_current_tag_master_count },
 		fn = function(opts, self)
 			awm.layout_master_count_decrease()
-			self:set_desc("rofl mao")
-			self:set_result("test", 1337)
 		end,
 	}
 end
@@ -190,7 +187,7 @@ function M.layout_master_count_increase()
 	return {
 		opts = { group = "layout.master.count" },
 		desc = "master count increase",
-		result = { master_count = helper.get_current_tag_master_count },
+		result = { master_count = helper.get_current_tag_master_count, test = "lol" },
 		fn = function()
 			awm.layout_master_count_increase()
 		end,
@@ -576,6 +573,12 @@ function M.client_resize_smart(dir)
 		cond = function()
 			return client.focus
 		end,
+		result = {
+			master_width = helper.get_current_tag_master_width_factor(),
+			master_count = helper.get_current_tag_master_count(),
+			column_count = helper.get_current_tag_column_count(),
+			something = helper.get_current_tag_column_count(),
+		},
 		desc = function()
 			-- local c = client.focus
 			-- local layout = awful.layout.get(awful.screen.focused()).name

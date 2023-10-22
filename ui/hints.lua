@@ -21,12 +21,6 @@ local M = {}
 local popup = {}
 local timer
 
-local function get_font_width(font)
-	local _, _, width = string.find(font, "[%s]+([0-9]+)")
-	-- TODO: figure out the default font size that awesome uses
-	return width or 10
-end
-
 local function sort_entries_by_group(entries, opts)
 	-- sort by group, desc, id
 	table.sort(entries, function(a, b)
@@ -138,7 +132,7 @@ function popup:update(t)
 			beautiful.get_font_height(font_separator)
 		)
 	)
-	local cell_width = dpi(get_font_width(font))
+	local cell_width = dpi(util.get_font_width(font))
 
 	-- print("cell_height: ", cell_height)
 	-- print("cell_width: ", cell_width)
@@ -177,7 +171,6 @@ function popup:update(t)
 	-- print("num_columns: ", num_columns)
 
 	local layout_columns = wibox.layout.fixed.horizontal({})
-
 	local entries_widget = {}
 	local i = 1
 	for c = 1, num_columns do

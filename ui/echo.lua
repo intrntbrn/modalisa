@@ -6,86 +6,105 @@ local awful = require("awful")
 local dump = require("motion.lib.vim").inspect
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
+local lib = require("motion.lib")
 
 local M = {}
 
 local popup = {}
 local timer
 
-local function make_center_textbox(text, font, fg)
+local function make_center_textbox(opts, text, font, fg)
 	local tb = wibox.widget.base.make_widget_declarative({
 		{
 			markup = util.markup.fg(fg, text),
 			font = font,
+			valign = "center",
+			halign = "center",
 			widget = wibox.widget.textbox,
 		},
-		valign = "center",
-		halign = "center",
-		widget = wibox.container.place,
+		forced_height = beautiful.get_font_height(font),
+		width = opts.echo_entry_width,
+		strategy = opts.echo_entry_width_strategy,
+		widget = wibox.container.constraint,
 	})
 	return tb
 end
 
-local function textbox(text, opts)
-	local tb = wibox.widget.base.make_widget_declarative({
-		markup = text,
-		font = opts.echo_font,
-		widget = wibox.widget.textbox,
-	})
-	return tb
-end
-
-local function double_vert(opts, key, value)
+local function make_key_value_textbox(opts, key, value)
 	local font = opts.echo_font
 	local fg = opts.echo_color_fg
 	local font_header = opts.echo_font_header
 	local fg_header = opts.echo_color_header_fg
 
-	local tb_key = make_center_textbox(key, font_header, fg_header)
-	local tb_value = make_center_textbox(value, font, fg)
+	local tb_key = make_center_textbox(opts, key, font_header, fg_header)
+	local tb_value = make_center_textbox(opts, value, font, fg)
 
-	print("make base")
+	local layout
+	local orientation = opts.echo_orientation
+	if orientation == "vertical" then
+		layout = wibox.layout.fixed.vertical({})
+	elseif orientation == "horizontal" then
+		layout = wibox.layout.fixed.horizontal({})
+	end
 
 	local base = wibox.widget.base.make_widget_declarative({
-		{
-			{
-				tb_key,
-				tb_value,
-				layout = wibox.layout.fixed.vertical(),
-			},
-			widget = wibox.container.constraint,
-		},
-		bg = opts.echo_color_bg,
-		widget = wibox.container.background,
+		tb_key,
+		tb_value,
+		spacing = opts.echo_spacing,
+		layout = layout,
 	})
-
-	print("base done")
 
 	return base
 end
 
-local function create_widget(opts, key, value)
-	local widget = double_vert(opts, key, value)
+local function create_widget(opts, kvs)
+	local widgets = {}
+	local i = 1
+	for k, v in pairs(kvs) do
+		local bg = opts.echo_color_bg
+		local is_odd = (i % 2) == 0
+		if is_odd then
+			bg = lib.lighten(bg, -7)
+		end
+
+		local tb = make_key_value_textbox(opts, k, v)
+		local base = wibox.widget.base.make_widget_declarative({
+			{
+				tb,
+				margins = opts.echo_padding,
+				widget = wibox.container.margin,
+			},
+			bg = bg,
+			widget = wibox.container.background,
+		})
+		table.insert(widgets, base)
+		i = i + 1
+	end
+
+	local layout
+	local orientation = opts.echo_orientation
+	if orientation == "vertical" then
+		layout = wibox.layout.fixed.horizontal({})
+	elseif orientation == "horizontal" then
+		layout = wibox.layout.fixed.vertical({})
+	end
+
+	for _, kv in ipairs(widgets) do
+		layout:add(kv)
+	end
 
 	local base = wibox.widget.base.make_widget_declarative({
 		{
-			{
-				widget,
-				valign = "center",
-				halign = "center",
-				widget = wibox.container.place,
-			},
-			border_width = opts.echo_border_width,
-			border_color = opts.echo_color_border,
-			bg = opts.echo_color_bg,
-			fg = opts.echo_color_fg,
-			-- forced_width = 200,
-			-- forced_height = 200,
-			shape = nil,
-			widget = wibox.container.background,
+			layout,
+			valign = "center",
+			halign = "center",
+			widget = wibox.container.place,
 		},
-		opacity = 1,
-		widget = wibox.container.margin,
+		border_width = opts.echo_border_width,
+		border_color = opts.echo_color_border,
+		shape = opts.echo_shape,
+		opacity = opts.echo_opacity,
+		widget = wibox.container.background,
 	})
 
 	return base
@@ -141,19 +160,6 @@ local function set_timer(opts)
 	})
 end
 
-local function parse(e)
-	if type(e) == "table" then
-		local k = e.key
-		local v = e.value
-		if type(k) == "function" then
-			k = k()
-		end
-		if type(v) == "function" then
-			v = v()
-		end
-	end
-end
-
 local function handle(args)
 	local result = args.result
 	if not result then
@@ -171,15 +177,7 @@ local function handle(args)
 		return
 	end
 
-	local rk
-	local rv
-
-	for k, v in pairs(result) do
-		rk = k
-		rv = v
-	end
-
-	local widget = create_widget(opts, rk, rv)
+	local widget = create_widget(opts, result)
 	popup:set_widget(widget, opts)
 	set_timer(opts)
 end
@@ -194,11 +192,5 @@ function M.setup(opts)
 		handle(args)
 	end)
 end
-
--- emit(name, value)
--- boolean: checkbox, string: textbox, float 0-1: progressbar
--- local types = "text, checkbox, progressbar"
-
--- local types = { value,}
 
 return M

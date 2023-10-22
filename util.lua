@@ -140,4 +140,10 @@ M.quote = function(str)
 	return str:gsub(quotepattern, "%%%1")
 end
 
+function M.get_font_width(font)
+	local _, _, width = string.find(font, "[%s]+([0-9]+)")
+	-- TODO: figure out the default font size that awesome uses
+	return width or 10
+end
+
 return M
