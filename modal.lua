@@ -105,8 +105,8 @@ local function on_update(t)
 end
 
 -- @param t table A motion (sub)tree
-local function on_execute(t, result)
-	awesome.emit_signal("motion::execute", { tree = t, result = result })
+local function on_exec(t, result)
+	awesome.emit_signal("motion::exec", { tree = t, result = result })
 end
 
 -- @param t table A motion (sub)tree
@@ -425,7 +425,7 @@ function trunner:run(t)
 	local list
 
 	if t:cond() then
-		list = t:fn(opts)
+		list = t:exec(opts)
 
 		-- make results
 		local result = t:result()
@@ -438,14 +438,14 @@ function trunner:run(t)
 					eval[k] = v
 				end
 			end
-			print("eval result")
 			result = eval
 		end
 
-		on_execute(t, result)
+		on_exec(t, result)
 	end
 
 	if list then
+		print("DYNAMIC LIST")
 		-- dynamically created list
 		if type(list) ~= "table" or vim.tbl_count(list) == 0 then
 			return
@@ -490,6 +490,7 @@ function trunner:input(key)
 	local next_tree
 
 	if node:is_leaf() then
+		print("is_leaf: ", node:desc())
 		next_tree = self:run(node)
 	else
 		next_tree = node

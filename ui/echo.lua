@@ -190,7 +190,7 @@ function M.setup(opts)
 	once = true
 
 	popup:new(opts)
-	awesome.connect_signal("motion::execute", function(args)
+	awesome.connect_signal("motion::exec", function(args)
 		handle(args)
 	end)
 end

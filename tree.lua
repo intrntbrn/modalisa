@@ -203,7 +203,7 @@ function M.mt(self)
 		tree = root_tree
 	end
 
-	self.fn = function(_, opts)
+	self.exec = function(_, opts)
 		local data = rawget(self, "_data")
 		if not data then
 			return nil
@@ -287,17 +287,17 @@ function M.mt(self)
 	self.desc = function(_, opts)
 		local data = rawget(self, "_data")
 		if not data then
-			return nil
+			return ""
 		end
 
 		local desc = rawget(data, "desc")
 
 		if desc and type(desc) == "function" then
 			opts = opts or rawget(data, "opts")
-			return desc(opts)
+			return desc(opts) or ""
 		end
 
-		return desc
+		return desc or ""
 	end
 
 	self.set_desc = function(_, value)
@@ -339,8 +339,8 @@ function M.mt(self)
 
 	self.add_successors = function(_, succs)
 		for k, succ in pairs(succs) do
-			local path, key = parse_key(succ, k)
-			add(key, self, path)
+			local seq, value = parse_key(succ, k)
+			add(value, self, seq)
 		end
 	end
 
@@ -349,7 +349,7 @@ function M.mt(self)
 		if not succs then
 			return true
 		end
-		return vim.tbl_count(succs) == 0
+		return vim.tbl_isempty(succs)
 	end
 
 	-- aliases

@@ -429,7 +429,7 @@ function M.setup(opts)
 	assert(once == nil, "hints are already setup")
 	once = popup:new(opts)
 
-	awesome.connect_signal("motion::execute", function(args)
+	awesome.connect_signal("motion::exec", function(args)
 		popup:refresh_entries()
 	end)
 	awesome.connect_signal("motion::update", function(args)
