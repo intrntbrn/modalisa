@@ -6,12 +6,14 @@ local awful = require("awful")
 local dump = require("motion.lib.vim").inspect
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
+local glib = require("lgi").GLib
 
 local M = {}
 
 -- TODO:
 -- merge keys with same desc
 -- group colors
+-- header
 
 local popup = {}
 local timer
@@ -184,7 +186,7 @@ function popup:update(t)
 			local bg = opts.hints_color_entry_bg
 
 			local odd_style = opts.hints_odd_style
-			if odd_style == "row" or odd_style == "column" or odd_style == "checkered" then
+			if odd_style and (odd_style == "row" or odd_style == "column" or odd_style == "checkered") then
 				local odd_source = r
 				if odd_style == "column" then
 					odd_source = c
@@ -433,16 +435,24 @@ function M.setup(opts)
 	once = popup:new(opts)
 
 	awesome.connect_signal("motion::exec", function(args)
-		popup:refresh_entries()
+		util.run_on_idle(function()
+			popup:refresh_entries()
+		end)
 	end)
+
 	awesome.connect_signal("motion::update", function(args)
-		handle_tree_changed(args.tree)
+		util.run_on_idle(function()
+			handle_tree_changed(args.tree)
+		end)
 	end)
+
 	awesome.connect_signal("motion::stop", function(args)
-		if timer then
-			timer:stop()
-		end
-		popup:set_visible(false)
+		util.run_on_idle(function()
+			if timer then
+				timer:stop()
+			end
+			popup:set_visible(false)
+		end)
 	end)
 end
 

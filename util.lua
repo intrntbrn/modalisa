@@ -7,6 +7,7 @@ local gstring = require("gears.string")
 local awful = require("awful")
 local vim = require("motion.lib.vim")
 local lighten = require("motion.lib.lighten")
+local glib = require("lgi").GLib
 
 M.labels_qwerty = "asdfghjklwertyuiozxcvbnmpqASDFGHJKLQWERTYUIOPZXCVBNM1234567890"
 M.labels_numericalpha = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -172,6 +173,10 @@ function M.color_or_luminosity(v, other_color)
 	if type(v) == "number" then
 		return lighten.lighten(other_color, v)
 	end
+end
+
+function M.run_on_idle(f)
+	glib.idle_add(glib.PRIORITY_DEFAULT_IDLE, f)
 end
 
 return M
