@@ -20,10 +20,13 @@ local function set(self, key, mods, overwrite_only)
 end
 
 function M:new(key, mods, modmap)
-	self.map = {}
-	self.conversion = modmap
-	set(self, key, mods, false)
-	return self
+	local inst = {}
+	inst.map = {}
+	inst.conversion = modmap
+	set(inst, key, mods, false)
+	return setmetatable(inst, {
+		__index = M,
+	})
 end
 
 function M:press(key, mods)
