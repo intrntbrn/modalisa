@@ -50,25 +50,20 @@ local defaults = {
 		XF86AudioNext = "⏭",
 		XF86AudioStop = "⏹",
 	},
-	hints_key_separator = " ➜ ",
+	hints_separator = " ➜ ",
 	hints_entry_key_width = 5,
-	hints_min_entry_width = 25,
-	hints_max_entry_width = 32,
+	hints_min_entry_width = 25, -- chars
+	hints_max_entry_width = 30, -- chars
 	hints_width = 0.75, -- fraction or abs
 	hints_height = 0.3, -- fraction or abs
 	hints_border_width = 0,
 	hints_opacity = 1,
 	hints_shape = nil,
-	hints_fill_strategy = "width", -- width | height
-	hints_placement = function(c)
-		return awful.placement.bottom(c, { honor_workarea = true })
+	hints_fill_remaining_space = true,
+	hints_fill_strategy = "horizontal", -- horizontal | vertical
+	hints_placement = function(h)
+		awful.placement.bottom(h, { honor_workarea = true })
 	end,
-	hints_placement_offset = {
-		left = 0,
-		right = 0,
-		top = 0,
-		bottom = dpi(50),
-	},
 	hints_odd_style = "row", -- row  | column | checkered | none
 	hints_font = "Monospace Bold 12",
 	hints_font_separator = "Monospace Bold 12",
@@ -89,7 +84,7 @@ local defaults = {
 	echo_timeout = 1000, -- ms
 	echo_orientation = "vertical", -- vertical | horizontal
 
-	echo_entry_width = 20,
+	echo_entry_width = 20, -- chars
 	echo_entry_width_strategy = "exact", -- min | max | exact
 	echo_padding = {
 		top = dpi(5),

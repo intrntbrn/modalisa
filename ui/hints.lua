@@ -147,7 +147,7 @@ function popup:update(t)
 	if num_entries < max_entries then
 		-- all entries fit
 		-- prefer width or height?
-		if opts.hints_fill_strategy == "width" then
+		if opts.hints_fill_strategy == "horizontal" then
 			-- fill columns first
 			num_columns = max_columns
 			num_rows = math.ceil(num_entries / num_columns)
@@ -165,24 +165,20 @@ function popup:update(t)
 	local layout_columns = wibox.layout.fixed.horizontal({})
 	local entries_widget = {}
 	local i = 1
-	local width_remaining = max_width
 	for c = 1, num_columns do
 		local column = wibox.layout.fixed.vertical({})
-
-		-- don't waste a single pixel
-		width_remaining = width_remaining - entry_width
-		if c == num_columns then
-			entry_width = entry_width + width_remaining
-		end
-
 		layout_columns:add(column)
 
 		for r = 1, num_rows do
 			local entry = entries[i]
 			if not entry then
-				entry = {
-					is_dummy = true,
-				}
+				if opts.hints_fill_remaining_space then
+					entry = {
+						is_dummy = true,
+					}
+				else
+					break
+				end
 			end
 
 			local bg = opts.hints_color_entry_bg
@@ -266,7 +262,7 @@ function popup:update(t)
 
 				tb_key.markup = util.markup.fg(fg, entry.key)
 				tb_desc.markup = util.markup.fg(fg_desc, entry.desc())
-				tb_separator.markup = util.markup.fg(fg_separator, opts.hints_key_separator)
+				tb_separator.markup = util.markup.fg(fg_separator, opts.hints_separator)
 			end
 
 			local function mouse_button_handler(_, _, _, button)
@@ -288,9 +284,11 @@ function popup:update(t)
 				background_entry.bg = bg
 			end
 
-			widget:connect_signal("button::press", mouse_button_handler)
-			widget:connect_signal("mouse::enter", mouse_enter_handler)
-			widget:connect_signal("mouse::leave", mouse_leave_handler)
+			if not entry.is_dummy then
+				widget:connect_signal("button::press", mouse_button_handler)
+				widget:connect_signal("mouse::enter", mouse_enter_handler)
+				widget:connect_signal("mouse::leave", mouse_leave_handler)
+			end
 
 			local teardown = function()
 				widget:disconnect_signal("button::press", mouse_button_handler)
@@ -311,6 +309,14 @@ function popup:update(t)
 		self.entries_widget = entries_widget
 	end
 
+	local margin_left
+	local margin_right
+	if opts.hints_fill_remaining_space then
+		local width_remaining = max_width - (num_columns * entry_width)
+		margin_left = math.floor(width_remaining / 2)
+		margin_right = width_remaining - margin_left
+	end
+
 	-- compute size
 	local placement = type(opts.hints_placement) == "string" and awful.placement[opts.hints_placement]
 		or opts.hints_placement
@@ -318,14 +324,16 @@ function popup:update(t)
 	local widget = wibox.widget.base.make_widget_declarative({
 		{
 			layout_columns,
-
-			border_width = opts.hints_border_width,
-			border_color = opts.hints_color_border,
-			shape = opts.hints_shape,
-			opacity = opts.hints_opacity,
-			widget = wibox.container.background,
+			right = margin_right,
+			left = margin_left,
+			widget = wibox.container.margin,
 		},
-		widget = wibox.container.margin,
+		bg = opts.hints_color_entry_bg,
+		border_width = opts.hints_border_width,
+		border_color = opts.hints_color_border,
+		shape = opts.hints_shape,
+		opacity = opts.hints_opacity,
+		widget = wibox.container.background,
 	})
 
 	-- update the popup
