@@ -6,6 +6,7 @@ local beautiful = require("beautiful")
 local gstring = require("gears.string")
 local awful = require("awful")
 local vim = require("motion.lib.vim")
+local lighten = require("motion.lib.lighten")
 
 M.labels_qwerty = "asdfghjklwertyuiozxcvbnmpqASDFGHJKLQWERTYUIOPZXCVBNM1234567890"
 M.labels_numericalpha = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -162,6 +163,15 @@ end
 
 function M.get_pixel_height(v, s)
 	return calc_pixel_count("width", v, s)
+end
+
+function M.color_or_luminosity(v, other_color)
+	if type(v) == "string" then
+		return v
+	end
+	if type(v) == "number" then
+		return lighten.lighten(other_color, v)
+	end
 end
 
 return M

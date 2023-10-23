@@ -68,11 +68,7 @@ local function create_widget(opts, kvs)
 		local is_odd = (i % 2) == 0
 		if is_odd then
 			local odd = opts.echo_odd
-			if type(odd) == "number" then
-				bg = lib.lighten(bg, odd)
-			elseif type(odd) == "string" then
-				bg = odd
-			end
+			bg = util.color_or_luminosity(odd, bg)
 		end
 
 		local tb = make_key_value_textbox(opts, k, v)

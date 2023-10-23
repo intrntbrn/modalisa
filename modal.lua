@@ -14,10 +14,11 @@ local M = {}
 -- tests for key parser
 -- option picker ("pick a string")
 -- color highlight links "bg or #ff00" opts["color"]
--- group sollte attribut und nicht opt sein
+-- group needs to be attribute, hidden as well, fg as well
 -- group colors
 -- notify for duplicate keys
 -- global keybinds (e.g. brightness, volume)
+-- merge keynames in hint
 
 local awful = require("awful")
 local lib = require("motion.lib")

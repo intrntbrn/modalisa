@@ -3,6 +3,7 @@ local vim = require("motion.lib.vim")
 local dump = vim.inspect
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
+local awful = require("awful")
 
 local unpack = unpack or table.unpack
 
@@ -24,7 +25,7 @@ local defaults = {
 	-- hints
 	hints_show = true,
 	hints_delay = 0, -- ms
-	hints_show_disabled_keys = false,
+	hints_show_disabled_keys = true,
 	hints_sort = "group", -- group | id | nil
 	hints_group_colors = {
 		["menu"] = "#FF00FF",
@@ -50,12 +51,18 @@ local defaults = {
 		XF86AudioStop = "⏹",
 	},
 	hints_key_separator = " ➜ ",
-	hints_max_key_width = 5,
-	hints_min_entry_width = 30,
+	hints_entry_key_width = 5,
+	hints_min_entry_width = 25,
+	hints_max_entry_width = 32,
 	hints_width = 0.75, -- fraction or abs
-	hints_height = 0.4, -- fraction or abs
+	hints_height = 0.3, -- fraction or abs
+	hints_border_width = 0,
+	hints_opacity = 1,
+	hints_shape = nil,
 	hints_fill_strategy = "width", -- width | height
-	hints_placement = "top",
+	hints_placement = function(c)
+		return awful.placement.bottom(c, { honor_workarea = true })
+	end,
 	hints_placement_offset = {
 		left = 0,
 		right = 0,
@@ -67,17 +74,19 @@ local defaults = {
 	hints_font_separator = "Monospace Bold 12",
 	hints_font_desc = "Monospace 12",
 
+	hints_color_border = "#1A1E2D",
 	hints_color_entry_fg = "#eceffc",
 	hints_color_entry_disabled_fg = "#959cbc",
 	hints_color_entry_desc_fg = "#eceffc",
 	hints_color_entry_separator_fg = "#82AAFF",
 	hints_color_entry_bg = "#24283B",
-	hints_color_entry_odd_bg = "#383F5A",
+	hints_color_entry_odd_bg = -5, -- color or luminosity
+	hints_color_hover_bg = 20, -- color or luminosity
 
 	-- echo
 	echo = true,
 	echo_placement = "centered",
-	echo_timeout = 1000,
+	echo_timeout = 1000, -- ms
 	echo_orientation = "vertical", -- vertical | horizontal
 
 	echo_entry_width = 20,

@@ -11,12 +11,7 @@ local M = {}
 
 -- TODO:
 -- merge keys with same desc
--- key description
--- margin and padding
 -- group colors
--- icons?
--- opts:
--- height %, width %, placement, cell_size, overlap_wibox
 
 local popup = {}
 local timer
@@ -58,8 +53,6 @@ local function make_entries(keys, opts)
 
 				local keyname = util.keyname(k, aliases)
 
-				local separator = kopts.hints_key_separator
-
 				table.insert(entries, {
 					key_unescaped = k,
 					key = keyname,
@@ -69,7 +62,6 @@ local function make_entries(keys, opts)
 					id = key:id(),
 					fg = kopts.fg,
 					bg = kopts.bg,
-					separator = separator,
 					run = function()
 						key:fn(kopts)
 					end,
@@ -136,12 +128,14 @@ function popup:update(t)
 	-- print("cell_width: ", cell_width)
 
 	local entry_height = cell_height
-	local entry_width = cell_width * opts.hints_min_entry_width
+	local min_entry_width = cell_width * opts.hints_min_entry_width
+	local max_entry_width = cell_width * opts.hints_max_entry_width
 
-	local max_entries = math.floor((max_width * max_height) / (entry_width * entry_height))
-	local max_columns = math.floor(max_width / entry_width)
+	local max_entries = math.floor((max_width * max_height) / (min_entry_width * entry_height))
+	local max_columns = math.floor(max_width / min_entry_width)
 	local max_rows = math.floor(max_height / entry_height)
 
+	local entry_width = math.floor(math.min((max_width / max_columns), max_entry_width))
 	-- print("max_entries: ", max_entries)
 	-- print("max_columns: ", max_columns)
 	-- print("max_rows: ", math.floor(max_rows))
@@ -171,24 +165,43 @@ function popup:update(t)
 	local layout_columns = wibox.layout.fixed.horizontal({})
 	local entries_widget = {}
 	local i = 1
+	local width_remaining = max_width
 	for c = 1, num_columns do
 		local column = wibox.layout.fixed.vertical({})
+
+		-- don't waste a single pixel
+		width_remaining = width_remaining - entry_width
+		if c == num_columns then
+			entry_width = entry_width + width_remaining
+		end
+
 		layout_columns:add(column)
 
 		for r = 1, num_rows do
 			local entry = entries[i]
 			if not entry then
-				break -- no more entries
+				entry = {
+					is_dummy = true,
+				}
 			end
 
-			local odd_source = opts.hints_odd_style == "row" and r or c
-			if opts.hints_odd_style == "checkered" then
-				odd_source = r + c
+			local bg = opts.hints_color_entry_bg
+
+			local odd_style = opts.hints_odd_style
+			if odd_style == "row" or odd_style == "column" or odd_style == "checkered" then
+				local odd_source = r
+				if odd_style == "column" then
+					odd_source = c
+				elseif odd_style == "checkered" then
+					odd_source = r + c
+				end
+				local odd = (odd_source % 2) == 0
+				if odd then
+					bg = util.color_or_luminosity(opts.hints_color_entry_odd_bg, bg)
+				end
 			end
 
-			local odd = (odd_source % 2) == 0
-			local bg = odd and opts.hints_color_entry_odd_bg or opts.hints_color_entry_bg
-			local bg_hover = lib.lighten(opts.hints_color_entry_bg, 25) -- TODO params
+			local bg_hover = util.color_or_luminosity(opts.hints_color_hover_bg, bg)
 
 			local widget = wibox.widget.base.make_widget_declarative({
 				{
@@ -201,7 +214,7 @@ function popup:update(t)
 								widget = wibox.widget.textbox,
 							},
 							strategy = "exact",
-							width = opts.hints_max_key_width * cell_width,
+							width = opts.hints_entry_key_width * cell_width,
 							widget = wibox.container.constraint,
 						},
 						{
@@ -222,13 +235,16 @@ function popup:update(t)
 					widget = wibox.container.background,
 				},
 				id = string.format("entry_%d", i),
-				strategy = "exact", -- TODO:
+				strategy = "exact",
 				width = entry_width,
 				height = entry_height,
 				widget = wibox.container.constraint,
 			})
 
 			local update = function()
+				if entry.is_dummy then
+					return
+				end
 				local tb_key = widget:get_children_by_id("textbox_key")[1]
 				local tb_desc = widget:get_children_by_id("textbox_desc")[1]
 				local tb_separator = widget:get_children_by_id("textbox_separator")[1]
@@ -250,7 +266,7 @@ function popup:update(t)
 
 				tb_key.markup = util.markup.fg(fg, entry.key)
 				tb_desc.markup = util.markup.fg(fg_desc, entry.desc())
-				tb_separator.markup = util.markup.fg(fg_separator, entry.separator)
+				tb_separator.markup = util.markup.fg(fg_separator, opts.hints_key_separator)
 			end
 
 			local function mouse_button_handler(_, _, _, button)
@@ -299,28 +315,16 @@ function popup:update(t)
 	local placement = type(opts.hints_placement) == "string" and awful.placement[opts.hints_placement]
 		or opts.hints_placement
 
-	local margin = dpi(1)
-
 	local widget = wibox.widget.base.make_widget_declarative({
 		{
-			{
-				layout_columns,
-				margins = {
-					top = margin,
-					bottom = margin,
-					left = margin,
-					right = margin,
-				},
-				widget = wibox.container.margin,
-			},
-			bg = "#1A1E2D",
-			-- forced_width = max_width,
-			-- forced_height = max_height,
-			-- shape = gears.shape.rounded_rect,
+			layout_columns,
+
+			border_width = opts.hints_border_width,
+			border_color = opts.hints_color_border,
+			shape = opts.hints_shape,
+			opacity = opts.hints_opacity,
 			widget = wibox.container.background,
 		},
-		opacity = 1,
-		bg = "#ff00ff00",
 		widget = wibox.container.margin,
 	})
 
