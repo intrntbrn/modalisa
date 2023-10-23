@@ -19,6 +19,7 @@ local M = {}
 -- notify for duplicate keys
 -- global keybinds (e.g. brightness, volume)
 -- merge keynames in hint
+-- cache tree keymap (~3ms)
 
 local awful = require("awful")
 local lib = require("motion.lib")
@@ -30,42 +31,7 @@ local akeygrabber = require("awful.keygrabber")
 local gears = require("gears")
 local notify = require("motion.notify")
 
-local instance
 local trunner = {}
-
-local global_keygrabber
-
-local function global_on_start()
-	awesome.emit_signal("motion::start", { tree = instance.tree })
-end
-
-local function global_on_stop()
-	awesome.emit_signal("motion::stop", { tree = instance.tree })
-end
-
-local function global_on_exec(result)
-	awesome.emit_signal("motion::exec", { tree = instance.tree, result = result })
-end
-
-local function new_global_keygrabber()
-	local grabber = akeygrabber({
-		-- keyreleased_callback = self:keyreleased_callback(),
-		-- keypressed_callback = self:keypressed_callback(),
-		-- timeout = opts.timeout and opts.timeout > 0 and opts.timeout / 1000,
-		-- timeout_callback = function()
-		-- 	run(t)
-		-- 	on_stop(t)
-		-- end,
-		start_callback = function()
-			global_on_start()
-		end,
-		stop_callback = function()
-			global_on_stop()
-		end,
-	})
-	global_keygrabber = grabber
-	return grabber
-end
 
 local ignore_mods = { "Lock2", "Mod2" }
 local supported_mods = {
@@ -125,27 +91,6 @@ local function is_match(v, comparator)
 		match = match and mod[v2]
 	end
 	return match
-end
-
--- @param t table A motion (sub)tree
-local function on_start(t)
-	awesome.emit_signal("motion::start", { tree = t })
-end
-
--- @param t table A motion (sub)tree
-local function on_update(t)
-	awesome.emit_signal("motion::update", { tree = t })
-end
-
--- @param t table A motion (sub)tree
-local function on_exec(t, result)
-	awesome.emit_signal("motion::exec", { tree = t, result = result })
-end
-
--- @param t table A motion (sub)tree
-local function on_stop(t)
-	print("motion::stop")
-	awesome.emit_signal("motion::stop", { tree = t })
 end
 
 local function parse_vim_key(k, opts)
@@ -293,6 +238,18 @@ local function add_key_to_map(m, k)
 	end)
 end
 
+local function keygrabber_init()
+	local grabber = akeygrabber({
+		start_callback = function()
+			trunner:on_start()
+		end,
+		stop_callback = function()
+			trunner:on_stop()
+		end,
+	})
+	return grabber
+end
+
 -- @param t table A motion (sub)tree
 -- @return table Table with tables of keys
 local function keygrabber_keys(t)
@@ -361,36 +318,39 @@ local function keygrabber_keys(t)
 	return all_keys
 end
 
-function trunner:new(t, root_key)
-	assert(not vim.tbl_isempty(t:opts()), "trunner:new t opts are mpty")
-	local inst = {}
-	setmetatable(inst, {
-		__index = trunner,
-	})
-	if root_key then
-		inst.mm = mmodmap(root_key.key, root_key.mods, mod_conversion)
-	else
-		inst.mm = mmodmap("", {}, mod_conversion)
-	end
+function trunner:init()
+	self.keygrabber = keygrabber_init()
+	self.keygrabber.keyreleased_callback = self:keyreleased_callback()
+	self.keygrabber.keypressed_callback = self:keypressed_callback()
 
-	inst.ran_once = false
-	inst.continue_mouse = false
-	inst.continue_key = false
-	inst.keygrabber = nil
-
-	inst.timer = gears.timer({
+	self.timer = gears.timer({
 		timeout = 0,
 		callback = function()
-			inst:stop()
+			self:stop()
 		end,
 		autostart = false,
 		single_shot = true,
 	})
 
+	self:reset()
+end
+
+function trunner:set(t, root_key)
+	assert(not trunner.is_running, "trunner is already running")
+	assert(not vim.tbl_isempty(t:opts()), "trunner:new t opts are empty")
+
+	if root_key then
+		self.mm = mmodmap(root_key.key, root_key.mods, mod_conversion)
+	else
+		self.mm = mmodmap("", {}, mod_conversion)
+	end
+
+	self:reset()
+
 	if vim.tbl_count(t:successors()) == 0 then
 		-- running the node might populate itself (e.g. user calls run on an
 		-- dynamic node)
-		inst:run(t)
+		self:run(t)
 
 		if vim.tbl_count(t:successors()) == 0 then
 			-- there is no point in running an empty tree
@@ -399,30 +359,47 @@ function trunner:new(t, root_key)
 		end
 	end
 
-	inst:set_tree(t)
+	self:set_tree(t)
 
-	global_keygrabber.keyreleased_callback = inst:keyreleased_callback()
-	global_keygrabber.keypressed_callback = inst:keypressed_callback()
+	return self
+end
 
-	-- local grabber = inst:setup_keygrabber(t)
-	inst.keygrabber = global_keygrabber
-
-	return inst
+function trunner:set_keygrabber(keygrabber)
+	self.keygrabber = keygrabber
 end
 
 function trunner:reset()
+	self.is_running = false
 	self.ran_once = false
 	self.continue_mouse = false
 	self.continue_key = false
 end
 
-function trunner:restart()
-	self:reset()
-	self:start()
-end
-
 function trunner:start()
 	self.keygrabber:start()
+end
+
+-- @param t table A motion (sub)tree
+function trunner:on_start()
+	self.is_running = true
+	awesome.emit_signal("motion::start", { tree = self.tree })
+end
+
+-- @param t table A motion (sub)tree
+function trunner:on_update()
+	awesome.emit_signal("motion::update", { tree = self.tree })
+end
+
+-- @param t table A motion (sub)tree
+function trunner:on_exec(t, result)
+	awesome.emit_signal("motion::exec", { tree = t, result = result })
+end
+
+-- @param t table A motion (sub)tree
+function trunner:on_stop()
+	self.is_running = false
+	print("motion::stop")
+	awesome.emit_signal("motion::stop", { tree = self.tree })
 end
 
 function trunner:start_timer()
@@ -439,7 +416,7 @@ function trunner:set_tree(t)
 	self.tree = t
 	self.keybinds = keygrabber_keys(t)
 	self:start_timer()
-	on_update(t)
+	self:on_update()
 end
 
 function trunner:stop()
@@ -518,7 +495,7 @@ function trunner:run(t)
 			result = eval
 		end
 
-		on_exec(t, result)
+		self:on_exec(t, result)
 	end
 
 	if list then
@@ -674,42 +651,19 @@ function trunner:keyreleased_callback()
 	end
 end
 
-function trunner:setup_keygrabber(t)
-	local grabber = akeygrabber({
-		keyreleased_callback = self:keyreleased_callback(),
-		keypressed_callback = self:keypressed_callback(),
-		-- timeout = opts.timeout and opts.timeout > 0 and opts.timeout / 1000,
-		-- timeout_callback = function()
-		-- 	run(t)
-		-- 	on_stop(t)
-		-- end,
-		start_callback = function()
-			on_start(t)
-		end,
-		stop_callback = function()
-			on_stop(t)
-		end,
-	})
-	return grabber
-end
-
 -- bypass the keygrabber
 function M.fake_input(key, force_continue)
 	if force_continue then
-		instance.continue_mouse = true
+		trunner.continue_mouse = true
 	end
-	instance:input(key)
+	trunner:input(key)
 end
 
 local function run(sequence, parsed_keybind, extra_opts)
 	---@diagnostic disable-next-line: need-check-nil
 	local t = mtree.get(sequence or "", extra_opts)
-	instance = trunner:new(t, parsed_keybind)
-	if instance then
-		instance:start()
-	end
-
-	return instance
+	trunner:set(t, parsed_keybind)
+	trunner:start()
 end
 
 -- run inline table
@@ -719,11 +673,8 @@ function M.run_tree(tree, opts, name)
 	if not t then
 		return
 	end
-	instance = trunner:new(t)
-	if instance then
-		instance:start()
-	end
-	return instance
+	trunner:set(t)
+	trunner:start()
 end
 
 -- run keyroot_tree with a keybind (opt)
@@ -811,10 +762,10 @@ end
 
 local once
 function M.setup(opts)
-	assert(once == nil, "modal setup once")
+	assert(once == nil, "modal is already setup")
 	once = true
 
-	new_global_keygrabber()
+	trunner:init()
 
 	awesome.connect_signal("xkb::map_changed", function()
 		generate_mod_conversion_maps()
@@ -845,6 +796,30 @@ function M.benchmark(n)
 	end
 
 	lib.benchmark(f, n or 100)
+
+	trunner:stop()
+end
+
+function M.benchmark_setup(n)
+	local f = function()
+		local root = require("motion.tree")[""]
+		trunner:set(root, { key = "a", mods = { "Mod1" } })
+	end
+
+	lib.benchmark(f, n or 100)
+
+	trunner:stop()
+end
+
+function M.benchmark_keymap(n)
+	local root = require("motion.tree")[""]
+	local f = function()
+		trunner:set_tree(root)
+	end
+
+	lib.benchmark(f, n or 100)
+
+	trunner:stop()
 end
 
 function M.benchmark_input(n, key)
@@ -855,7 +830,7 @@ function M.benchmark_input(n, key)
 
 	lib.benchmark(f, n or 100)
 
-	M.fake_input("stop")
+	trunner:stop()
 end
 
 return setmetatable(M, {
