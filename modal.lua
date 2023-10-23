@@ -30,7 +30,42 @@ local akeygrabber = require("awful.keygrabber")
 local gears = require("gears")
 local notify = require("motion.notify")
 
+local instance
 local trunner = {}
+
+local global_keygrabber
+
+local function global_on_start()
+	awesome.emit_signal("motion::start", { tree = instance.tree })
+end
+
+local function global_on_stop()
+	awesome.emit_signal("motion::stop", { tree = instance.tree })
+end
+
+local function global_on_exec(result)
+	awesome.emit_signal("motion::exec", { tree = instance.tree, result = result })
+end
+
+local function new_global_keygrabber()
+	local grabber = akeygrabber({
+		-- keyreleased_callback = self:keyreleased_callback(),
+		-- keypressed_callback = self:keypressed_callback(),
+		-- timeout = opts.timeout and opts.timeout > 0 and opts.timeout / 1000,
+		-- timeout_callback = function()
+		-- 	run(t)
+		-- 	on_stop(t)
+		-- end,
+		start_callback = function()
+			global_on_start()
+		end,
+		stop_callback = function()
+			global_on_stop()
+		end,
+	})
+	global_keygrabber = grabber
+	return grabber
+end
 
 local ignore_mods = { "Lock2", "Mod2" }
 local supported_mods = {
@@ -328,21 +363,25 @@ end
 
 function trunner:new(t, root_key)
 	assert(not vim.tbl_isempty(t:opts()), "trunner:new t opts are mpty")
+	local inst = {}
+	setmetatable(inst, {
+		__index = trunner,
+	})
 	if root_key then
-		self.mm = mmodmap(root_key.key, root_key.mods, mod_conversion)
+		inst.mm = mmodmap(root_key.key, root_key.mods, mod_conversion)
 	else
-		self.mm = mmodmap("", {}, mod_conversion)
+		inst.mm = mmodmap("", {}, mod_conversion)
 	end
 
-	self.ran_once = false
-	self.continue_mouse = false
-	self.continue_key = false
-	self.keygrabber = nil
+	inst.ran_once = false
+	inst.continue_mouse = false
+	inst.continue_key = false
+	inst.keygrabber = nil
 
-	self.timer = gears.timer({
+	inst.timer = gears.timer({
 		timeout = 0,
 		callback = function()
-			self:stop()
+			inst:stop()
 		end,
 		autostart = false,
 		single_shot = true,
@@ -351,7 +390,7 @@ function trunner:new(t, root_key)
 	if vim.tbl_count(t:successors()) == 0 then
 		-- running the node might populate itself (e.g. user calls run on an
 		-- dynamic node)
-		self:run(t)
+		inst:run(t)
 
 		if vim.tbl_count(t:successors()) == 0 then
 			-- there is no point in running an empty tree
@@ -360,13 +399,30 @@ function trunner:new(t, root_key)
 		end
 	end
 
-	self:set_tree(t)
-	local grabber = self:setup_keygrabber(t)
-	self.keygrabber = grabber
+	inst:set_tree(t)
 
-	grabber:start()
+	global_keygrabber.keyreleased_callback = inst:keyreleased_callback()
+	global_keygrabber.keypressed_callback = inst:keypressed_callback()
 
-	return self
+	-- local grabber = inst:setup_keygrabber(t)
+	inst.keygrabber = global_keygrabber
+
+	return inst
+end
+
+function trunner:reset()
+	self.ran_once = false
+	self.continue_mouse = false
+	self.continue_key = false
+end
+
+function trunner:restart()
+	self:reset()
+	self:start()
+end
+
+function trunner:start()
+	self.keygrabber:start()
 end
 
 function trunner:start_timer()
@@ -391,11 +447,11 @@ function trunner:stop()
 end
 
 function trunner:stop_maybe(reason)
-	if trunner.continue_mouse then
+	if self.continue_mouse then
 		return
 	end
 
-	local opts = trunner.tree:opts()
+	local opts = self.tree:opts()
 	local mode = opts.mode
 
 	print("maybe_stop: ", reason)
@@ -640,15 +696,20 @@ end
 -- bypass the keygrabber
 function M.fake_input(key, force_continue)
 	if force_continue then
-		trunner.continue_mouse = true
+		instance.continue_mouse = true
 	end
-	trunner:input(key)
+	instance:input(key)
 end
 
 local function run(sequence, parsed_keybind, extra_opts)
 	---@diagnostic disable-next-line: need-check-nil
 	local t = mtree.get(sequence or "", extra_opts)
-	return trunner:new(t, parsed_keybind)
+	instance = trunner:new(t, parsed_keybind)
+	if instance then
+		instance:start()
+	end
+
+	return instance
 end
 
 -- run inline table
@@ -658,7 +719,11 @@ function M.run_tree(tree, opts, name)
 	if not t then
 		return
 	end
-	return trunner:new(t)
+	instance = trunner:new(t)
+	if instance then
+		instance:start()
+	end
+	return instance
 end
 
 -- run keyroot_tree with a keybind (opt)
@@ -749,6 +814,8 @@ function M.setup(opts)
 	assert(once == nil, "modal setup once")
 	once = true
 
+	new_global_keygrabber()
+
 	awesome.connect_signal("xkb::map_changed", function()
 		generate_mod_conversion_maps()
 	end)
@@ -769,8 +836,6 @@ function M.setup(opts)
 	if opts.key then
 		M.add_globalkey("", opts.key)
 	end
-
-	print(dump(mod_conversion))
 end
 
 function M.benchmark(n)
