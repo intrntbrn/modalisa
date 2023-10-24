@@ -10,12 +10,12 @@ local function get_id()
 	return global_id
 end
 
-local function on_update(id, new, old)
-	awesome.emit_signal("motion::tree::update", id, new, old)
+local function on_update(t, old_t)
+	awesome.emit_signal("motion::tree::update", t, old_t)
 end
 
-local function on_remove(id, entry)
-	awesome.emit_signal("motion::tree::remove", id, entry)
+local function on_remove(t)
+	awesome.emit_signal("motion::tree::remove", t)
 end
 
 -- parse a loosely defined key
@@ -229,7 +229,7 @@ local function make_initial_node(prev_tree)
 	}
 end
 
-local mt = function(obj)
+local function mt(obj)
 	return setmetatable(obj, {
 		__index = M,
 		__tostring = function(t)
@@ -275,12 +275,15 @@ local function add(tree, value, seq, prev_opts)
 
 	-- insert
 	if value then
-		local old = tree._data and vim.deepcopy(tree._data)
+		local old = tree and vim.deepcopy(tree)
+		if old then
+			old = mt(old)
+		end
 
 		tree._data = value
 		tree._data.opts_merged = merged_opts
 
-		on_update(tree._id, vim.deepcopy(tree._data), old)
+		on_update(mt(tree), old)
 	else
 		tree._data.opts_merged = merged_opts
 	end
@@ -320,7 +323,7 @@ local function remove(tree, seq)
 		tree._succs[key] = nil
 
 		if old_data then
-			on_remove(tree._id, old_data)
+			on_remove(old_data)
 		end
 		return true
 	end

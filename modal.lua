@@ -228,38 +228,31 @@ end
 
 local global_keys = {}
 
-local function global_add(id, entry)
-	if not entry then
+local function global_keybinding_add(t)
+	if not t then
 		return
 	end
-
-	local global_key = entry.global
+	local global_key = t:global()
 	if not global_key then
-		return
-	end
-
-	local entry_fn = entry.fn
-	if not entry_fn then
 		return
 	end
 
 	local pks = parse_vim_key(global_key)
 	for _, pk in pairs(pks) do
 		local fn = function()
-			-- FIXME: no opts as param
-			entry_fn()
+			t:exec()
 		end
 		local akey = awful.key(pk.mods, pk.key, fn)
-		global_keys[id] = akey
+		global_keys[t:id()] = akey
 		awful.keyboard.append_global_keybinding(akey)
 	end
 end
 
-local function global_remove(id, entry)
-	if not entry then
+local function global_keybinding_remove(t)
+	if not t then
 		return
 	end
-	local akey = global_keys[id]
+	local akey = global_keys[t:id()]
 	if not akey then
 		return
 	end
@@ -810,14 +803,14 @@ function M.setup(opts)
 
 	trunner:init()
 
-	awesome.connect_signal("motion::tree::update", function(id, new, old)
-		global_remove(id, old)
-		global_add(id, new)
+	awesome.connect_signal("motion::tree::update", function(new, old)
+		global_keybinding_remove(old)
+		global_keybinding_add(new)
 	end)
 
-	awesome.connect_signal("motion::tree::remove", function(id, old)
+	awesome.connect_signal("motion::tree::remove", function(old)
 		print("motion::tree::remove")
-		global_remove(id, old)
+		global_keybinding_remove(old)
 	end)
 
 	awesome.connect_signal("xkb::map_changed", function()
