@@ -81,6 +81,10 @@ function M:opts()
 	return self._data.opts_merged
 end
 
+function M:opts_merged() -- alias
+	return M:opts()
+end
+
 function M:opts_raw()
 	return self._data.opts_raw
 end
@@ -193,7 +197,9 @@ end
 
 function M:new(opts, name)
 	local inst = make_initial_node()
+	opts = opts or {}
 	inst._data.opts_raw = opts
+	inst._data.opts_merged = opts
 	inst._data.desc = name
 
 	local obj = setmetatable(inst, {
@@ -207,6 +213,7 @@ function M:new(opts, name)
 end
 
 local function add(tree, value, seq, prev_opts)
+	assert(tree)
 	local key, next_seq = util.split_vim_key(seq)
 	if key then
 		local opts_raw = tree._data.opts_raw
@@ -242,6 +249,7 @@ local function add(tree, value, seq, prev_opts)
 end
 
 local function get(tree, seq)
+	assert(tree)
 	local key, next_seq = util.split_vim_key(seq)
 	if key then
 		local next_tree = tree._succs[key]
@@ -277,9 +285,14 @@ local function remove(tree, seq, prev_opts)
 	return true
 end
 
+-- @param[opt=nil] seq
 function M:add(value, seq)
 	seq, value = parse_key(value, seq)
-	return add(self, value, seq)
+	return add(self, value, seq, self:opts())
+end
+
+function M:update_opts()
+	return add(self, nil, "", self:opts())
 end
 
 function M:get(seq)
@@ -287,7 +300,8 @@ function M:get(seq)
 end
 
 function M:remove(seq)
-	return remove(self, seq)
+	assert(seq and string.len(seq) > 0)
+	return remove(self, seq, self:opts())
 end
 
 function M:get_id()

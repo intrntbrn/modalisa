@@ -418,8 +418,9 @@ local function handle_tree_changed(t)
 		timer = gears.timer({
 			timeout = delay / 1000,
 			callback = function()
-				popup:update(t)
-				return false
+				util.run_on_idle(function()
+					popup:update(t)
+				end)
 			end,
 			autostart = true,
 			single_shot = true,

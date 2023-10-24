@@ -157,7 +157,6 @@ function M.layout_master_width_increase(factor)
 		desc = "master width increase",
 		fn = function()
 			awm.layout_master_width_increase(factor)
-			return "master_width", helper.get_current_tag_master_width_factor()
 		end,
 	})
 end
