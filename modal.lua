@@ -3,7 +3,6 @@ local M = {}
 -- TODO: MAJOR:
 -- config menu
 -- exposed api
--- echo keybinds rework
 -- renamer
 -- beautiful menu
 -- client label params

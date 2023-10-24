@@ -78,33 +78,34 @@ local defaults = {
 	hints_color_entry_odd_bg = -12, -- color or luminosity
 	hints_color_hover_bg = 20, -- color or luminosity
 
-	-- echo
-	echo = true,
-	echo_placement = "centered",
-	echo_timeout = 1000, -- ms
-	echo_orientation = "vertical", -- vertical | horizontal
+	echo = {
+		enabled = true,
+		placement = "centered",
+		timeout = 1000, -- ms
+		orientation = "vertical", -- vertical | horizontal
 
-	echo_entry_width = 20, -- chars
-	echo_entry_width_strategy = "exact", -- min | max | exact
-	echo_padding = {
-		top = dpi(5),
-		bottom = dpi(5),
-		left = dpi(5),
-		right = dpi(5),
+		entry_width = 20, -- chars
+		entry_width_strategy = "exact", -- min | max | exact
+		padding = {
+			top = dpi(5),
+			bottom = dpi(5),
+			left = dpi(5),
+			right = dpi(5),
+		},
+		spacing = 0,
+
+		font_header = "Monospace Bold 22",
+		font = "Monospace Bold 22",
+		border_width = dpi(1),
+
+		odd = -12, -- luminosity or color
+		shape = nil,
+		opacity = 1,
+		color_border = "#444A73",
+		color_bg = "#383F5A",
+		color_fg = "#eceffc",
+		color_header_fg = "#82AAFF",
 	},
-	echo_spacing = 0,
-
-	echo_font_header = "Monospace Bold 22",
-	echo_font = "Monospace Bold 22",
-	echo_border_width = dpi(1),
-
-	echo_odd = -12, -- luminosity or color
-	echo_shape = nil,
-	echo_opacity = 1,
-	echo_color_border = "#444A73",
-	echo_color_bg = "#383F5A",
-	echo_color_fg = "#eceffc",
-	echo_color_header_fg = "#82AAFF",
 
 	-- awesome
 	auto_select_the_only_choice = false,

@@ -13,7 +13,7 @@ local M = {}
 local popup = {}
 local timer
 
-local function make_center_textbox(opts, text, font, fg, width)
+local function make_center_textbox(eopts, text, font, fg, width)
 	local tb = wibox.widget.base.make_widget_declarative({
 		{
 			markup = util.markup.fg(fg, text),
@@ -24,26 +24,26 @@ local function make_center_textbox(opts, text, font, fg, width)
 		},
 		forced_height = beautiful.get_font_height(font),
 		width = width,
-		strategy = opts.echo_entry_width_strategy,
+		strategy = eopts.entry_width_strategy,
 		widget = wibox.container.constraint,
 	})
 	return tb
 end
 
-local function make_key_value_textbox(opts, key, value)
-	local font = opts.echo_font
-	local fg = opts.echo_color_fg
-	local font_header = opts.echo_font_header
-	local fg_header = opts.echo_color_header_fg
+local function make_key_value_textbox(eopts, key, value)
+	local font = eopts.font
+	local fg = eopts.color_fg
+	local font_header = eopts.font_header
+	local fg_header = eopts.color_header_fg
 
 	local font_width = dpi(math.max(util.get_font_width(font), util.get_font_width(font_header)))
-	local width = font_width * opts.echo_entry_width
+	local width = font_width * eopts.entry_width
 
-	local tb_key = make_center_textbox(opts, key, font_header, fg_header, width)
-	local tb_value = make_center_textbox(opts, value, font, fg, width)
+	local tb_key = make_center_textbox(eopts, key, font_header, fg_header, width)
+	local tb_value = make_center_textbox(eopts, value, font, fg, width)
 
 	local layout
-	local orientation = opts.echo_orientation
+	local orientation = eopts.orientation
 	if orientation == "vertical" then
 		layout = wibox.layout.fixed.vertical({})
 	elseif orientation == "horizontal" then
@@ -53,29 +53,29 @@ local function make_key_value_textbox(opts, key, value)
 	local base = wibox.widget.base.make_widget_declarative({
 		tb_key,
 		tb_value,
-		spacing = opts.echo_spacing,
+		spacing = eopts.spacing,
 		layout = layout,
 	})
 
 	return base
 end
 
-local function create_widget(opts, kvs)
+local function create_widget(eopts, kvs)
 	local widgets = {}
 	local i = 1
 	for k, v in pairs(kvs) do
-		local bg = opts.echo_color_bg
+		local bg = eopts.color_bg
 		local is_odd = (i % 2) == 0
 		if is_odd then
-			local odd = opts.echo_odd
+			local odd = eopts.odd
 			bg = util.color_or_luminosity(odd, bg)
 		end
 
-		local tb = make_key_value_textbox(opts, k, v)
+		local tb = make_key_value_textbox(eopts, k, v)
 		local base = wibox.widget.base.make_widget_declarative({
 			{
 				tb,
-				margins = opts.echo_padding,
+				margins = eopts.padding,
 				widget = wibox.container.margin,
 			},
 			bg = bg,
@@ -86,7 +86,7 @@ local function create_widget(opts, kvs)
 	end
 
 	local layout
-	local orientation = opts.echo_orientation
+	local orientation = eopts.orientation
 	if orientation == "vertical" then
 		layout = wibox.layout.fixed.horizontal({})
 	elseif orientation == "horizontal" then
@@ -104,17 +104,17 @@ local function create_widget(opts, kvs)
 			halign = "center",
 			widget = wibox.container.place,
 		},
-		border_width = opts.echo_border_width,
-		border_color = opts.echo_color_border,
-		shape = opts.echo_shape,
-		opacity = opts.echo_opacity,
+		border_width = eopts.border_width,
+		border_color = eopts.color_border,
+		shape = eopts.shape,
+		opacity = eopts.opacity,
 		widget = wibox.container.background,
 	})
 
 	return base
 end
 
-function popup:new(opts)
+function popup:new(eopts)
 	local pop = awful.popup({
 		visible = false,
 		ontop = true,
@@ -134,10 +134,9 @@ function popup:is_visible()
 	return self.popup.visible
 end
 
-function popup:set_widget(widget, opts)
+function popup:set_widget(widget, eopts)
 	local s = awful.screen.focused()
-	local placement = type(opts.echo_placement) == "string" and awful.placement[opts.echo_placement]
-		or opts.echo_placement
+	local placement = type(eopts.placement) == "string" and awful.placement[eopts.placement] or eopts.placement
 
 	self.popup.widget = widget
 	self.popup.screen = s
@@ -147,12 +146,12 @@ function popup:set_widget(widget, opts)
 	self.popup.visible = true
 end
 
-local function set_timer(opts)
+local function set_timer(eopts)
 	if timer then
 		timer:stop()
 	end
 
-	local delay = opts.echo_timeout
+	local delay = eopts.timeout
 
 	timer = gears.timer({
 		timeout = delay / 1000,
@@ -181,9 +180,14 @@ local function handle(args)
 		return
 	end
 
-	local widget = create_widget(opts, result)
-	popup:set_widget(widget, opts)
-	set_timer(opts)
+	local eopts = opts.echo
+	if not eopts.enabled then
+		return
+	end
+
+	local widget = create_widget(eopts, result)
+	popup:set_widget(widget, eopts)
+	set_timer(eopts)
 end
 
 local once
