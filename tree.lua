@@ -243,7 +243,7 @@ local function add(tree, value, seq, prev_opts)
 	local key, next_seq = util.split_vim_key(seq)
 	if key then
 		local opts_raw = tree._data.opts_raw
-		local merged_opts = util.merge_opts(opts_raw, prev_opts)
+		local merged_opts = util.merge_opts(prev_opts, opts_raw)
 		-- keep traversing until key is nil
 		local next_tree = tree._succs[key]
 		if not next_tree then
@@ -254,7 +254,7 @@ local function add(tree, value, seq, prev_opts)
 	end
 
 	local opts_raw = value and value.opts_raw
-	local merged_opts = util.merge_opts(opts_raw, prev_opts)
+	local merged_opts = util.merge_opts(prev_opts, opts_raw)
 
 	-- insert
 	if value then
