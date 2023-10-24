@@ -25,6 +25,7 @@ local awful = require("awful")
 local lib = require("motion.lib")
 local vim = require("motion.lib.vim")
 local dump = require("motion.lib").inspect
+local root_tree = require("motion.root")
 local mtree = require("motion.tree")
 local mmodmap = require("motion.modmap")
 local akeygrabber = require("awful.keygrabber")
@@ -659,9 +660,10 @@ function M.fake_input(key, force_continue)
 	trunner:input(key)
 end
 
-local function run(sequence, parsed_keybind, extra_opts)
+local function run(seq, parsed_keybind, extra_opts)
+	print("run: ", seq)
 	---@diagnostic disable-next-line: need-check-nil
-	local t = mtree.get(sequence or "", extra_opts)
+	local t = root_tree.get(seq, extra_opts)
 	trunner:set(t, parsed_keybind)
 	trunner:start()
 end
@@ -669,22 +671,20 @@ end
 -- run inline table
 function M.run_tree(tree, opts, name)
 	---@diagnostic disable-next-line: need-check-nil
-	local t = mtree.create_tree(tree, opts, name)
-	if not t then
-		return
-	end
+	local t = mtree:new(opts, name)
+	assert(t)
+	t:add_successors(tree)
 	trunner:set(t)
 	trunner:start()
 end
 
 -- run keyroot_tree with a keybind (opt)
-function M.run(sequence, keybind, extra_opts)
-	sequence = sequence or ""
+function M.run(seq, keybind, extra_opts)
 	if keybind then
 		keybind = parse_key_all(keybind)
 		assert(keybind)
 	end
-	run(sequence, keybind, extra_opts)
+	run(seq, keybind, extra_opts)
 end
 
 local function make_awful_key(prefix, parsed_key, extra_opts)
@@ -812,7 +812,7 @@ function M.benchmark_setup(n)
 end
 
 function M.benchmark_keymap(n)
-	local root = require("motion.tree")[""]
+	local root = require("motion.root")[""]
 	local f = function()
 		trunner:set_tree(root)
 	end

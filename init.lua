@@ -9,7 +9,7 @@ function M.setup(opts)
 
 	print(dump(opts))
 
-	require("motion.tree").setup(opts)
+	require("motion.root").setup(opts)
 	require("motion.modal").setup(opts)
 
 	require("motion.ui.hints").setup(opts)

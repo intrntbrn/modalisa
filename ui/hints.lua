@@ -42,6 +42,7 @@ end
 local function make_entries(keys, opts)
 	local entries = {}
 
+	print("make entries")
 	local aliases = opts and opts.hints_key_aliases
 	local show_disabled = opts.hints_show_disabled_keys
 	for k, key in pairs(keys) do
@@ -59,8 +60,12 @@ local function make_entries(keys, opts)
 					key_unescaped = k,
 					key = keyname,
 					group = group,
-					cond = key.cond,
-					desc = key.desc,
+					cond = function()
+						return key:cond()
+					end,
+					desc = function()
+						return key:desc()
+					end,
 					id = key:id(),
 					fg = kopts.fg,
 					bg = kopts.bg,
@@ -92,6 +97,8 @@ function popup:update(t)
 
 	local opts = t:opts()
 	local keys = t:successors()
+
+	print("keys: ", dump(keys))
 
 	local entries = make_entries(keys, opts)
 

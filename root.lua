@@ -1,4 +1,4 @@
-local baum = require("motion.baum")
+local tree = require("motion.tree")
 local config = require("motion.config")
 local vim = require("motion.lib.vim")
 
@@ -29,7 +29,7 @@ end
 
 function M.setup(opts)
 	assert(root_tree == nil, "root is already setup")
-	root_tree = baum:new(opts, "motion")
+	root_tree = tree:new(opts, "motion root")
 
 	awesome.connect_signal("motion::config", function(k, v)
 		local new_opts = config.get()
