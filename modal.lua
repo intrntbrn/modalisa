@@ -6,6 +6,9 @@ local M = {}
 -- echo keybinds rework
 -- renamer
 -- beautiful menu
+-- client label params
+-- color themes
+-- param array instead hint_
 
 -- TODO:
 -- add keybind support for each tree node
@@ -349,12 +352,12 @@ function trunner:set(t, root_key)
 
 	self:reset()
 
-	if vim.tbl_count(t:successors()) == 0 then
+	if t:is_leaf() then
 		-- running the node might populate itself (e.g. user calls run on an
 		-- dynamic node)
 		self:run(t)
 
-		if vim.tbl_count(t:successors()) == 0 then
+		if t:is_leaf() then
 			-- there is no point in running an empty tree
 			notify.error("tree is empty")
 			return nil
@@ -505,7 +508,7 @@ function trunner:run(t)
 		if type(list) ~= "table" or vim.tbl_count(list) == 0 then
 			return
 		end
-		t:add_successors(list)
+		t:add_temp_successors(list)
 
 		return t
 	end
@@ -545,9 +548,12 @@ function trunner:input(key)
 
 	local next_tree
 
+	node:remove_temp_successors()
+
 	if node:is_leaf() then
 		next_tree = self:run(node)
 	else
+		print("not a leaf")
 		next_tree = node
 	end
 
@@ -663,8 +669,6 @@ function M.fake_input(key, force_continue)
 end
 
 local function run(seq, parsed_keybind)
-	print("run: ", seq)
-	---@diagnostic disable-next-line: need-check-nil
 	local t = root_tree.get(seq)
 	trunner:set(t, parsed_keybind)
 	trunner:start()
@@ -804,7 +808,7 @@ end
 
 function M.benchmark_setup(n)
 	local f = function()
-		local root = require("motion.tree")[""]
+		local root = require("motion.root").get("")
 		trunner:set(root, { key = "a", mods = { "Mod1" } })
 	end
 

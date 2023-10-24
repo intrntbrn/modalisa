@@ -188,6 +188,7 @@ function popup:update(t)
 			end
 
 			local bg = opts.hints_color_entry_bg
+			local bg_hover = util.color_or_luminosity(opts.hints_color_hover_bg, bg)
 
 			local odd_style = opts.hints_odd_style
 			if odd_style and (odd_style == "row" or odd_style == "column" or odd_style == "checkered") then
@@ -202,8 +203,6 @@ function popup:update(t)
 					bg = util.color_or_luminosity(opts.hints_color_entry_odd_bg, bg)
 				end
 			end
-
-			local bg_hover = util.color_or_luminosity(opts.hints_color_hover_bg, bg)
 
 			local widget = wibox.widget.base.make_widget_declarative({
 				{

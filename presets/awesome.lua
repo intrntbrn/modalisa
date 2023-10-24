@@ -278,12 +278,17 @@ function M.client_select_picker(multi_window, include_focused_client)
 			return client.focus
 		end,
 		desc = "select client picker",
-		fn = function(opts)
+		fn = function(opts, t)
 			local filter = awm.client_create_filter(multi_window, include_focused_client)
 			local fn = function(c)
 				c:activate({ raise = true, context = "client.focus.bydirection" })
 			end
-			return awm.client_picker(opts, fn, filter)
+			local list = awm.client_picker(opts, fn, filter)
+
+			-- FIXME:
+			-- require("motion.config")["hints_separator"] = "xxx"
+
+			return list
 		end,
 	})
 end

@@ -56,7 +56,7 @@ local defaults = {
 	hints_max_entry_width = 30, -- chars
 	hints_width = 0.75, -- fraction or abs
 	hints_height = 0.3, -- fraction or abs
-	hints_border_width = 0,
+	hints_border_width = dpi(1),
 	hints_opacity = 1,
 	hints_shape = nil,
 	hints_fill_remaining_space = true,
@@ -69,13 +69,13 @@ local defaults = {
 	hints_font_separator = "Monospace Bold 12",
 	hints_font_desc = "Monospace 12",
 
-	hints_color_border = "#1A1E2D",
+	hints_color_border = "#444A73",
 	hints_color_entry_fg = "#eceffc",
 	hints_color_entry_disabled_fg = "#959cbc",
 	hints_color_entry_desc_fg = "#eceffc",
 	hints_color_entry_separator_fg = "#82AAFF",
-	hints_color_entry_bg = "#24283B",
-	hints_color_entry_odd_bg = -5, -- color or luminosity
+	hints_color_entry_bg = "#383F5A",
+	hints_color_entry_odd_bg = -12, -- color or luminosity
 	hints_color_hover_bg = 20, -- color or luminosity
 
 	-- echo
@@ -98,10 +98,10 @@ local defaults = {
 	echo_font = "Monospace Bold 22",
 	echo_border_width = dpi(1),
 
-	echo_odd = -10, -- luminosity or color
+	echo_odd = -12, -- luminosity or color
 	echo_shape = nil,
 	echo_opacity = 1,
-	echo_color_border = "#1A1E2D",
+	echo_color_border = "#444A73",
 	echo_color_bg = "#383F5A",
 	echo_color_fg = "#eceffc",
 	echo_color_header_fg = "#82AAFF",

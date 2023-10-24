@@ -20,6 +20,7 @@ local function parse_key(key, table_index)
 	local cond
 	local desc
 	local result
+	local temp
 
 	local t = type(key)
 
@@ -60,6 +61,10 @@ local function parse_key(key, table_index)
 					assert(not fn, "multiple undeclared functions")
 					fn = v
 				end
+			elseif t == "boolean" then
+				if k == "temp" then
+					temp = v
+				end
 			end
 		end
 	end
@@ -74,6 +79,7 @@ local function parse_key(key, table_index)
 		cond = cond,
 		desc = desc,
 		result = result,
+		temp = temp,
 	}
 end
 
@@ -169,6 +175,27 @@ function M:is_leaf()
 	return false
 end
 
+function M:add_temp_successors(succs)
+	for k, succ in pairs(succs) do
+		local seq, value = parse_key(succ, k)
+		value.temp = true
+		self:add(value, seq)
+	end
+end
+
+function M:remove_temp_successors()
+	local succs = self._succs
+	if not succs then
+		return
+	end
+
+	for k, succ in pairs(succs) do
+		if succ._data.temp then
+			self:remove(k)
+		end
+	end
+end
+
 function M:add_successors(succs)
 	for k, succ in pairs(succs) do
 		local seq, value = parse_key(succ, k)
@@ -257,28 +284,18 @@ local function get(tree, seq)
 	return mt(tree)
 end
 
-local function remove(tree, seq, prev_opts)
+local function remove(tree, seq)
 	local key, next_seq = util.split_vim_key(seq)
 	if key then
-		local opts_raw = tree._data.opts_raw
-		local merged_opts = util.merge_opts(opts_raw, prev_opts)
-		local next_tree = tree._succs[key]
-		if not next_tree then
-			return false
+		if next_seq and next_seq ~= "" then
+			local next_tree = tree._succs[key]
+			return remove(next_tree, next_seq)
 		end
-		return remove(next_tree, next_seq, merged_opts)
+		tree._succs[key] = nil
+		return true
 	end
 
-	-- update opts_merged for successors
-	if vim.tbl_count(tree._data.opts_raw) > 0 then
-		for _, succ in pairs(tree._succs) do
-			add(succ, nil, "", prev_opts)
-		end
-	end
-
-	tree._data = {}
-
-	return true
+	return false
 end
 
 -- @param[opt=nil] seq
@@ -297,7 +314,7 @@ end
 
 function M:remove(seq)
 	assert(seq and string.len(seq) > 0)
-	return remove(self, seq, self:opts())
+	return remove(self, seq)
 end
 
 function M:get_id()
