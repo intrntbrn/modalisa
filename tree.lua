@@ -108,7 +108,7 @@ function M:cond(opts)
 	end
 
 	if type(cond) == "function" then
-		opts = opts or M:opts()
+		opts = opts or self:opts()
 		return cond()
 	end
 
@@ -133,8 +133,7 @@ function M:desc(opts)
 	end
 
 	if type(desc) == "function" then
-		opts = opts or M:opts()
-		return desc(opts)
+		return desc(opts or self:opts())
 	end
 
 	return desc
@@ -154,12 +153,8 @@ function M:successors()
 		return {}
 	end
 
-	print("SUCCESSORS")
-
 	local tree_objects = {}
 	for k in pairs(succs) do
-		local succ = self:get(k)
-		assert(succ, "succ is nil in successors")
 		tree_objects[k] = self:get(k)
 	end
 
@@ -193,8 +188,8 @@ end
 local mt = function(obj)
 	return setmetatable(obj, {
 		__index = M,
-		__tostring = function(obj)
-			return vim.inspect(obj)
+		__tostring = function(t)
+			return vim.inspect(t)
 		end,
 	})
 end
@@ -246,7 +241,7 @@ local function add(tree, value, seq, prev_opts)
 		add(succ, nil, "", merged_opts)
 	end
 
-	return tree
+	return mt(tree)
 end
 
 local function get(tree, seq)

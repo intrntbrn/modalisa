@@ -534,7 +534,7 @@ function trunner:input(key)
 	end
 
 	-- traverse
-	local node = tree[key]
+	local node = tree:get(key)
 	if not node then
 		print(tree)
 		assert(false, "catch bug: tree is empty for accepted key: " .. key)
