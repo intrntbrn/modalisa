@@ -31,6 +31,7 @@ local mmodmap = require("motion.modmap")
 local akeygrabber = require("awful.keygrabber")
 local gears = require("gears")
 local notify = require("motion.notify")
+local config = require("motion.config")
 
 local trunner = {}
 
@@ -505,6 +506,7 @@ function trunner:run(t)
 			return
 		end
 		t:add_successors(list)
+
 		return t
 	end
 
@@ -660,17 +662,17 @@ function M.fake_input(key, force_continue)
 	trunner:input(key)
 end
 
-local function run(seq, parsed_keybind, extra_opts)
+local function run(seq, parsed_keybind)
 	print("run: ", seq)
 	---@diagnostic disable-next-line: need-check-nil
-	local t = root_tree.get(seq, extra_opts)
+	local t = root_tree.get(seq)
 	trunner:set(t, parsed_keybind)
 	trunner:start()
 end
 
 -- run inline table
 function M.run_tree(tree, opts, name)
-	---@diagnostic disable-next-line: need-check-nil
+	opts = config.get(opts)
 	local t = mtree:new(opts, name)
 	assert(t)
 	t:add_successors(tree)
@@ -679,17 +681,17 @@ function M.run_tree(tree, opts, name)
 end
 
 -- run keyroot_tree with a keybind (opt)
-function M.run(seq, keybind, extra_opts)
+function M.run(seq, keybind)
 	if keybind then
 		keybind = parse_key_all(keybind)
 		assert(keybind)
 	end
-	run(seq, keybind, extra_opts)
+	run(seq, keybind)
 end
 
-local function make_awful_key(prefix, parsed_key, extra_opts)
+local function make_awful_key(prefix, parsed_key)
 	return awful.key(parsed_key.mods, parsed_key.key, function()
-		run(prefix, parsed_key, extra_opts)
+		run(prefix, parsed_key)
 	end)
 end
 
@@ -723,7 +725,7 @@ function M.add_globalkey(prefix, vimkey, extra_opts)
 
 	for _, parsed_key in pairs(parsed_keys) do
 		-- the specified key
-		table.insert(keys, make_awful_key(prefix, parsed_key, extra_opts))
+		table.insert(keys, make_awful_key(prefix, parsed_key))
 
 		local map = vim.deepcopy(all_mods)
 
@@ -744,18 +746,18 @@ function M.add_globalkey(prefix, vimkey, extra_opts)
 			local keybind = vim.deepcopy(parsed_key)
 			keybind.mods = all
 
-			table.insert(keys, make_awful_key(prefix, keybind, extra_opts))
+			table.insert(keys, make_awful_key(prefix, keybind))
 		end
 	end
 
 	awful.keyboard.append_global_keybindings(keys)
 end
 
-function M.add_globalkey_solo(prefix, vimkey, extra_opts)
+function M.add_globalkey_solo(prefix, vimkey)
 	local parsed_keys = parse_vim_key(vimkey)
 	for _, parsed_key in pairs(parsed_keys) do
 		awful.keyboard.append_global_keybindings({
-			make_awful_key(prefix, parsed_key, extra_opts),
+			make_awful_key(prefix, parsed_key),
 		})
 	end
 end

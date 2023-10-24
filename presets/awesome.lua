@@ -33,7 +33,7 @@ end
 function M.awesome_menubar()
 	return mt({
 		opts = { group = "awesome.menu" },
-		desc = "show the menubar",
+		desc = "show menubar",
 		cond = function()
 			return pcall(require, "menubar")
 		end,

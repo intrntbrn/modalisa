@@ -82,7 +82,7 @@ function M:opts()
 end
 
 function M:opts_merged() -- alias
-	return M:opts()
+	return self:opts()
 end
 
 function M:opts_raw()
@@ -172,7 +172,7 @@ end
 function M:add_successors(succs)
 	for k, succ in pairs(succs) do
 		local seq, value = parse_key(succ, k)
-		M:add(value, seq)
+		self:add(value, seq)
 	end
 end
 
@@ -246,10 +246,6 @@ end
 
 local function get(tree, seq)
 	assert(tree)
-	-- FIXME:
-	if type(seq) == "table" then
-		print("get table: ", dump(seq._data))
-	end
 	local key, next_seq = util.split_vim_key(seq)
 	if key then
 		local next_tree = tree._succs[key]
@@ -296,7 +292,6 @@ function M:update_opts()
 end
 
 function M:get(seq)
-	print("tree.lua:get: ", seq)
 	return get(self, seq)
 end
 
