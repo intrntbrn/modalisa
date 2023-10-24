@@ -1,16 +1,17 @@
 local M = {}
 
 -- TODO: MAJOR:
+-- find a new name
 -- config menu
 -- exposed api
 -- renamer
 -- beautiful menu
 -- client label params
 -- color themes
--- param array instead hint_
+-- key keybinds
 
 -- TODO:
--- add keybind support for each tree node
+-- client properties c param
 -- keyname tester
 -- fix default clienting floating resize
 -- tests for key parser
@@ -19,7 +20,6 @@ local M = {}
 -- group needs to be attribute, hidden as well, fg as well
 -- group colors
 -- notify for duplicate keys
--- global keybinds (e.g. brightness, volume)
 -- merge keynames in hint
 -- cache tree keymap (~3ms)
 

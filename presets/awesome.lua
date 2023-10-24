@@ -309,7 +309,6 @@ function M.client_swap_picker()
 			local include_focused_client = false
 			local filter = awm.client_create_filter(false, include_focused_client)
 			local fn = function(c)
-				local cf = client.focus
 				client.focus:swap(c)
 			end
 			return awm.client_picker(opts, fn, filter)
@@ -317,7 +316,7 @@ function M.client_swap_picker()
 	})
 end
 
-function M.client_toggle_fullscreen()
+function M.client_focus_toggle_fullscreen()
 	return mt({
 		opts = { group = "client.property" },
 		desc = function()
@@ -335,12 +334,33 @@ function M.client_toggle_fullscreen()
 		end,
 		fn = function()
 			awm.client_toggle_fullscreen()
-			return "fullscreen", client.focus.fullscreen
 		end,
 	})
 end
 
-function M.client_toggle_maximize()
+function M.client_toggle_fullscreen(c)
+	assert(c)
+	return mt({
+		opts = { group = "client.property" },
+		desc = function()
+			if not c then
+				return "toggle fullscreen"
+			end
+			if c.fullscreen then
+				return "unfullscreen"
+			end
+			return "fullscreen"
+		end,
+		cond = function()
+			return c and c.valid
+		end,
+		fn = function()
+			awm.client_toggle_fullscreen()
+		end,
+	})
+end
+
+function M.client_focus_toggle_maximize()
 	return mt({
 		opts = { group = "client.property" },
 		desc = function()
@@ -362,7 +382,29 @@ function M.client_toggle_maximize()
 	})
 end
 
-function M.client_toggle_sticky()
+function M.client_toggle_maximize(c)
+	assert(c)
+	return mt({
+		opts = { group = "client.property" },
+		desc = function()
+			if not c then
+				return "toggle maximize"
+			end
+			if c.maximized then
+				return "unmaximize"
+			end
+			return "maximize"
+		end,
+		cond = function()
+			return c and c.valid
+		end,
+		fn = function()
+			awm.client_toggle_maximize(c)
+		end,
+	})
+end
+
+function M.client_focus_toggle_sticky()
 	return mt({
 		opts = { group = "client.property" },
 		desc = function()
@@ -384,7 +426,29 @@ function M.client_toggle_sticky()
 	})
 end
 
-function M.client_toggle_maximize_horizontally()
+function M.client_toggle_sticky(c)
+	assert(c)
+	return mt({
+		opts = { group = "client.property" },
+		desc = function()
+			if not c then
+				return "toggle sticky"
+			end
+			if c.sticky then
+				return "unsticky"
+			end
+			return "sticky"
+		end,
+		cond = function()
+			return c and c.valid
+		end,
+		fn = function()
+			awm.client_toggle_sticky(c)
+		end,
+	})
+end
+
+function M.client_focus_toggle_maximize_horizontally()
 	return mt({
 		opts = { group = "client.property" },
 		desc = function()
@@ -406,7 +470,29 @@ function M.client_toggle_maximize_horizontally()
 	})
 end
 
-function M.client_toggle_maximize_vertically()
+function M.client_toggle_maximize_horizontally(c)
+	assert(c)
+	return mt({
+		opts = { group = "client.property" },
+		desc = function()
+			if not c then
+				return "toggle maximize horizontally"
+			end
+			if c.maximized_horizontal then
+				return "unmaximize horizontally"
+			end
+			return "maximize horizontally"
+		end,
+		cond = function()
+			return c and c.valid
+		end,
+		fn = function()
+			awm.client_toggle_maximize_horizontally(c)
+		end,
+	})
+end
+
+function M.client_focus_toggle_maximize_vertically()
 	return mt({
 		opts = { group = "client.property" },
 		desc = function()
@@ -428,7 +514,29 @@ function M.client_toggle_maximize_vertically()
 	})
 end
 
-function M.client_toggle_floating()
+function M.client_toggle_maximize_vertically(c)
+	assert(_)
+	return mt({
+		opts = { group = "client.property" },
+		desc = function()
+			if not c then
+				return "toggle maximize vertically"
+			end
+			if c.maximized_vertical then
+				return "unmaximize vertically"
+			end
+			return "maximize vertically"
+		end,
+		cond = function()
+			return c and c.valid
+		end,
+		fn = function()
+			awm.client_toggle_maximize_vertically(c)
+		end,
+	})
+end
+
+function M.client_focus_toggle_floating()
 	return mt({
 		opts = { group = "client.property" },
 		desc = function()
@@ -450,7 +558,29 @@ function M.client_toggle_floating()
 	})
 end
 
-function M.client_toggle_ontop()
+function M.client_toggle_floating(c)
+	assert(c)
+	return mt({
+		opts = { group = "client.property" },
+		desc = function()
+			if not c then
+				return "toggle floating"
+			end
+			if c.floating then
+				return "unfloating"
+			end
+			return "floating"
+		end,
+		cond = function()
+			return c and c.valid
+		end,
+		fn = function()
+			awm.client_toggle_floating(c)
+		end,
+	})
+end
+
+function M.client_focus_toggle_ontop()
 	return mt({
 		opts = { group = "client.property" },
 		desc = function()
@@ -472,7 +602,29 @@ function M.client_toggle_ontop()
 	})
 end
 
-function M.client_minimize()
+function M.client_toggle_ontop(c)
+	assert(c)
+	return mt({
+		opts = { group = "client.property" },
+		desc = function()
+			if not c then
+				return "toggle ontop"
+			end
+			if c.ontop then
+				return "ontop disable"
+			end
+			return "ontop"
+		end,
+		cond = function()
+			return c and c.valid
+		end,
+		fn = function()
+			awm.client_toggle_ontop(1)
+		end,
+	})
+end
+
+function M.client_focus_minimize()
 	return mt({
 		opts = { group = "client.property" },
 		desc = "minimize",
@@ -485,7 +637,21 @@ function M.client_minimize()
 	})
 end
 
-function M.client_kill()
+function M.client_minimize(c)
+	assert(c)
+	return mt({
+		opts = { group = "client.property" },
+		desc = "minimize",
+		cond = function()
+			return c and c.valid
+		end,
+		fn = function()
+			awm.client_minmize(c)
+		end,
+	})
+end
+
+function M.client_focus_kill()
 	return mt({
 		opts = { group = "client" },
 		desc = function()
@@ -496,6 +662,22 @@ function M.client_kill()
 		end,
 		fn = function()
 			awm.client_kill()
+		end,
+	})
+end
+
+function M.client_kill(c)
+	assert(c)
+	return mt({
+		opts = { group = "client" },
+		desc = function()
+			return "client kill"
+		end,
+		cond = function()
+			return c and c.valid
+		end,
+		fn = function()
+			awm.client_kill(c)
 		end,
 	})
 end
@@ -748,6 +930,34 @@ function M.tag_move_focused_client_to_tag(i)
 	})
 end
 
+function M.move_client_to_tag_menu(c)
+	assert(c)
+	return mt({
+		opts = { group = "tag.client.move" },
+		cond = function()
+			return c and c.valid
+		end,
+		desc = "move client to tag",
+		fn = function(opts)
+			local s = c.screen
+
+			local ret = {}
+			for i, t in ipairs(s.tags) do
+				local desc = helper.tagname(t)
+				table.insert(ret, {
+					util.index_to_label(i, opts.labels),
+					desc = desc,
+					fn = function()
+						awm.client_move_to_tag(c, t)
+					end,
+				})
+			end
+
+			return ret
+		end,
+	})
+end
+
 function M.tag_move_all_clients_to_tag_menu()
 	return mt({
 		opts = { group = "tag.client.move.all" },
@@ -767,10 +977,7 @@ function M.tag_move_all_clients_to_tag_menu()
 
 			local ret = {}
 			for i, t in ipairs(s.tags) do
-				local desc = string.format("%d", i)
-				if t.name then
-					desc = string.format("%s: %s", desc, t.name)
-				end
+				local desc = helper.tagname(t)
 				table.insert(ret, {
 					util.index_to_label(i, opts.labels),
 					desc = desc,

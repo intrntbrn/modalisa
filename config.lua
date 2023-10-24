@@ -28,9 +28,6 @@ local defaults = {
 		delay = 0, -- ms
 		show_disabled_keys = true,
 		sort = "group", -- group | id | nil
-		group_colors = {
-			["menu"] = "#FF00FF",
-		},
 		key_aliases = {
 			-- ["(A%-)[%u%-]"] = "Alt",
 			-- ["S%-"] = "Shift",
@@ -52,24 +49,27 @@ local defaults = {
 			XF86AudioStop = "⏹",
 		},
 		separator = " ➜ ",
-		entry_key_width = 5,
+		entry_key_width = 5, -- chars
 		min_entry_width = 25, -- chars
 		max_entry_width = 30, -- chars
 		width = 0.75, -- fraction or abs
 		height = 0.3, -- fraction or abs
-		border_width = dpi(1),
-		opacity = 1,
-		shape = nil,
 		fill_remaining_space = true,
 		fill_strategy = "horizontal", -- horizontal | vertical
 		placement = function(h)
 			awful.placement.bottom(h, { honor_workarea = true })
 		end,
+		border_width = dpi(1),
+		opacity = 1,
+		shape = nil,
 		odd_style = "row", -- row  | column | checkered | none
 		font = "Monospace Bold 12",
 		font_separator = "Monospace Bold 12",
 		font_desc = "Monospace 12",
 
+		group_colors = {
+			["menu"] = "#FF00FF",
+		},
 		color_border = "#444A73",
 		color_entry_fg = "#eceffc",
 		color_entry_disabled_fg = "#959cbc",
