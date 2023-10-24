@@ -11,7 +11,6 @@ local glib = require("lgi").GLib
 local M = {}
 
 -- TODO:
--- merge keys with same desc
 -- group colors
 -- header
 
@@ -130,9 +129,6 @@ function popup:update(t)
 	)
 	local cell_width = dpi(util.get_font_width(font))
 
-	-- print("cell_height: ", cell_height)
-	-- print("cell_width: ", cell_width)
-
 	local entry_height = cell_height
 	local min_entry_width = cell_width * hopts.min_entry_width
 	local max_entry_width = cell_width * hopts.max_entry_width
@@ -142,9 +138,6 @@ function popup:update(t)
 	local max_rows = math.floor(max_height / entry_height)
 
 	local entry_width = math.floor(math.min((max_width / max_columns), max_entry_width))
-	-- print("max_entries: ", max_entries)
-	-- print("max_columns: ", max_columns)
-	-- print("max_rows: ", math.floor(max_rows))
 
 	local num_entries = #entries
 	local num_columns = max_columns
@@ -163,10 +156,6 @@ function popup:update(t)
 			num_columns = math.ceil(num_entries / num_rows)
 		end
 	end
-
-	-- print("num_entries: ", num_entries)
-	-- print("num_rows: ", num_rows)
-	-- print("num_columns: ", num_columns)
 
 	local layout_columns = wibox.layout.fixed.horizontal({})
 	local entries_widget = {}

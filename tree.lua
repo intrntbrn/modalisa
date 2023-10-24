@@ -4,10 +4,18 @@ local dump = vim.inspect
 
 local M = {}
 
-local id = 0
+local global_id = 0
 local function get_id()
-	id = id + 1
-	return id
+	global_id = global_id + 1
+	return global_id
+end
+
+local function on_update(id, new, old)
+	awesome.emit_signal("motion::tree::update", id, new, old)
+end
+
+local function on_remove(id, entry)
+	awesome.emit_signal("motion::tree::remove", id, entry)
 end
 
 -- parse a loosely defined key
@@ -21,6 +29,7 @@ local function parse_key(key, table_index)
 	local desc
 	local result
 	local temp
+	local global
 
 	local t = type(key)
 
@@ -35,6 +44,8 @@ local function parse_key(key, table_index)
 				if k == "desc" or k == "description" then
 					assert(not desc, "multiple descrptions")
 					desc = v
+				elseif k == "global" then
+					global = v
 				else
 					assert(not seq, "multiple undeclared strings")
 					seq = v
@@ -73,14 +84,16 @@ local function parse_key(key, table_index)
 		seq = table_index
 	end
 
-	return seq, {
-		fn = fn,
-		opts_raw = opts,
-		cond = cond,
-		desc = desc,
-		result = result,
-		temp = temp,
-	}
+	return seq,
+		{
+			fn = fn,
+			opts_raw = opts,
+			cond = cond,
+			desc = desc,
+			result = result,
+			temp = temp,
+			global = global,
+		}
 end
 
 function M:opts()
@@ -101,6 +114,10 @@ function M:exec(opts)
 		opts = opts or self:opts()
 		return fn(opts, self)
 	end
+end
+
+function M:global()
+	return self._data.global
 end
 
 function M:pred()
@@ -258,9 +275,15 @@ local function add(tree, value, seq, prev_opts)
 
 	-- insert
 	if value then
+		local old = tree._data and vim.deepcopy(tree._data)
+
 		tree._data = value
+		tree._data.opts_merged = merged_opts
+
+		on_update(tree._id, vim.deepcopy(tree._data), old)
+	else
+		tree._data.opts_merged = merged_opts
 	end
-	tree._data.opts_merged = merged_opts
 
 	-- update merged_opts for all successors
 	for _, succ in pairs(tree._succs) do
@@ -291,7 +314,14 @@ local function remove(tree, seq)
 			local next_tree = tree._succs[key]
 			return remove(next_tree, next_seq)
 		end
+		local old = tree._succs[key]
+		local old_data = old._data and vim.deepcopy(old._data)
+
 		tree._succs[key] = nil
+
+		if old_data then
+			on_remove(tree._id, old_data)
+		end
 		return true
 	end
 

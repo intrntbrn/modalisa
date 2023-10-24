@@ -9,18 +9,17 @@ local M = {}
 -- client label params
 -- color themes
 -- key keybinds
+-- fix default clienting floating resize
+-- group needs to be attribute, hidden as well, fg as well
+-- option picker ("pick a string")
 
 -- TODO:
--- client properties c param
+-- menu indicator in hints
 -- keyname tester
--- fix default clienting floating resize
 -- tests for key parser
--- option picker ("pick a string")
 -- color highlight links "bg or #ff00" opts["color"]
--- group needs to be attribute, hidden as well, fg as well
 -- group colors
 -- notify for duplicate keys
--- merge keynames in hint
 -- cache tree keymap (~3ms)
 
 local awful = require("awful")
@@ -225,6 +224,46 @@ local function parse_key_all(key)
 	end
 
 	return nil
+end
+
+local global_keys = {}
+
+local function global_add(id, entry)
+	if not entry then
+		return
+	end
+
+	local global_key = entry.global
+	if not global_key then
+		return
+	end
+
+	local entry_fn = entry.fn
+	if not entry_fn then
+		return
+	end
+
+	local pks = parse_vim_key(global_key)
+	for _, pk in pairs(pks) do
+		local fn = function()
+			-- FIXME: no opts as param
+			entry_fn()
+		end
+		local akey = awful.key(pk.mods, pk.key, fn)
+		global_keys[id] = akey
+		awful.keyboard.append_global_keybinding(akey)
+	end
+end
+
+local function global_remove(id, entry)
+	if not entry then
+		return
+	end
+	local akey = global_keys[id]
+	if not akey then
+		return
+	end
+	awful.keyboard.remove_global_keybinding(akey)
 end
 
 -- @param m table Map of parsed keys
@@ -552,7 +591,6 @@ function trunner:input(key)
 	if node:is_leaf() then
 		next_tree = self:run(node)
 	else
-		print("not a leaf")
 		next_tree = node
 	end
 
@@ -692,7 +730,7 @@ function M.run(seq, keybind)
 	run(seq, keybind)
 end
 
-local function make_awful_key(prefix, parsed_key)
+local function run_prefix_awful_key(prefix, parsed_key)
 	return awful.key(parsed_key.mods, parsed_key.key, function()
 		run(prefix, parsed_key)
 	end)
@@ -728,7 +766,7 @@ function M.add_globalkey(prefix, vimkey, extra_opts)
 
 	for _, parsed_key in pairs(parsed_keys) do
 		-- the specified key
-		table.insert(keys, make_awful_key(prefix, parsed_key))
+		table.insert(keys, run_prefix_awful_key(prefix, parsed_key))
 
 		local map = vim.deepcopy(all_mods)
 
@@ -749,7 +787,7 @@ function M.add_globalkey(prefix, vimkey, extra_opts)
 			local keybind = vim.deepcopy(parsed_key)
 			keybind.mods = all
 
-			table.insert(keys, make_awful_key(prefix, keybind))
+			table.insert(keys, run_prefix_awful_key(prefix, keybind))
 		end
 	end
 
@@ -760,7 +798,7 @@ function M.add_globalkey_solo(prefix, vimkey)
 	local parsed_keys = parse_vim_key(vimkey)
 	for _, parsed_key in pairs(parsed_keys) do
 		awful.keyboard.append_global_keybindings({
-			make_awful_key(prefix, parsed_key),
+			run_prefix_awful_key(prefix, parsed_key),
 		})
 	end
 end
@@ -771,6 +809,16 @@ function M.setup(opts)
 	once = true
 
 	trunner:init()
+
+	awesome.connect_signal("motion::tree::update", function(id, new, old)
+		global_remove(id, old)
+		global_add(id, new)
+	end)
+
+	awesome.connect_signal("motion::tree::remove", function(id, old)
+		print("motion::tree::remove")
+		global_remove(id, old)
+	end)
 
 	awesome.connect_signal("xkb::map_changed", function()
 		generate_mod_conversion_maps()
