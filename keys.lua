@@ -88,7 +88,7 @@ local keys = {
 	["f"] = ps.client_toggle_fullscreen(),
 	["m"] = ps.client_toggle_maximize(),
 	["n"] = ps.client_minimize(),
-	["u"] = ps.client_unminimize_menu() + { opts = { hints_delay = 0, labels = util.labels_qwerty } },
+	["u"] = ps.client_unminimize_menu() + { opts = { hints = { delay = 0 }, labels = util.labels_qwerty } },
 	["<Tab>"] = ps.client_focus_prev(),
 
 	-- apps
@@ -111,8 +111,8 @@ local keys = {
 	["tr"] = { desc = "rename tag" }, -- TODO
 	["tn"] = { desc = "new tag" }, -- TODO
 	["tp"] = ps.tag_toggle_policy(),
-	["tt"] = ps.tag_toggle_menu() + { opts = { hints_delay = 0, hints_show = true } },
-	["ta"] = ps.tag_move_all_clients_to_tag_menu() + { opts = { hints_delay = 0, hints_show = true } },
+	["tt"] = ps.tag_toggle_menu() + { opts = { hints = { enabled = true, delay = 0 } } },
+	["ta"] = ps.tag_move_all_clients_to_tag_menu() + { opts = { hints = { enabled = true, delay = 0 } } },
 	["t<Left>"] = ps.tag_previous(),
 	["t<Right>"] = ps.tag_next(),
 	["t<Tab>"] = ps.tag_last(),

@@ -271,7 +271,9 @@ function M.client_select_picker(multi_window, include_focused_client)
 	return mt({
 		opts = {
 			group = "client.menu.focus",
-			hints_show = false,
+			hints = {
+				enabled = false,
+			},
 			labels = util.labels_qwerty,
 		},
 		cond = function()
@@ -285,9 +287,6 @@ function M.client_select_picker(multi_window, include_focused_client)
 			end
 			local list = awm.client_picker(opts, fn, filter)
 
-			-- FIXME:
-			-- require("motion.config")["hints_separator"] = "xxx"
-
 			return list
 		end,
 	})
@@ -297,7 +296,9 @@ function M.client_swap_picker()
 	return mt({
 		opts = {
 			group = "client.swap",
-			hints_show = false,
+			hints = {
+				enabled = false,
+			},
 			labels = "asdfertgcvjkluionmb",
 		},
 		cond = function()

@@ -18,7 +18,7 @@ local M = {}
 local popup = {}
 local timer
 
-local function sort_entries_by_group(entries, opts)
+local function sort_entries_by_group(entries, hopts)
 	-- sort by group, desc, id
 	table.sort(entries, function(a, b)
 		if a.group == b.group then
@@ -33,17 +33,17 @@ local function sort_entries_by_group(entries, opts)
 	end)
 end
 
-local function sort_entries_by_id(entries, opts)
+local function sort_entries_by_id(entries, hopts)
 	table.sort(entries, function(a, b)
 		return a.id < b.id
 	end)
 end
 
-local function make_entries(keys, opts)
+local function make_entries(keys, hopts)
 	local entries = {}
 
-	local aliases = opts and opts.hints_key_aliases
-	local show_disabled = opts.hints_show_disabled_keys
+	local aliases = hopts and hopts.key_aliases
+	local show_disabled = hopts.show_disabled_keys
 	for k, key in pairs(keys) do
 		if show_disabled or key:cond() then
 			local kopts = key:opts()
@@ -94,12 +94,12 @@ function popup:update(t)
 
 	local s = awful.screen.focused()
 
-	local opts = t:opts()
+	local hopts = t:opts().hints
 	local keys = t:successors()
 
-	local entries = make_entries(keys, opts)
+	local entries = make_entries(keys, hopts)
 
-	local sort = opts.hints_sort
+	local sort = hopts.sort
 	if sort then
 		local fn
 		if sort == "id" then
@@ -109,17 +109,17 @@ function popup:update(t)
 		end
 
 		if fn then
-			fn(entries, opts)
+			fn(entries, hopts)
 		end
 	end
 
 	-- calculations
-	local max_width = util.get_pixel_width(opts.hints_width, s)
-	local max_height = util.get_pixel_height(opts.hints_height, s)
+	local max_width = util.get_pixel_width(hopts.width, s)
+	local max_height = util.get_pixel_height(hopts.height, s)
 
-	local font = opts.hints_font or opts.hints_font_desc or opts.hints_font_separator
-	local font_desc = opts.hints_font_desc or font
-	local font_separator = opts.hints_font_separator or font
+	local font = hopts.font or hopts.font_desc or hopts.font_separator
+	local font_desc = hopts.font_desc or font
+	local font_separator = hopts.font_separator or font
 
 	local cell_height = dpi(
 		math.max(
@@ -134,8 +134,8 @@ function popup:update(t)
 	-- print("cell_width: ", cell_width)
 
 	local entry_height = cell_height
-	local min_entry_width = cell_width * opts.hints_min_entry_width
-	local max_entry_width = cell_width * opts.hints_max_entry_width
+	local min_entry_width = cell_width * hopts.min_entry_width
+	local max_entry_width = cell_width * hopts.max_entry_width
 
 	local max_entries = math.floor((max_width * max_height) / (min_entry_width * entry_height))
 	local max_columns = math.floor(max_width / min_entry_width)
@@ -153,7 +153,7 @@ function popup:update(t)
 	if num_entries < max_entries then
 		-- all entries fit
 		-- prefer width or height?
-		if opts.hints_fill_strategy == "horizontal" then
+		if hopts.fill_strategy == "horizontal" then
 			-- fill columns first
 			num_columns = max_columns
 			num_rows = math.ceil(num_entries / num_columns)
@@ -178,7 +178,7 @@ function popup:update(t)
 		for r = 1, num_rows do
 			local entry = entries[i]
 			if not entry then
-				if opts.hints_fill_remaining_space then
+				if hopts.fill_remaining_space then
 					entry = {
 						is_dummy = true,
 					}
@@ -187,10 +187,10 @@ function popup:update(t)
 				end
 			end
 
-			local bg = opts.hints_color_entry_bg
-			local bg_hover = util.color_or_luminosity(opts.hints_color_hover_bg, bg)
+			local bg = hopts.color_entry_bg
+			local bg_hover = util.color_or_luminosity(hopts.color_hover_bg, bg)
 
-			local odd_style = opts.hints_odd_style
+			local odd_style = hopts.odd_style
 			if odd_style and (odd_style == "row" or odd_style == "column" or odd_style == "checkered") then
 				local odd_source = r
 				if odd_style == "column" then
@@ -200,7 +200,7 @@ function popup:update(t)
 				end
 				local odd = (odd_source % 2) == 0
 				if odd then
-					bg = util.color_or_luminosity(opts.hints_color_entry_odd_bg, bg)
+					bg = util.color_or_luminosity(hopts.color_entry_odd_bg, bg)
 				end
 			end
 
@@ -215,7 +215,7 @@ function popup:update(t)
 								widget = wibox.widget.textbox,
 							},
 							strategy = "exact",
-							width = opts.hints_entry_key_width * cell_width,
+							width = hopts.entry_key_width * cell_width,
 							widget = wibox.container.constraint,
 						},
 						{
@@ -255,19 +255,19 @@ function popup:update(t)
 				local fg_desc
 				local fg_separator
 				if entry.cond() then
-					fg = entry.fg or opts.hints_color_entry_fg
-					fg_desc = entry.fg or opts.hints_color_entry_desc_fg or fg
-					fg_separator = opts.hints_color_entry_separator_fg or fg
+					fg = entry.fg or hopts.color_entry_fg
+					fg_desc = entry.fg or hopts.color_entry_desc_fg or fg
+					fg_separator = hopts.color_entry_separator_fg or fg
 				else
-					fg = opts.hints_color_entry_disabled_fg
-					fg_desc = opts.hints_color_entry_disabled_fg
-					fg_separator = opts.hints_color_entry_disabled_fg
+					fg = hopts.color_entry_disabled_fg
+					fg_desc = hopts.color_entry_disabled_fg
+					fg_separator = hopts.color_entry_disabled_fg
 				end
 				bg_entry.fg = fg
 
 				tb_key.markup = util.markup.fg(fg, entry.key)
 				tb_desc.markup = util.markup.fg(fg_desc, entry.desc())
-				tb_separator.markup = util.markup.fg(fg_separator, opts.hints_separator)
+				tb_separator.markup = util.markup.fg(fg_separator, hopts.separator)
 			end
 
 			local function mouse_button_handler(_, _, _, button)
@@ -316,15 +316,14 @@ function popup:update(t)
 
 	local margin_left
 	local margin_right
-	if opts.hints_fill_remaining_space then
+	if hopts.fill_remaining_space then
 		local width_remaining = max_width - (num_columns * entry_width)
 		margin_left = math.floor(width_remaining / 2)
 		margin_right = width_remaining - margin_left
 	end
 
 	-- compute size
-	local placement = type(opts.hints_placement) == "string" and awful.placement[opts.hints_placement]
-		or opts.hints_placement
+	local placement = type(hopts.placement) == "string" and awful.placement[hopts.placement] or hopts.placement
 
 	local widget = wibox.widget.base.make_widget_declarative({
 		{
@@ -333,11 +332,11 @@ function popup:update(t)
 			left = margin_left,
 			widget = wibox.container.margin,
 		},
-		bg = opts.hints_color_entry_bg,
-		border_width = opts.hints_border_width,
-		border_color = opts.hints_color_border,
-		shape = opts.hints_shape,
-		opacity = opts.hints_opacity,
+		bg = hopts.color_entry_bg,
+		border_width = hopts.border_width,
+		border_color = hopts.color_border,
+		shape = hopts.shape,
+		opacity = hopts.opacity,
 		widget = wibox.container.background,
 	})
 
@@ -350,7 +349,7 @@ function popup:update(t)
 	self.popup.visible = true
 end
 
-function popup:new(opts)
+function popup:new(hopts)
 	local pop = awful.popup({
 		visible = false,
 		ontop = true,
@@ -403,18 +402,18 @@ function popup:refresh_entries()
 end
 
 local function handle_tree_changed(t)
-	local opts = t:opts()
+	local hopts = t:opts().hints
 
 	if timer then
 		timer:stop()
 	end
 
-	if not opts.hints_show then
+	if not hopts.enabled then
 		popup:set_visible(false)
 		return
 	end
 
-	local delay = opts.hints_delay
+	local delay = hopts.delay
 
 	-- do not delay if hints are already displayed
 	if not popup:is_visible() and delay and delay > 0 then
@@ -436,7 +435,7 @@ end
 local once
 function M.setup(opts)
 	assert(once == nil, "hints are already setup")
-	once = popup:new(opts)
+	once = popup:new(opts.hints)
 
 	awesome.connect_signal("motion::exec", function(args)
 		util.run_on_idle(function()
