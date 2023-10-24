@@ -121,7 +121,7 @@ local options
 local function on_update(key)
 	local value = rawget(options, key)
 	print("motion::config: ", key, " = ", vim.inspect(value))
-	awesome.emit_signal(string.format("motion::property::%s", key), value)
+	awesome.emit_signal("motion::config", key, value)
 end
 
 function M.get(...)
@@ -147,10 +147,6 @@ function M.setup(opts)
 	assert(not options, "config setup once")
 	options = defaults
 	options = M.get(opts or {})
-
-	for k in pairs(options) do
-		on_update(k)
-	end
 end
 
 return setmetatable(M, {
