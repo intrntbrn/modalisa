@@ -77,6 +77,102 @@ local function parse_key(key, table_index)
 	}
 end
 
+function M:opts()
+	return self._data.opts_merged
+end
+
+function M:opts_raw()
+	return self._data.opts_raw
+end
+
+function M:exec(opts)
+	local fn = self._data.fn
+	if fn then
+		opts = opts or self:opts()
+		return fn(opts, self)
+	end
+end
+
+function M:pred()
+	return self._prev
+end
+
+function M:cond(opts)
+	local cond = self._data.cond
+	if cond == nil then
+		return true
+	end
+
+	if type(cond) == "function" then
+		opts = opts or M:opts()
+		return cond()
+	end
+
+	return cond
+end
+
+function M:result()
+	return self._data.result
+end
+
+function M:set_result(key, value)
+	if not self._data.result then
+		self._data.result = {}
+	end
+	self._data.result[key] = value
+end
+
+function M:desc(opts)
+	local desc = self._data.desc
+	if not desc then
+		return ""
+	end
+
+	if type(desc) == "function" then
+		opts = opts or M:opts()
+		return desc(opts)
+	end
+
+	return desc
+end
+
+function M:set_desc(desc)
+	self._data.desc = desc
+end
+
+function M:id()
+	return self._id
+end
+
+function M:successors()
+	local succs = self._succs
+	if not succs then
+		return {}
+	end
+
+	local tree_objects = {}
+	for k in pairs(succs) do
+		tree_objects[k] = self:get(k)
+	end
+
+	return tree_objects
+end
+
+function M:is_leaf()
+	local succs = self._succs
+	if not succs or vim.tbl_isempty(succs) then
+		return true
+	end
+	return false
+end
+
+function M:add_successors(succs)
+	for k, succ in pairs(succs) do
+		local seq, value = parse_key(succ, k)
+		M:add(value, seq)
+	end
+end
+
 local function make_initial_node(prev_tree)
 	return {
 		_id = get_id(),
