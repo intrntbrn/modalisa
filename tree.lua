@@ -299,7 +299,6 @@ local function add(tree, value, seq, prev_opts, prev_tree)
 
 	-- update merged_opts for all successors
 	for _, succ in pairs(tree._succs) do
-		-- NOTE: calling add with a nil value only merges the opts
 		add(succ, nil, "", merged_opts, tree)
 	end
 
@@ -343,11 +342,11 @@ end
 -- @param[opt=nil] seq
 function M:add(value, seq)
 	seq, value = parse_key(value, seq)
-	return add(self, value, seq, self:opts(), self:pred()) -- FIXME: last param
+	return add(self, value, seq, self:opts(), self:pred())
 end
 
 function M:update_opts()
-	return add(self, nil, "", self:opts(), self:pred()) -- FIXME: last param
+	return add(self, nil, "", self:opts(), self:pred())
 end
 
 function M:get(seq)
