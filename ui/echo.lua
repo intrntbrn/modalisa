@@ -33,14 +33,21 @@ end
 local function make_key_value_textbox(eopts, key, value)
 	local font = eopts.font
 	local fg = eopts.color_fg
-	local font_header = eopts.font_header
-	local fg_header = eopts.color_header_fg
+	local font_key = eopts.font_header
+	local fg_key = eopts.color_header_fg
 
-	local font_width = dpi(math.max(util.get_font_width(font), util.get_font_width(font_header)))
+	local font_width = dpi(math.max(util.get_font_width(font), util.get_font_width(font_key)))
 	local width = font_width * eopts.entry_width
 
-	local tb_key = make_center_textbox(eopts, key, font_header, fg_header, width)
-	local tb_value = make_center_textbox(eopts, value, font, fg, width)
+	local tb_key
+	if key and string.len(key) > 0 then
+		tb_key = make_center_textbox(eopts, key, font_key, fg_key, width)
+	end
+
+	local tb_value
+	if value and string.len(value) > 0 then
+		tb_value = make_center_textbox(eopts, value, font, fg, width)
+	end
 
 	local layout
 	local orientation = eopts.orientation
@@ -53,7 +60,7 @@ local function make_key_value_textbox(eopts, key, value)
 	local base = wibox.widget.base.make_widget_declarative({
 		tb_key,
 		tb_value,
-		spacing = eopts.spacing,
+		spacing = tb_key and tb_value and eopts.spacing,
 		layout = layout,
 	})
 
@@ -163,10 +170,18 @@ local function set_timer(eopts)
 	})
 end
 
-local function handle(args)
-	local result = args.result
-	if not result then
-		print("no result")
+local function run(kvs, opts)
+	opts = opts or require("motion.config").get()
+	local eopts = opts.echo
+
+	local widget = create_widget(eopts, kvs)
+	popup:set_widget(widget, eopts)
+	set_timer(eopts)
+end
+
+local function handle_signal(args)
+	local results = args.result
+	if not results then
 		return
 	end
 
@@ -185,9 +200,22 @@ local function handle(args)
 		return
 	end
 
-	local widget = create_widget(eopts, result)
-	popup:set_widget(widget, eopts)
-	set_timer(eopts)
+	run(results, opts)
+end
+
+function M.show(kvs, opts)
+	run(kvs, opts)
+end
+
+function M.show_simple(key, value, opts)
+	if not value then
+		value = ""
+	end
+
+	local result = {}
+	result[key] = value
+
+	run(result, opts)
 end
 
 local once
@@ -196,8 +224,9 @@ function M.setup(opts)
 	once = true
 
 	popup:new(opts)
+
 	awesome.connect_signal("motion::exec", function(args)
-		handle(args)
+		handle_signal(args)
 	end)
 end
 
