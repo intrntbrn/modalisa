@@ -12,12 +12,12 @@ local defaults = {
 	key = "<M-y>",
 	back_keys = "<BackSpace>",
 	stop_keys = { "<Escape>" },
-	default_keys = true,
+	include_default_keys = true,
 
 	-- core
 	unique = { "key", "hidden", "fg", "continue" },
 	mode = "hybrid", -- "modal" | "hold" | "hybrid" | "forever"
-	ignore_modifiers = true,
+	smart_modifiers = true,
 	stop_on_unknown_key = false,
 	ignore_shift_state_for_special_characters = true,
 	timeout = 0, -- ms

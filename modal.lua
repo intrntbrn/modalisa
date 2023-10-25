@@ -605,7 +605,7 @@ function trunner:keypressed_callback()
 			end
 
 			local opts = self.tree:opts()
-			if opts.ignore_modifiers and self.mm:has_pressed_mods() then
+			if opts.smart_modifiers and self.mm:has_pressed_mods() then
 				-- find the match with the least amount of ignored mods
 				local pressed_mods_list = self.mm:get_pressed_mods()
 				local combinations = {}

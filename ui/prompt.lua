@@ -120,7 +120,7 @@ function popup:set_widget(widget, popts)
 	self.popup.visible = true
 end
 
-local function run(fn, initial, header_text, opts)
+local function run(fn, initial_text, header_text, opts)
 	assert(fn)
 	opts = opts or config.get()
 
@@ -137,7 +137,7 @@ local function run(fn, initial, header_text, opts)
 		font = popts.font,
 		fg_cursor = popts.color_cursor_fg,
 		bg_cursor = popts.color_cursor_bg,
-		text = initial or "",
+		text = initial_text or "",
 		done_callback = function()
 			popup:set_visible(false)
 		end,
