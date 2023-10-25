@@ -390,7 +390,7 @@ function popup:refresh_entries()
 	})
 end
 
-local function handle_tree_changed(t)
+local function show(t)
 	local hopts = t:opts().hints
 
 	if timer then
@@ -421,6 +421,10 @@ local function handle_tree_changed(t)
 	end
 end
 
+function M.show(t)
+	show(t)
+end
+
 local once
 function M.setup(opts)
 	assert(once == nil, "hints are already setup")
@@ -434,7 +438,7 @@ function M.setup(opts)
 
 	awesome.connect_signal("motion::update", function(args)
 		util.run_on_idle(function()
-			handle_tree_changed(args.tree)
+			show(args.tree)
 		end)
 	end)
 
