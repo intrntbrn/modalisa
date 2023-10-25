@@ -156,9 +156,7 @@ local function on_update(key)
 end
 
 function M.get(...)
-	if options == nil then
-		M.setup()
-	end
+	assert(options)
 
 	local all = { {}, options }
 
@@ -174,8 +172,21 @@ function M.get(...)
 	return ret
 end
 
+function M.set(k, v)
+	assert(options)
+	assert(type(k) == "string", "key is not a string")
+
+	local tbl = {}
+	tbl[k] = v and vim.deepcopy(v)
+	local merged = vim.tbl_deep_extend("force", options, tbl)
+	assert(merged)
+
+	options = merged
+	on_update(k)
+end
+
 function M.setup(opts)
-	assert(not options, "config setup once")
+	assert(not options, "config is already setup")
 	options = defaults
 	options = M.get(opts or {})
 end
@@ -192,9 +203,8 @@ return setmetatable(M, {
 		if options == nil then
 			M.setup()
 		end
-		---@diagnostic disable-next-line: param-type-mismatch
-		rawset(options, key, value)
-		on_update(key)
+
+		M.set(key, value)
 	end,
 	__tostring = function(t)
 		if options == nil then
