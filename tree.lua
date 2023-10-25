@@ -1,5 +1,7 @@
 local vim = require("motion.lib.vim")
 local util = require("motion.util")
+
+---@diagnostic disable-next-line: unused-local
 local dump = vim.inspect
 
 local M = {}

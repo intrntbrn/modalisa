@@ -4,7 +4,6 @@ local M = {}
 -- find a new name
 -- config menu
 -- exposed api
--- renamer
 -- beautiful menu
 -- client label params
 -- color themes
@@ -30,7 +29,6 @@ local mtree = require("motion.tree")
 local mmodmap = require("motion.modmap")
 local akeygrabber = require("awful.keygrabber")
 local gears = require("gears")
-local notify = require("motion.notify")
 local config = require("motion.config")
 
 local trunner = {}
@@ -262,7 +260,7 @@ local function keygrabber_keys(t)
 	local all_keys = {}
 
 	-- regular keys (successors)
-	for k, v in pairs(succs) do
+	for k in pairs(succs) do
 		for _, key in pairs(parse_vim_key(k, opts)) do
 			add_key_to_map(all_keys, key)
 		end
@@ -716,7 +714,7 @@ end
 -- "y"	{ "Mod4", "Control", "Shift" }
 -- "y"	{ "Mod4", "Shift" }
 
-function M.add_globalkey(prefix, vimkey, extra_opts)
+function M.add_globalkey(prefix, vimkey)
 	-- hook every possible mod combination
 	-- so we know exactly which mods are pressed down on start
 	assert(mod_map)

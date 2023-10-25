@@ -3,9 +3,10 @@ local util = require("motion.util")
 local gears = require("gears")
 local wibox = require("wibox")
 local awful = require("awful")
-local dump = require("motion.lib.vim").inspect
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
+---@diagnostic disable-next-line: unused-local
+local dump = require("motion.lib.vim").inspect
 
 local M = {}
 
@@ -120,6 +121,7 @@ local function create_widget(eopts, kvs)
 	return base
 end
 
+---@diagnostic disable-next-line: unused-local
 function popup:init(eopts)
 	local pop = awful.popup({
 		visible = false,
@@ -223,6 +225,11 @@ function M.setup(opts)
 	once = true
 
 	popup:init(opts)
+
+	---@diagnostic disable-next-line: redefined-local
+	awesome.connect_signal("motion::echo", function(kvs, opts)
+		run(kvs, opts)
+	end)
 
 	awesome.connect_signal("motion::exec", function(args)
 		handle_signal(args)

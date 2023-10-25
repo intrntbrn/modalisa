@@ -2,15 +2,17 @@ local config = require("motion.config")
 local util = require("motion.util")
 local wibox = require("wibox")
 local awful = require("awful")
-local dump = require("motion.lib.vim").inspect
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
+---@diagnostic disable-next-line: unused-local
+local dump = require("motion.lib.vim").inspect
 
 local M = {}
 
 local popup = {}
 local prompt
 
+---@diagnostic disable-next-line: unused-local
 local function make_textbox(popts, text, font, fg, width)
 	local tb = wibox.widget.base.make_widget_declarative({
 		{
@@ -22,7 +24,7 @@ local function make_textbox(popts, text, font, fg, width)
 		},
 		forced_height = beautiful.get_font_height(font),
 		width = width,
-		strategy = popts.width_strategy,
+		strategy = "exact",
 		widget = wibox.container.constraint,
 	})
 	return tb
@@ -88,6 +90,7 @@ local function create_widget(text, popts)
 	return base
 end
 
+---@diagnostic disable-next-line: unused-local
 function popup:init(popts)
 	local pop = awful.popup({
 		visible = false,

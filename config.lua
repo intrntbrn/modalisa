@@ -1,7 +1,6 @@
 local M = {}
 local vim = require("motion.lib.vim")
 local dump = vim.inspect
-local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
 local awful = require("awful")
 
@@ -114,7 +113,6 @@ local defaults = {
 		orientation = "vertical",
 
 		width = 20, -- chars
-		width_strategy = "exact", -- min | max | exact
 		padding = {
 			top = dpi(5),
 			bottom = dpi(5),
@@ -206,7 +204,7 @@ return setmetatable(M, {
 
 		M.set(key, value)
 	end,
-	__tostring = function(t)
+	__tostring = function(_)
 		if options == nil then
 			M.setup()
 		end

@@ -2,7 +2,6 @@ local M = {}
 
 local unpack = unpack or table.unpack
 
-local beautiful = require("beautiful")
 local gstring = require("gears.string")
 local awful = require("awful")
 local vim = require("motion.lib.vim")

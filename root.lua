@@ -31,7 +31,7 @@ function M.setup(opts)
 	assert(root_tree == nil, "root is already setup")
 	root_tree = tree:new(opts, "motion root")
 
-	awesome.connect_signal("motion::config", function(k, v)
+	awesome.connect_signal("motion::config", function(_, _)
 		local new_opts = config.get()
 		root_tree._data.opts_raw = new_opts
 		root_tree._data.opts_merged = new_opts

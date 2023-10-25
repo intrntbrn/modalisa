@@ -1,12 +1,11 @@
 local util = require("motion.util")
-local lib = require("motion.lib")
 local gears = require("gears")
 local wibox = require("wibox")
 local awful = require("awful")
-local dump = require("motion.lib.vim").inspect
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
-local glib = require("lgi").GLib
+---@diagnostic disable-next-line: unused-local
+local dump = require("motion.lib.vim").inspect
 
 local M = {}
 
@@ -17,7 +16,7 @@ local M = {}
 local popup = {}
 local timer
 
-local function sort_entries_by_group(entries, hopts)
+local function sort_entries_by_group(entries)
 	-- sort by group, desc, id
 	table.sort(entries, function(a, b)
 		if a.group == b.group then
@@ -32,7 +31,7 @@ local function sort_entries_by_group(entries, hopts)
 	end)
 end
 
-local function sort_entries_by_id(entries, hopts)
+local function sort_entries_by_id(entries)
 	table.sort(entries, function(a, b)
 		return a.id < b.id
 	end)
@@ -108,7 +107,7 @@ function popup:update(t)
 		end
 
 		if fn then
-			fn(entries, hopts)
+			fn(entries)
 		end
 	end
 
@@ -338,6 +337,7 @@ function popup:update(t)
 	self.popup.visible = true
 end
 
+---@diagnostic disable-next-line: unused-local
 function popup:new(hopts)
 	local pop = awful.popup({
 		visible = false,
@@ -430,7 +430,7 @@ function M.setup(opts)
 	assert(once == nil, "hints are already setup")
 	once = popup:new(opts.hints)
 
-	awesome.connect_signal("motion::exec", function(args)
+	awesome.connect_signal("motion::exec", function(_)
 		util.run_on_idle(function()
 			popup:refresh_entries()
 		end)
@@ -442,7 +442,7 @@ function M.setup(opts)
 		end)
 	end)
 
-	awesome.connect_signal("motion::stop", function(args)
+	awesome.connect_signal("motion::stop", function(_)
 		util.run_on_idle(function()
 			if timer then
 				timer:stop()

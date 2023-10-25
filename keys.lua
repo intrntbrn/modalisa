@@ -157,7 +157,7 @@ local keys = {
 	["c<Return>"] = ps.client_move_to_master(),
 }
 
-function M.setup(opts)
+function M.setup(_)
 	motion.add_keys(keys)
 end
 
