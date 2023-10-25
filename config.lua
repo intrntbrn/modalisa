@@ -109,6 +109,34 @@ local defaults = {
 		color_header_fg = "#82AAFF",
 	},
 
+	prompt = {
+		placement = "centered",
+		orientation = "vertical",
+
+		width = 20, -- chars
+		width_strategy = "exact", -- min | max | exact
+		padding = {
+			top = dpi(5),
+			bottom = dpi(5),
+			left = dpi(5),
+			right = dpi(5),
+		},
+		spacing = 0,
+
+		font_header = "Monospace Bold 20",
+		font = "Monospace Bold 20",
+		border_width = dpi(1),
+
+		shape = nil,
+		opacity = 1,
+		color_border = "#444A73",
+		color_bg = "#383F5A",
+		color_fg = "#eceffc",
+		color_header_fg = "#82AAFF",
+		color_cursor_fg = "#383F5A",
+		color_cursor_bg = "#eceffc",
+	},
+
 	-- awesome
 	auto_select_the_only_choice = false,
 	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",

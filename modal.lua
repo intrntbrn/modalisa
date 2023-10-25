@@ -8,7 +8,6 @@ local M = {}
 -- beautiful menu
 -- client label params
 -- color themes
--- global keybinds to support submenues
 -- fix default clienting floating resize
 -- group needs to be attribute, hidden as well, fg as well
 -- option picker ("pick a string")
@@ -831,10 +830,6 @@ local function global_keybinding_add(t)
 	local pks = parse_vim_key(global_key)
 	for _, pk in pairs(pks) do
 		local fn = function()
-			-- support 3 cases:
-			-- simple fn (no succs)
-			-- dynamic menu (no succs)
-			-- menu (succs)
 			run_tree(t, pk)
 		end
 		local akey = awful.key(pk.mods, pk.key, fn)

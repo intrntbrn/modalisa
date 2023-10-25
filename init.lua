@@ -15,6 +15,7 @@ function M.setup(opts)
 	require("motion.ui.hints").setup(opts)
 	require("motion.ui.label").setup(opts)
 	require("motion.ui.echo").setup(opts)
+	require("motion.ui.prompt").setup(opts)
 
 	-- default keys
 	if opts.default_keys then

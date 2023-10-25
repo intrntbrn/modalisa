@@ -6,7 +6,6 @@ local awful = require("awful")
 local dump = require("motion.lib.vim").inspect
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
-local lib = require("motion.lib")
 
 local M = {}
 
@@ -121,7 +120,7 @@ local function create_widget(eopts, kvs)
 	return base
 end
 
-function popup:new(eopts)
+function popup:init(eopts)
 	local pop = awful.popup({
 		visible = false,
 		ontop = true,
@@ -171,7 +170,7 @@ local function set_timer(eopts)
 end
 
 local function run(kvs, opts)
-	opts = opts or require("motion.config").get()
+	opts = opts or config.get()
 	local eopts = opts.echo
 
 	local widget = create_widget(eopts, kvs)
@@ -223,7 +222,7 @@ function M.setup(opts)
 	assert(once == nil, "echo is already setup")
 	once = true
 
-	popup:new(opts)
+	popup:init(opts)
 
 	awesome.connect_signal("motion::exec", function(args)
 		handle_signal(args)
