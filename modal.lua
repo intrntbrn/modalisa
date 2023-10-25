@@ -8,7 +8,7 @@ local M = {}
 -- beautiful menu
 -- client label params
 -- color themes
--- key keybinds
+-- global keybinds to support submenues
 -- fix default clienting floating resize
 -- group needs to be attribute, hidden as well, fg as well
 -- option picker ("pick a string")
@@ -226,39 +226,6 @@ local function parse_key_all(key)
 	return nil
 end
 
-local global_keys = {}
-
-local function global_keybinding_add(t)
-	if not t then
-		return
-	end
-	local global_key = t:global()
-	if not global_key then
-		return
-	end
-
-	local pks = parse_vim_key(global_key)
-	for _, pk in pairs(pks) do
-		local fn = function()
-			t:exec()
-		end
-		local akey = awful.key(pk.mods, pk.key, fn)
-		global_keys[t:id()] = akey
-		awful.keyboard.append_global_keybinding(akey)
-	end
-end
-
-local function global_keybinding_remove(t)
-	if not t then
-		return
-	end
-	local akey = global_keys[t:id()]
-	if not akey then
-		return
-	end
-	awful.keyboard.remove_global_keybinding(akey)
-end
-
 -- @param m table Map of parsed keys
 -- @param k table Parsed key
 local function add_key_to_map(m, k)
@@ -372,7 +339,7 @@ function trunner:init()
 end
 
 function trunner:set(t, root_key)
-	assert(not trunner.is_running, "trunner is already running")
+	assert(not trunner.is_running, "keygrabber is already running")
 	assert(not vim.tbl_isempty(t:opts()), "trunner:new t opts are empty")
 
 	if root_key then
@@ -390,7 +357,6 @@ function trunner:set(t, root_key)
 
 		if t:is_leaf() then
 			-- there is no point in running an empty tree
-			notify.error("tree is empty")
 			return nil
 		end
 	end
@@ -457,6 +423,7 @@ end
 
 function trunner:stop()
 	self.keygrabber:stop()
+	self.is_running = false
 end
 
 function trunner:stop_maybe(reason)
@@ -698,19 +665,29 @@ function M.fake_input(key, force_continue)
 	trunner:input(key)
 end
 
-local function run(seq, parsed_keybind)
-	local t = root_tree.get(seq)
-	trunner:set(t, parsed_keybind)
+local function run_tree(t, parsed_keybind)
+	local ok = trunner:set(t, parsed_keybind)
+	if not ok then
+		return
+	end
 	trunner:start()
 end
 
+local function run_root_tree(seq, parsed_keybind)
+	local t = root_tree.get(seq)
+	run_tree(t, parsed_keybind)
+end
+
 -- run inline table
-function M.run_tree(tree, opts, name)
+function M.run_new_tree(tree, opts, name)
 	opts = config.get(opts)
 	local t = mtree:new(opts, name)
 	assert(t)
 	t:add_successors(tree)
-	trunner:set(t)
+	local ok = trunner:set(t)
+	if not ok then
+		return
+	end
 	trunner:start()
 end
 
@@ -720,12 +697,12 @@ function M.run(seq, keybind)
 		keybind = parse_key_all(keybind)
 		assert(keybind)
 	end
-	run(seq, keybind)
+	run_root_tree(seq, keybind)
 end
 
 local function run_prefix_awful_key(prefix, parsed_key)
 	return awful.key(parsed_key.mods, parsed_key.key, function()
-		run(prefix, parsed_key)
+		run_root_tree(prefix, parsed_key)
 	end)
 end
 
@@ -796,45 +773,6 @@ function M.add_globalkey_solo(prefix, vimkey)
 	end
 end
 
-local once
-function M.setup(opts)
-	assert(once == nil, "modal is already setup")
-	once = true
-
-	trunner:init()
-
-	awesome.connect_signal("motion::tree::update", function(new, old)
-		global_keybinding_remove(old)
-		global_keybinding_add(new)
-	end)
-
-	awesome.connect_signal("motion::tree::remove", function(old)
-		print("motion::tree::remove")
-		global_keybinding_remove(old)
-	end)
-
-	awesome.connect_signal("xkb::map_changed", function()
-		generate_mod_conversion_maps()
-	end)
-
-	awesome.connect_signal("motion::fake_input", function(args)
-		if type(args) == "string" then
-			M.fake_input(args)
-			return
-		end
-		if type(args) == "table" then
-			M.fake_input(args.key, args.continue)
-			return
-		end
-	end)
-
-	generate_mod_conversion_maps()
-
-	if opts.key then
-		M.add_globalkey("", opts.key)
-	end
-end
-
 function M.benchmark(n)
 	local f = function()
 		M.run("")
@@ -877,6 +815,83 @@ function M.benchmark_input(n, key)
 	lib.benchmark(f, n or 100)
 
 	trunner:stop()
+end
+
+local global_keys = {}
+
+local function global_keybinding_add(t)
+	if not t then
+		return
+	end
+	local global_key = t:global()
+	if not global_key then
+		return
+	end
+
+	local pks = parse_vim_key(global_key)
+	for _, pk in pairs(pks) do
+		local fn = function()
+			-- support 3 cases:
+			-- simple fn (no succs)
+			-- dynamic menu (no succs)
+			-- menu (succs)
+			run_tree(t, pk)
+		end
+		local akey = awful.key(pk.mods, pk.key, fn)
+		global_keys[t:id()] = akey
+		awful.keyboard.append_global_keybinding(akey)
+	end
+end
+
+local function global_keybinding_remove(t)
+	if not t or not t.id then
+		return
+	end
+
+	local akey = global_keys[t:id()]
+	if not akey then
+		return
+	end
+	awful.keyboard.remove_global_keybinding(akey)
+end
+
+local once
+function M.setup(opts)
+	assert(once == nil, "modal is already setup")
+	once = true
+
+	trunner:init()
+
+	awesome.connect_signal("motion::tree::update", function(new, old)
+		global_keybinding_remove(old)
+		global_keybinding_add(new)
+	end)
+
+	awesome.connect_signal("motion::tree::remove", function(old)
+		print("motion::tree::remove")
+		global_keybinding_remove(old)
+	end)
+
+	awesome.connect_signal("xkb::map_changed", function()
+		generate_mod_conversion_maps()
+	end)
+
+	awesome.connect_signal("motion::fake_input", function(args)
+		if type(args) == "string" then
+			M.fake_input(args)
+			return
+		end
+		if type(args) == "table" then
+			M.fake_input(args.key, args.continue)
+			return
+		end
+	end)
+
+	generate_mod_conversion_maps()
+
+	if opts.key then
+		M.add_globalkey("", opts.key)
+	end
 end
 
 return setmetatable(M, {

@@ -10,6 +10,15 @@ local function get_id()
 	return global_id
 end
 
+local function mt(obj)
+	return setmetatable(obj, {
+		__index = M,
+		__tostring = function(t)
+			return vim.inspect(t)
+		end,
+	})
+end
+
 local function on_update(t, old_t)
 	awesome.emit_signal("motion::tree::update", t, old_t)
 end
@@ -121,7 +130,11 @@ function M:global()
 end
 
 function M:pred()
-	return self._prev
+	local prev = self._prev
+	if prev then
+		return mt(prev)
+	end
+	return nil
 end
 
 function M:cond(opts)
@@ -227,15 +240,6 @@ local function make_initial_node(prev_tree)
 		_data = {},
 		_prev = prev_tree,
 	}
-end
-
-local function mt(obj)
-	return setmetatable(obj, {
-		__index = M,
-		__tostring = function(t)
-			return vim.inspect(t)
-		end,
-	})
 end
 
 function M:new(opts, name)
