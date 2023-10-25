@@ -25,6 +25,7 @@ function M.merge_opts(a, b)
 
 	local all = { a, b }
 	local ret = vim.tbl_deep_extend("force", unpack(all))
+	ret = vim.deepcopy(ret)
 
 	return ret
 end

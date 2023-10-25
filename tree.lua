@@ -259,19 +259,19 @@ function M:new(opts, name)
 	return obj
 end
 
-local function add(tree, value, seq, prev_opts)
+local function add(tree, value, seq, prev_opts, prev_tree)
 	assert(tree)
 	local key, next_seq = util.split_vim_key(seq)
 	if key then
-		local opts_raw = tree._data.opts_raw
-		local merged_opts = util.merge_opts(prev_opts, opts_raw)
 		-- keep traversing until key is nil
+		local merged_opts = util.merge_opts(prev_opts, tree._data.opts_raw)
+		tree._data.opts_merged = merged_opts
 		local next_tree = tree._succs[key]
 		if not next_tree then
 			tree._succs[key] = make_initial_node(tree)
 			next_tree = tree._succs[key]
 		end
-		return add(tree._succs[key], value, next_seq, merged_opts)
+		return add(tree._succs[key], value, next_seq, merged_opts, tree)
 	end
 
 	local opts_raw = value and value.opts_raw
@@ -284,18 +284,21 @@ local function add(tree, value, seq, prev_opts)
 			old = mt(old)
 		end
 
+		tree._prev = prev_tree
 		tree._data = value
 		tree._data.opts_merged = merged_opts
 
 		on_update(mt(tree), old)
 	else
+		-- value == nil is used to refresh merged_opts on updates
+		tree._prev = prev_tree
 		tree._data.opts_merged = merged_opts
 	end
 
 	-- update merged_opts for all successors
 	for _, succ in pairs(tree._succs) do
 		-- NOTE: calling add with a nil value only merges the opts
-		add(succ, nil, "", merged_opts)
+		add(succ, nil, "", merged_opts, tree)
 	end
 
 	return mt(tree)
@@ -338,11 +341,11 @@ end
 -- @param[opt=nil] seq
 function M:add(value, seq)
 	seq, value = parse_key(value, seq)
-	return add(self, value, seq, self:opts())
+	return add(self, value, seq, self:opts(), self:pred()) -- FIXME: last param
 end
 
 function M:update_opts()
-	return add(self, nil, "", self:opts())
+	return add(self, nil, "", self:opts(), self:pred()) -- FIXME: last param
 end
 
 function M:get(seq)
