@@ -49,7 +49,9 @@ local function gen_signals()
 	for k, v in pairs(M) do
 		if type(v) == "function" then
 			local name = string.format("motion::%s", k)
-			awesome.connect_signal(name, v)
+			awesome.connect_signal(name, function(...)
+				v(...)
+			end)
 		end
 	end
 end
