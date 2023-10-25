@@ -66,7 +66,6 @@ local function make_entries(keys, opts)
 					end,
 					id = key:id(),
 					fg = kopts.fg,
-					bg = kopts.bg, -- TODO:
 					run = function()
 						key:fn(kopts)
 					end,
@@ -335,10 +334,10 @@ function popup:update(t)
 
 	-- update the popup
 	self.popup.widget = widget
+	self.popup.screen = s
 	if placement then
 		self.popup.placement = placement
 	end
-	self.popup.screen = s
 	self.popup.visible = true
 end
 

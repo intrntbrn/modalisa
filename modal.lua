@@ -395,8 +395,8 @@ end
 
 -- @param t table A motion (sub)tree
 function trunner:on_stop()
-	self.is_running = false
 	print("motion::stop")
+	self.is_running = false
 	awesome.emit_signal("motion::stop", { tree = self.tree })
 end
 
@@ -666,7 +666,7 @@ local function run_root_tree(seq, parsed_keybind)
 	run_tree(t, parsed_keybind)
 end
 
-function M:stop()
+function M.stop()
 	trunner:stop()
 end
 
@@ -679,7 +679,7 @@ function M.fake_input(key, force_continue)
 end
 
 -- run inline table
-function M.run_new_tree(tree, opts, name)
+function M.run_tree(tree, opts, name)
 	opts = config.get(opts)
 	local t = mtree:new(opts, name)
 	assert(t)

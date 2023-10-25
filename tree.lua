@@ -41,6 +41,9 @@ local function parse_key(key, table_index)
 	local result
 	local temp
 	local global
+	local fg
+	local hidden
+	local group
 
 	local t = type(key)
 
@@ -52,11 +55,15 @@ local function parse_key(key, table_index)
 			t = type(v)
 			if t == "string" then
 				-- can be key, desc, without mods
-				if k == "desc" or k == "description" then
+				if k == "desc" then
 					assert(not desc, "multiple descrptions")
 					desc = v
 				elseif k == "global" then
 					global = v
+				elseif k == "fg" then
+					fg = v
+				elseif k == "group" then
+					group = group
 				else
 					assert(not seq, "multiple undeclared strings")
 					seq = v
@@ -66,7 +73,6 @@ local function parse_key(key, table_index)
 					assert(not opts, "multiple opts")
 					opts = v
 				elseif k == "result" then
-					assert(not result, "multiple result")
 					result = v
 				else
 					assert(not opts, "multiple opts")
@@ -74,8 +80,7 @@ local function parse_key(key, table_index)
 				end
 			elseif t == "function" then
 				-- can be fn, condition, desc with mods
-				if k == "cond" or k == "condition" then
-					assert(not cond, "multiple conditions")
+				if k == "cond" then
 					cond = v
 				elseif k == "desc" then
 					desc = v
@@ -86,12 +91,17 @@ local function parse_key(key, table_index)
 			elseif t == "boolean" then
 				if k == "temp" then
 					temp = v
+				elseif k == "hidden" then
+					hidden = v
+				else
+					assert(false, "unknown boolean: ", k, v)
 				end
 			end
 		end
 	end
 
 	if not seq then
+		assert(table_index, "no key sequence found")
 		seq = table_index
 	end
 
@@ -104,6 +114,9 @@ local function parse_key(key, table_index)
 			result = result,
 			temp = temp,
 			global = global,
+			hidden = hidden,
+			group = group,
+			fg = fg,
 		}
 end
 
@@ -299,6 +312,7 @@ local function add(tree, value, seq, prev_opts, prev_tree)
 
 	-- update merged_opts for all successors
 	for _, succ in pairs(tree._succs) do
+		-- NOTE: calling add with a nil value only merges the opts
 		add(succ, nil, "", merged_opts, tree)
 	end
 
@@ -342,11 +356,11 @@ end
 -- @param[opt=nil] seq
 function M:add(value, seq)
 	seq, value = parse_key(value, seq)
-	return add(self, value, seq, self:opts(), self:pred())
+	return add(self, value, seq, self:opts(), self:pred()) -- FIXME: last param
 end
 
 function M:update_opts()
-	return add(self, nil, "", self:opts(), self:pred())
+	return add(self, nil, "", self:opts(), self:pred()) -- FIXME: last param
 end
 
 function M:get(seq)
