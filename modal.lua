@@ -654,6 +654,10 @@ function trunner:keyreleased_callback()
 	end
 end
 
+function M:stop()
+	trunner:stop()
+end
+
 -- bypass the keygrabber
 function M.fake_input(key, force_continue)
 	if force_continue then
@@ -768,50 +772,6 @@ function M.add_globalkey_solo(prefix, vimkey)
 			run_prefix_awful_key(prefix, parsed_key),
 		})
 	end
-end
-
-function M.benchmark(n)
-	local f = function()
-		M.run("")
-		M.fake_input("stop")
-	end
-
-	lib.benchmark(f, n or 100)
-
-	trunner:stop()
-end
-
-function M.benchmark_setup(n)
-	local f = function()
-		local root = require("motion.root").get("")
-		trunner:set(root, { key = "a", mods = { "Mod1" } })
-	end
-
-	lib.benchmark(f, n or 100)
-
-	trunner:stop()
-end
-
-function M.benchmark_keymap(n)
-	local root = require("motion.root")[""]
-	local f = function()
-		trunner:set_tree(root)
-	end
-
-	lib.benchmark(f, n or 100)
-
-	trunner:stop()
-end
-
-function M.benchmark_input(n, key)
-	M.run("")
-	local f = function()
-		M.fake_input(key or "a", true)
-	end
-
-	lib.benchmark(f, n or 100)
-
-	trunner:stop()
 end
 
 local global_keys = {}
