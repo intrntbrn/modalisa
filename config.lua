@@ -8,13 +8,13 @@ local unpack = unpack or table.unpack
 
 local defaults = {
 	-- keys
-	key = "<M-y>",
+	root_key = "<M-y>",
 	back_keys = "<BackSpace>",
 	stop_keys = { "<Escape>" },
 	include_default_keys = true,
 
 	-- core
-	unique = { "key", "hidden", "fg", "continue" },
+	unique = { "hidden", "fg", "continue" },
 	mode = "hybrid", -- "modal" | "hold" | "hybrid" | "forever"
 	smart_modifiers = true,
 	stop_on_unknown_key = false,

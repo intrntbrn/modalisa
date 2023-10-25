@@ -370,7 +370,7 @@ end
 function trunner:reset()
 	self.is_running = false
 	self.ran_once = false
-	self.continue_mouse = false
+	self.continue_external = false
 	self.continue_key = false
 end
 
@@ -424,7 +424,7 @@ function trunner:stop()
 end
 
 function trunner:stop_maybe(reason)
-	if self.continue_mouse then
+	if self.continue_external then
 		return
 	end
 
@@ -567,7 +567,7 @@ function trunner:input(key)
 
 	self:stop_maybe("no_next_tree")
 
-	self.continue_mouse = false
+	self.continue_external = false
 end
 
 function trunner:keypressed_callback()
@@ -654,18 +654,6 @@ function trunner:keyreleased_callback()
 	end
 end
 
-function M:stop()
-	trunner:stop()
-end
-
--- bypass the keygrabber
-function M.fake_input(key, force_continue)
-	if force_continue then
-		trunner.continue_mouse = true
-	end
-	trunner:input(key)
-end
-
 local function run_tree(t, parsed_keybind)
 	local ok = trunner:set(t, parsed_keybind)
 	if not ok then
@@ -677,6 +665,18 @@ end
 local function run_root_tree(seq, parsed_keybind)
 	local t = root_tree.get(seq)
 	run_tree(t, parsed_keybind)
+end
+
+function M:stop()
+	trunner:stop()
+end
+
+-- bypass the keygrabber
+function M.fake_input(key, force_continue)
+	if force_continue then
+		trunner.continue_external = true
+	end
+	trunner:input(key)
 end
 
 -- run inline table
@@ -701,9 +701,9 @@ function M.run(seq, keybind)
 	run_root_tree(seq, keybind)
 end
 
-local function run_prefix_awful_key(prefix, parsed_key)
+local function make_awful_key_run_seq(seq, parsed_key)
 	return awful.key(parsed_key.mods, parsed_key.key, function()
-		run_root_tree(prefix, parsed_key)
+		run_root_tree(seq, parsed_key)
 	end)
 end
 
@@ -718,7 +718,8 @@ end
 -- "y"	{ "Mod4", "Control", "Shift" }
 -- "y"	{ "Mod4", "Shift" }
 
-function M.add_globalkey(prefix, vimkey)
+function M.add_globalkey_run_root(vimkey, seq)
+	seq = seq or ""
 	-- hook every possible mod combination
 	-- so we know exactly which mods are pressed down on start
 	assert(mod_map)
@@ -737,7 +738,7 @@ function M.add_globalkey(prefix, vimkey)
 
 	for _, parsed_key in pairs(parsed_keys) do
 		-- the specified key
-		table.insert(keys, run_prefix_awful_key(prefix, parsed_key))
+		table.insert(keys, make_awful_key_run_seq(seq, parsed_key))
 
 		local map = vim.deepcopy(all_mods)
 
@@ -758,18 +759,19 @@ function M.add_globalkey(prefix, vimkey)
 			local keybind = vim.deepcopy(parsed_key)
 			keybind.mods = all
 
-			table.insert(keys, run_prefix_awful_key(prefix, keybind))
+			table.insert(keys, make_awful_key_run_seq(seq, keybind))
 		end
 	end
 
 	awful.keyboard.append_global_keybindings(keys)
 end
 
-function M.add_globalkey_solo(prefix, vimkey)
+function M.add_globalkey_run_root_simple(vimkey, seq)
+	seq = seq or ""
 	local parsed_keys = parse_vim_key(vimkey)
 	for _, parsed_key in pairs(parsed_keys) do
 		awful.keyboard.append_global_keybindings({
-			run_prefix_awful_key(prefix, parsed_key),
+			make_awful_key_run_seq(seq, parsed_key),
 		})
 	end
 end
@@ -842,8 +844,8 @@ function M.setup(opts)
 
 	generate_mod_conversion_maps()
 
-	if opts.key then
-		M.add_globalkey("", opts.key)
+	if opts.root_key then
+		M.add_globalkey_run_root(opts.root_key, "")
 	end
 end
 
