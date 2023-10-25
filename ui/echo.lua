@@ -30,11 +30,12 @@ local function make_center_textbox(eopts, text, font, fg, width)
 	return tb
 end
 
-local function make_key_value_textbox(eopts, key, value)
+local function make_key_value_textbox(opts, key, value)
+	local eopts = opts.echo
 	local font = eopts.font
-	local fg = eopts.color_fg
+	local fg = eopts.color_fg or opts.theme.fg
 	local font_key = eopts.font_header
-	local fg_key = eopts.color_header_fg
+	local fg_key = eopts.color_header_fg or opts.theme.accent
 
 	local font_width = dpi(math.max(util.get_font_width(font), util.get_font_width(font_key)))
 	local width = font_width * eopts.entry_width
@@ -67,18 +68,19 @@ local function make_key_value_textbox(eopts, key, value)
 	return base
 end
 
-local function create_widget(eopts, kvs)
+local function create_widget(opts, kvs)
+	local eopts = opts.echo
 	local widgets = {}
 	local i = 1
 	for k, v in pairs(kvs) do
-		local bg = eopts.color_bg
+		local bg = eopts.color_bg or opts.theme.bg
 		local is_odd = (i % 2) == 0
 		if is_odd then
 			local odd = eopts.odd
 			bg = util.color_or_luminosity(odd, bg)
 		end
 
-		local tb = make_key_value_textbox(eopts, k, v)
+		local tb = make_key_value_textbox(opts, k, v)
 		local base = wibox.widget.base.make_widget_declarative({
 			{
 				tb,
@@ -112,7 +114,7 @@ local function create_widget(eopts, kvs)
 			widget = wibox.container.place,
 		},
 		border_width = eopts.border_width,
-		border_color = eopts.color_border,
+		border_color = eopts.color_border or opts.theme.border,
 		shape = eopts.shape,
 		opacity = eopts.opacity,
 		widget = wibox.container.background,
@@ -175,7 +177,7 @@ local function run(kvs, opts)
 	opts = opts or config.get()
 	local eopts = opts.echo
 
-	local widget = create_widget(eopts, kvs)
+	local widget = create_widget(opts, kvs)
 	popup:set_widget(widget, eopts)
 	set_timer(eopts)
 end

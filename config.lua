@@ -3,6 +3,7 @@ local vim = require("motion.lib.vim")
 local dump = vim.inspect
 local dpi = require("beautiful").xresources.apply_dpi
 local awful = require("awful")
+local beautiful = require("beautiful")
 
 local unpack = unpack or table.unpack
 
@@ -20,6 +21,14 @@ local defaults = {
 	stop_on_unknown_key = false,
 	ignore_shift_state_for_special_characters = true,
 	timeout = 0, -- ms
+
+	theme = {
+		fg = beautiful.fg_focus or "#eceffc",
+		bg = beautiful.bg_focus or "#24283B",
+		grey = beautiful.fg_normal or "#959cbc",
+		border = beautiful.border_color_normal or "#444A73",
+		accent = "#82AAFF",
+	},
 
 	-- hints
 	hints = {
@@ -58,24 +67,23 @@ local defaults = {
 		placement = function(h)
 			awful.placement.bottom(h, { honor_workarea = true })
 		end,
-		border_width = dpi(1),
+		border_width = beautiful.border_width or dpi(1),
 		opacity = 1,
 		shape = nil,
 		odd_style = "row", -- row  | column | checkered | none
 		font = "Monospace Bold 12",
 		font_separator = "Monospace Bold 12",
 		font_desc = "Monospace 12",
-
 		group_colors = {
 			["menu"] = "#FF00FF",
 		},
-		color_border = "#444A73",
-		color_entry_fg = "#eceffc",
-		color_entry_disabled_fg = "#959cbc",
-		color_entry_desc_fg = "#eceffc",
-		color_entry_separator_fg = "#82AAFF",
-		color_entry_bg = "#383F5A",
-		color_entry_odd_bg = -12, -- color or luminosity
+		color_border = nil,
+		color_fg = nil,
+		color_disabled_fg = nil,
+		color_desc_fg = nil,
+		color_separator_fg = nil,
+		color_bg = nil,
+		color_odd_bg = -8, -- color or luminosity
 		color_hover_bg = 20, -- color or luminosity
 	},
 
@@ -84,7 +92,6 @@ local defaults = {
 		placement = "centered",
 		timeout = 1000, -- ms
 		orientation = "vertical", -- vertical | horizontal
-
 		entry_width = 20, -- chars
 		entry_width_strategy = "exact", -- min | max | exact
 		padding = {
@@ -94,24 +101,21 @@ local defaults = {
 			right = dpi(5),
 		},
 		spacing = 0,
-
-		font_header = "Monospace Bold 22",
-		font = "Monospace Bold 22",
-		border_width = dpi(1),
-
-		odd = -12, -- luminosity or color
+		font_header = "Monospace Bold 20",
+		font = "Monospace 20",
+		border_width = beautiful.border_width or dpi(1),
+		odd = 0, -- luminosity or color
 		shape = nil,
 		opacity = 1,
-		color_border = "#444A73",
-		color_bg = "#383F5A",
-		color_fg = "#eceffc",
-		color_header_fg = "#82AAFF",
+		color_border = nil,
+		color_bg = nil,
+		color_fg = nil,
+		color_header_fg = nil,
 	},
 
 	prompt = {
 		placement = "centered",
 		orientation = "vertical",
-
 		width = 20, -- chars
 		padding = {
 			top = dpi(5),
@@ -120,19 +124,17 @@ local defaults = {
 			right = dpi(5),
 		},
 		spacing = 0,
-
 		font_header = "Monospace Bold 20",
 		font = "Monospace Bold 20",
-		border_width = dpi(1),
-
+		border_width = beautiful.border_width or dpi(1),
 		shape = nil,
 		opacity = 1,
-		color_border = "#444A73",
-		color_bg = "#383F5A",
-		color_fg = "#eceffc",
-		color_header_fg = "#82AAFF",
-		color_cursor_fg = "#383F5A",
-		color_cursor_bg = "#eceffc",
+		color_border = nil,
+		color_bg = nil,
+		color_fg = nil,
+		color_header_fg = nil,
+		color_cursor_fg = nil,
+		color_cursor_bg = nil,
 	},
 
 	-- awesome

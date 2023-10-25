@@ -5,8 +5,8 @@ local M = {}
 -- config menu
 -- exposed api
 -- beautiful menu
--- client label params
 -- color themes
+-- client label params (before: theme)
 -- fix default clienting floating resize
 -- group needs to be attribute, hidden as well, fg as well
 -- option picker ("pick a string")
@@ -15,7 +15,6 @@ local M = {}
 -- menu indicator in hints
 -- keyname tester
 -- tests for key parser
--- color highlight links "bg or #ff00" opts["color"]
 -- group colors
 -- notify for duplicate keys
 -- cache tree keymap (~3ms)

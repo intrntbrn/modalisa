@@ -37,7 +37,8 @@ local function sort_entries_by_id(entries)
 	end)
 end
 
-local function make_entries(keys, hopts)
+local function make_entries(keys, opts)
+	local hopts = opts.hints
 	local entries = {}
 
 	local aliases = hopts and hopts.key_aliases
@@ -65,7 +66,7 @@ local function make_entries(keys, hopts)
 					end,
 					id = key:id(),
 					fg = kopts.fg,
-					bg = kopts.bg,
+					bg = kopts.bg, -- TODO:
 					run = function()
 						key:fn(kopts)
 					end,
@@ -92,10 +93,11 @@ function popup:update(t)
 
 	local s = awful.screen.focused()
 
-	local hopts = t:opts().hints
+	local opts = t:opts()
+	local hopts = opts.hints
 	local keys = t:successors()
 
-	local entries = make_entries(keys, hopts)
+	local entries = make_entries(keys, opts)
 
 	local sort = hopts.sort
 	if sort then
@@ -175,7 +177,7 @@ function popup:update(t)
 				end
 			end
 
-			local bg = hopts.color_entry_bg
+			local bg = hopts.color_bg or opts.theme.bg
 			local bg_hover = util.color_or_luminosity(hopts.color_hover_bg, bg)
 
 			local odd_style = hopts.odd_style
@@ -188,7 +190,7 @@ function popup:update(t)
 				end
 				local odd = (odd_source % 2) == 0
 				if odd then
-					bg = util.color_or_luminosity(hopts.color_entry_odd_bg, bg)
+					bg = util.color_or_luminosity(hopts.color_odd_bg, bg)
 				end
 			end
 
@@ -243,13 +245,13 @@ function popup:update(t)
 				local fg_desc
 				local fg_separator
 				if entry.cond() then
-					fg = entry.fg or hopts.color_entry_fg
-					fg_desc = entry.fg or hopts.color_entry_desc_fg or fg
-					fg_separator = hopts.color_entry_separator_fg or fg
+					fg = entry.fg or hopts.color_fg or opts.theme.fg
+					fg_desc = entry.fg or hopts.color_desc_fg or opts.theme.fg
+					fg_separator = hopts.color_separator_fg or opts.theme.accent
 				else
-					fg = hopts.color_entry_disabled_fg
-					fg_desc = hopts.color_entry_disabled_fg
-					fg_separator = hopts.color_entry_disabled_fg
+					fg = hopts.color_disabled_fg or opts.theme.grey
+					fg_desc = hopts.color_disabled_fg or opts.theme.grey
+					fg_separator = hopts.color_disabled_fg or opts.theme.grey
 				end
 				bg_entry.fg = fg
 
@@ -313,6 +315,9 @@ function popup:update(t)
 	-- compute size
 	local placement = type(hopts.placement) == "string" and awful.placement[hopts.placement] or hopts.placement
 
+	local bg = hopts.color_bg or opts.theme.bg
+	local border_color = hopts.color_border or opts.theme.border
+
 	local widget = wibox.widget.base.make_widget_declarative({
 		{
 			layout_columns,
@@ -320,9 +325,9 @@ function popup:update(t)
 			left = margin_left,
 			widget = wibox.container.margin,
 		},
-		bg = hopts.color_entry_bg,
+		bg = bg,
 		border_width = hopts.border_width,
-		border_color = hopts.color_border,
+		border_color = border_color,
 		shape = hopts.shape,
 		opacity = hopts.opacity,
 		widget = wibox.container.background,
