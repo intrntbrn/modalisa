@@ -13,7 +13,7 @@ local M = {}
 local popup = {}
 local timer
 
-local function create_textbox(eopts, text, font, fg, width)
+local function create_textbox(text, eopts, font, fg, width)
 	local tb = wibox.widget.base.make_widget_declarative({
 		{
 			markup = util.markup.fg(fg, text),
@@ -30,6 +30,50 @@ local function create_textbox(eopts, text, font, fg, width)
 	return tb
 end
 
+local function create_progressbar(value, opts, font, fg, width)
+	local eopts = opts.echo
+	local popts = eopts.progressbar
+	local tb = wibox.widget.base.make_widget_declarative({
+		{
+			max_value = 1,
+			value = value,
+			color = popts.color or opts.theme.fg,
+			background_color = popts.background_color or opts.theme.bg,
+			bar_border_color = popts.bar_border_color or opts.theme.fg,
+			border_color = popts.border_color or opts.theme.border,
+			bar_shape = popts.bar_shape,
+			shape = popts.shape,
+			border_width = popts.border_width,
+			bar_border_width = popts.bar_border_width,
+			margins = popts.margins,
+			paddings = popts.paddings,
+			opacity = popts.opacity,
+			widget = wibox.widget.progressbar,
+		},
+		forced_height = beautiful.get_font_height(font),
+		width = width,
+		strategy = eopts.entry_width_strategy,
+		widget = wibox.container.constraint,
+	})
+	return tb
+end
+
+local function create_element(value, opts, font, fg, width)
+	local eopts = opts.echo
+	local t = type(value)
+	if t == "string" then
+		return create_textbox(value, eopts, font, fg, width)
+	end
+	if t == "number" then
+		if eopts.show_percentage_as_progressbar then
+			if value >= 0 and value <= 1.0 then
+				return create_progressbar(value, opts, font, fg, width)
+			end
+		end
+	end
+	return create_textbox(value, eopts, font, fg, width)
+end
+
 local function create_key_value_widget(opts, key, value)
 	local eopts = opts.echo
 	local font = eopts.font
@@ -41,13 +85,14 @@ local function create_key_value_widget(opts, key, value)
 	local width = font_width * eopts.entry_width
 
 	local tb_key
-	if key and string.len(key) > 0 then
-		tb_key = create_textbox(eopts, key, font_key, fg_key, width)
+	if key then
+		tb_key = create_element(key, opts, font_key, fg_key, width)
 	end
 
 	local tb_value
-	if value and string.len(value) > 0 then
-		tb_value = create_textbox(eopts, value, font, fg, width)
+	if value then
+		tb_value = create_element(value, opts, font, fg, width)
+		-- tb_value = create_textbox(eopts, value, font, fg, width)
 	end
 
 	local layout

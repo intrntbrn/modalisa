@@ -4,6 +4,7 @@ local dump = vim.inspect
 local dpi = require("beautiful").xresources.apply_dpi
 local awful = require("awful")
 local beautiful = require("beautiful")
+local gears = require("gears")
 
 local unpack = unpack or table.unpack
 
@@ -89,6 +90,7 @@ local defaults = {
 
 	echo = {
 		enabled = true,
+		show_percentage_as_progressbar = true,
 		placement = "centered",
 		timeout = 1000, -- ms
 		orientation = "vertical", -- vertical | horizontal
@@ -111,6 +113,25 @@ local defaults = {
 		color_bg = nil,
 		color_fg = nil,
 		color_header_fg = nil,
+
+		progressbar = {
+			shape = gears.shape.rounded_rect,
+			bar_shape = gears.shape.rounded_rect,
+			border_width = dpi(2),
+			bar_border_width = dpi(2),
+			color = nil,
+			background_color = nil,
+			border_color = nil,
+			bar_border_color = nil,
+			margins = {
+				left = 5,
+				right = 5,
+				top = 5,
+				bottom = 5,
+			},
+			paddings = nil,
+			opacity = 1,
+		},
 	},
 
 	prompt = {

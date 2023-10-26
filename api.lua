@@ -14,9 +14,9 @@ function M.run_tree(...)
 	return modal.run_tree(...)
 end
 
-function M.stop()
-	modal.stop()
-end
+-- function M.stop()
+-- 	modal.stop()
+-- end
 
 function M.fake_input(...)
 	return modal.fake_input(...)

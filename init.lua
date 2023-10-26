@@ -2,10 +2,6 @@ local M = {}
 
 local dump = require("motion.lib.vim").inspect
 
-function M.stop()
-	print("fucking weird")
-end
-
 local mt = {
 	__call = function(_, opts)
 		return M.setup(opts)
