@@ -16,7 +16,7 @@ function M.run_tree(...)
 end
 
 function M.stop()
-	print("STOP BUG PLS NO")
+	modal.stop()
 end
 
 function M.fake_input(...)

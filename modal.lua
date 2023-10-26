@@ -670,6 +670,9 @@ end
 
 -- bypass the keygrabber
 function M.fake_input(key, force_continue)
+	if not trunner.is_running then
+		return
+	end
 	if force_continue then
 		trunner.continue_external = true
 	end
