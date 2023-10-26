@@ -269,11 +269,11 @@ function popup:update(t)
 
 			local function mouse_button_handler(_, _, _, button)
 				if button == 1 then -- left click
-					awesome.emit_signal("motion::fake_input", { key = entry.key_unescaped, continue = false })
+					awesome.emit_signal("motion::fake_input", entry.key_unescaped, false)
 					return
 				end
 				if button == 3 then -- rightclick
-					awesome.emit_signal("motion::fake_input", { key = entry.key_unescaped, continue = true })
+					awesome.emit_signal("motion::fake_input", entry.key_unescaped, true)
 					return
 				end
 			end

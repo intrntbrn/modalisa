@@ -831,17 +831,6 @@ function M.setup(opts)
 		generate_mod_conversion_maps()
 	end)
 
-	awesome.connect_signal("motion::fake_input", function(args)
-		if type(args) == "string" then
-			M.fake_input(args)
-			return
-		end
-		if type(args) == "table" then
-			M.fake_input(args.key, args.continue)
-			return
-		end
-	end)
-
 	generate_mod_conversion_maps()
 
 	if opts.root_key then
