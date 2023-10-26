@@ -46,7 +46,7 @@ local function make_entries(keys, opts)
 	for k, key in pairs(keys) do
 		if show_disabled or key:cond() then
 			local kopts = key:opts()
-			if not kopts or not kopts.hidden then
+			if not kopts or not key:hidden() then
 				local keyname = util.keyname(k, aliases)
 				table.insert(entries, {
 					key_unescaped = k,
