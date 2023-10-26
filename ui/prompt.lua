@@ -23,7 +23,7 @@ local function make_textbox(popts, text, font, fg, width)
 			widget = wibox.widget.textbox,
 		},
 		forced_height = beautiful.get_font_height(font),
-		width = width,
+		forced_width = width,
 		strategy = "exact",
 		widget = wibox.container.constraint,
 	})
@@ -40,7 +40,6 @@ local function make_prompt(opts, header_text)
 	local width = font_width * popts.width
 
 	local tb_header
-
 	if header_text and string.len(header_text) > 0 then
 		tb_header = make_textbox(popts, header_text, font_header, fg_header, width)
 	end
@@ -57,6 +56,7 @@ local function make_prompt(opts, header_text)
 		tb_header,
 		prompt,
 		spacing = tb_header and popts.spacing,
+		forced_width = not tb_header and width,
 		layout = layout,
 	})
 
@@ -128,6 +128,7 @@ end
 local function run(fn, initial_text, header_text, opts)
 	assert(fn)
 	opts = opts or config.get()
+	header_text = header_text or ""
 
 	local popts = opts.prompt
 
