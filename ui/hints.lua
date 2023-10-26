@@ -47,17 +47,11 @@ local function make_entries(keys, opts)
 		if show_disabled or key:cond() then
 			local kopts = key:opts()
 			if not kopts or not kopts.hidden then
-				local group = ""
-				if kopts and kopts.group then
-					group = kopts.group
-				end
-
 				local keyname = util.keyname(k, aliases)
-
 				table.insert(entries, {
 					key_unescaped = k,
 					key = keyname,
-					group = group,
+					group = key:group(),
 					cond = function()
 						return key:cond()
 					end,
@@ -65,7 +59,7 @@ local function make_entries(keys, opts)
 						return key:desc()
 					end,
 					id = key:id(),
-					fg = kopts.fg,
+					fg = key:fg(),
 					run = function()
 						key:fn(kopts)
 					end,

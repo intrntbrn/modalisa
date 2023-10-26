@@ -198,6 +198,18 @@ function M:id()
 	return self._id
 end
 
+function M:hidden()
+	return self._data.hidden
+end
+
+function M:group()
+	return self._data.group or ""
+end
+
+function M:fg()
+	return self._data.fg
+end
+
 function M:successors()
 	local succs = self._succs
 	if not succs then
@@ -356,11 +368,11 @@ end
 -- @param[opt=nil] seq
 function M:add(value, seq)
 	seq, value = parse_key(value, seq)
-	return add(self, value, seq, self:opts(), self:pred()) -- FIXME: last param
+	return add(self, value, seq, self:opts(), self:pred())
 end
 
 function M:update_opts()
-	return add(self, nil, "", self:opts(), self:pred()) -- FIXME: last param
+	return add(self, nil, "", self:opts(), self:pred())
 end
 
 function M:get(seq)

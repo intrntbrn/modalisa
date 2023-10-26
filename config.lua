@@ -15,12 +15,12 @@ local defaults = {
 	include_default_keys = true,
 
 	-- core
-	unique = { "hidden", "fg", "continue" },
 	mode = "hybrid", -- "modal" | "hold" | "hybrid" | "forever"
 	smart_modifiers = true,
 	stop_on_unknown_key = false,
 	ignore_shift_state_for_special_characters = true,
 	timeout = 0, -- ms
+	unique = {},
 
 	theme = {
 		fg = beautiful.fg_focus or "#eceffc",
