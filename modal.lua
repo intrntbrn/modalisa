@@ -378,24 +378,24 @@ end
 -- @param t table A motion (sub)tree
 function trunner:on_start()
 	self.is_running = true
-	awesome.emit_signal("motion::start", { tree = self.tree })
+	awesome.emit_signal("motion::started", { tree = self.tree })
 end
 
 -- @param t table A motion (sub)tree
 function trunner:on_update()
-	awesome.emit_signal("motion::update", { tree = self.tree })
+	awesome.emit_signal("motion::updated", { tree = self.tree })
 end
 
 -- @param t table A motion (sub)tree
 function trunner:on_exec(t, result)
-	awesome.emit_signal("motion::exec", { tree = t, result = result })
+	awesome.emit_signal("motion::executed", { tree = t, result = result })
 end
 
 -- @param t table A motion (sub)tree
 function trunner:on_stop()
 	print("motion::stop")
 	self.is_running = false
-	awesome.emit_signal("motion::stop", { tree = self.tree })
+	awesome.emit_signal("motion::stopped", { tree = self.tree })
 end
 
 function trunner:start_timer()

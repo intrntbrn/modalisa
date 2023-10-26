@@ -295,7 +295,7 @@ function M.setup(opts)
 		run(kvs, opts)
 	end)
 
-	awesome.connect_signal("motion::exec", function(args)
+	awesome.connect_signal("motion::executed", function(args)
 		handle_signal(args)
 	end)
 end

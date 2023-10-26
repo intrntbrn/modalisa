@@ -428,19 +428,19 @@ function M.setup(opts)
 	assert(once == nil, "hints are already setup")
 	once = popup:new(opts.hints)
 
-	awesome.connect_signal("motion::exec", function(_)
+	awesome.connect_signal("motion::executed", function(_)
 		util.run_on_idle(function()
 			popup:refresh_entries()
 		end)
 	end)
 
-	awesome.connect_signal("motion::update", function(args)
+	awesome.connect_signal("motion::updated", function(args)
 		util.run_on_idle(function()
 			show(args.tree)
 		end)
 	end)
 
-	awesome.connect_signal("motion::stop", function(_)
+	awesome.connect_signal("motion::stopped", function(_)
 		util.run_on_idle(function()
 			if timer then
 				timer:stop()
