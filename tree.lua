@@ -64,7 +64,7 @@ local function parse_key(key, table_index)
 				elseif k == "fg" then
 					fg = v
 				elseif k == "group" then
-					group = group
+					group = v
 				else
 					assert(not seq, "multiple undeclared strings")
 					seq = v
