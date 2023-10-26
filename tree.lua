@@ -92,6 +92,8 @@ local function parse_key(key, table_index)
 			elseif t == "boolean" then
 				if k == "temp" then
 					temp = v
+				elseif k == "global" then
+					global = v
 				elseif k == "hidden" then
 					hidden = v
 				elseif k == "continue" then
@@ -106,6 +108,10 @@ local function parse_key(key, table_index)
 	if not seq then
 		assert(table_index, "no key sequence found")
 		seq = table_index
+	end
+
+	if global == true then
+		global = seq
 	end
 
 	return seq,
