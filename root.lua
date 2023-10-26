@@ -32,6 +32,7 @@ function M.setup(opts)
 	root_tree = tree:new(opts, "motion root")
 
 	awesome.connect_signal("motion::config", function(_, _)
+		-- when config has been updated, we have to merge all opts again
 		local new_opts = config.get()
 		root_tree._data.opts_raw = new_opts
 		root_tree._data.opts_merged = new_opts

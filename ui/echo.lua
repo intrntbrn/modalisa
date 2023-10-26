@@ -72,7 +72,10 @@ local function create_widget(opts, kvs)
 	local eopts = opts.echo
 	local widgets = {}
 	local i = 1
-	for k, v in pairs(kvs) do
+	for _, kv in ipairs(kvs) do
+		local k = kv.key
+		local v = kv.value
+
 		local bg = eopts.color_bg or opts.theme.bg
 		local is_odd = (i % 2) == 0
 		if is_odd then
@@ -173,11 +176,25 @@ local function set_timer(eopts)
 	})
 end
 
+local function transform(kvs)
+	local list = {}
+	for k, v in pairs(kvs) do
+		table.insert(list, { key = k, value = v })
+	end
+
+	table.sort(list, function(a, b)
+		return a.key < b.key
+	end)
+	return list
+end
+
 local function run(kvs, opts)
 	opts = opts or config.get()
 	local eopts = opts.echo
 
-	local widget = create_widget(opts, kvs)
+	local list = transform(kvs)
+
+	local widget = create_widget(opts, list)
 	popup:set_widget(widget, eopts)
 	set_timer(eopts)
 end
