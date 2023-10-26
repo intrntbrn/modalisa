@@ -30,8 +30,7 @@ function M.merge_opts(a, b)
 end
 
 function M.keyname(k, aliases)
-	-- we are forced to remove the <> surrounding,
-	-- otherwise the key is interpreted as a tag in widgets
+	-- remove <> surrounding
 	_, _, key = string.find(k, "<(.+)>")
 	if key then
 		k = key
