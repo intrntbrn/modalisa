@@ -92,7 +92,6 @@ local function create_key_value_widget(opts, key, value)
 	local tb_value
 	if value then
 		tb_value = create_element(value, opts, font, fg, width)
-		-- tb_value = create_textbox(eopts, value, font, fg, width)
 	end
 
 	local layout

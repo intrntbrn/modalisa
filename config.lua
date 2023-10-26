@@ -59,6 +59,12 @@ local defaults = {
 		entry_key_width = 5, -- chars
 		min_entry_width = 25, -- chars
 		max_entry_width = 30, -- chars
+		entry_padding = {
+			top = 0,
+			bottom = 0,
+			left = 0,
+			right = 0,
+		},
 		width = 0.75, -- fraction or abs
 		height = 0.3, -- fraction or abs
 		fill_remaining_space = true,

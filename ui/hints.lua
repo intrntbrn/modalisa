@@ -123,9 +123,19 @@ function popup:update(t)
 	)
 	local cell_width = dpi(util.get_font_width(font))
 
-	local entry_height = cell_height
-	local min_entry_width = cell_width * hopts.min_entry_width
-	local max_entry_width = cell_width * hopts.max_entry_width
+	local width_padding = 0
+	local height_padding = 0
+	local entry_padding = hopts.entry_padding
+	if entry_padding then
+		width_padding = width_padding + (entry_padding.left or 0)
+		width_padding = width_padding + (entry_padding.right or 0)
+		height_padding = height_padding + (entry_padding.top or 0)
+		height_padding = height_padding + (entry_padding.bottom or 0)
+	end
+
+	local entry_height = cell_height + height_padding
+	local min_entry_width = cell_width * (hopts.min_entry_width + width_padding)
+	local max_entry_width = cell_width * (hopts.max_entry_width + width_padding)
 
 	local max_entries = math.floor((max_width * max_height) / (min_entry_width * entry_height))
 	local max_columns = math.floor(max_width / min_entry_width)
@@ -192,27 +202,31 @@ function popup:update(t)
 					{
 						{
 							{
-								id = "textbox_key",
-								halign = "right",
-								font = font,
+								{
+									id = "textbox_key",
+									halign = "right",
+									font = font,
+									widget = wibox.widget.textbox,
+								},
+								strategy = "exact",
+								width = hopts.entry_key_width * cell_width,
+								widget = wibox.container.constraint,
+							},
+							{
+
+								id = "textbox_separator",
+								font = font_separator,
 								widget = wibox.widget.textbox,
 							},
-							strategy = "exact",
-							width = hopts.entry_key_width * cell_width,
-							widget = wibox.container.constraint,
+							{
+								id = "textbox_desc",
+								font = font_desc,
+								widget = wibox.widget.textbox,
+							},
+							layout = wibox.layout.fixed.horizontal(),
 						},
-						{
-
-							id = "textbox_separator",
-							font = font_separator,
-							widget = wibox.widget.textbox,
-						},
-						{
-							id = "textbox_desc",
-							font = font_desc,
-							widget = wibox.widget.textbox,
-						},
-						layout = wibox.layout.fixed.horizontal(),
+						margins = hopts.entry_padding,
+						widget = wibox.container.margin,
 					},
 					bg = bg,
 					id = "background_entry",
