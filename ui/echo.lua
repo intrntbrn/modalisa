@@ -13,7 +13,7 @@ local M = {}
 local popup = {}
 local timer
 
-local function make_center_textbox(eopts, text, font, fg, width)
+local function create_textbox(eopts, text, font, fg, width)
 	local tb = wibox.widget.base.make_widget_declarative({
 		{
 			markup = util.markup.fg(fg, text),
@@ -30,7 +30,7 @@ local function make_center_textbox(eopts, text, font, fg, width)
 	return tb
 end
 
-local function make_key_value_textbox(opts, key, value)
+local function create_key_value_widget(opts, key, value)
 	local eopts = opts.echo
 	local font = eopts.font
 	local fg = eopts.color_fg or opts.theme.fg
@@ -42,12 +42,12 @@ local function make_key_value_textbox(opts, key, value)
 
 	local tb_key
 	if key and string.len(key) > 0 then
-		tb_key = make_center_textbox(eopts, key, font_key, fg_key, width)
+		tb_key = create_textbox(eopts, key, font_key, fg_key, width)
 	end
 
 	local tb_value
 	if value and string.len(value) > 0 then
-		tb_value = make_center_textbox(eopts, value, font, fg, width)
+		tb_value = create_textbox(eopts, value, font, fg, width)
 	end
 
 	local layout
@@ -83,7 +83,7 @@ local function create_widget(opts, kvs)
 			bg = util.color_or_luminosity(odd, bg)
 		end
 
-		local tb = make_key_value_textbox(opts, k, v)
+		local tb = create_key_value_widget(opts, k, v)
 		local base = wibox.widget.base.make_widget_declarative({
 			{
 				tb,

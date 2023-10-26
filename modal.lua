@@ -23,8 +23,7 @@ local lib = require("motion.lib")
 local vim = require("motion.lib.vim")
 local dump = require("motion.lib").inspect
 local root_tree = require("motion.root")
-local mtree = require("motion.tree")
-local mmodmap = require("motion.modmap")
+local modmap = require("motion.modmap")
 local akeygrabber = require("awful.keygrabber")
 local gears = require("gears")
 local config = require("motion.config")
@@ -338,9 +337,9 @@ function trunner:set(t, root_key)
 	assert(not vim.tbl_isempty(t:opts()), "trunner:new t opts are empty")
 
 	if root_key then
-		self.mm = mmodmap(root_key.key, root_key.mods, mod_conversion)
+		self.mm = modmap(root_key.key, root_key.mods, mod_conversion)
 	else
-		self.mm = mmodmap("", {}, mod_conversion)
+		self.mm = modmap("", {}, mod_conversion)
 	end
 
 	self:reset()
@@ -680,7 +679,7 @@ end
 -- run inline table
 function M.run_tree(tree, opts, name)
 	opts = config.get(opts)
-	local t = mtree:new(opts, name)
+	local t = require("motion.tree"):new(opts, name)
 	assert(t)
 	t:add_successors(tree)
 	local ok = trunner:set(t)
