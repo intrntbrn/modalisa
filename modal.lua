@@ -8,7 +8,6 @@ local M = {}
 -- color themes
 -- client label params (before: theme)
 -- fix default clienting floating resize
--- group needs to be attribute, hidden as well, fg as well
 -- option picker ("pick a string")
 
 -- TODO:
@@ -560,7 +559,7 @@ function trunner:input(key)
 	-- determine if we should keep on running the current tree
 
 	self.continue_key = false
-	if node:opts().continue then
+	if node:continue() then
 		self.continue_key = true
 	end
 

@@ -44,6 +44,7 @@ local function parse_key(key, table_index)
 	local fg
 	local hidden
 	local group
+	local continue
 
 	local t = type(key)
 
@@ -93,6 +94,8 @@ local function parse_key(key, table_index)
 					temp = v
 				elseif k == "hidden" then
 					hidden = v
+				elseif k == "continue" then
+					continue = v
 				else
 					assert(false, "unknown boolean: ", k, v)
 				end
@@ -117,6 +120,7 @@ local function parse_key(key, table_index)
 			hidden = hidden,
 			group = group,
 			fg = fg,
+			continue = continue,
 		}
 end
 
@@ -204,6 +208,10 @@ end
 
 function M:group()
 	return self._data.group or ""
+end
+
+function M:continue()
+	return self._data.continue
 end
 
 function M:fg()
