@@ -58,31 +58,24 @@ function M.split_vim_key(str)
 	if not str or string.len(str) == 0 then
 		return nil, nil
 	end
-	local regex
 
-	-- e.g. <Tab> or <F10>
-	regex = "<%w+>"
-	if string.match(str, string.format("^%s", regex)) then
-		for first in string.gmatch(str, regex) do
-			local rest = string.gsub(str, regex, "", 1)
-			return first, rest
+	local all = {
+		"<.*>",
+		"%u",
+		"[%w%s]",
+		"%p",
+	}
+
+	for _, regex in ipairs(all) do
+		if string.match(str, string.format("^%s", regex)) then
+			for first in string.gmatch(str, regex) do
+				local rest = string.gsub(str, regex, "", 1)
+				return first, rest
+			end
 		end
 	end
 
-	-- e.g. <A-C-Tab>
-	regex = "<[%u%-]+%w+>"
-	if string.match(str, string.format("^%s", regex)) then
-		for first in string.gmatch(str, regex) do
-			local rest = string.gsub(str, regex, "", 1)
-			return first, rest
-		end
-	end
-
-	-- use the first character
-	local first = string.sub(str, 1, 1)
-	local rest = string.gsub(str, "^.", "", 1)
-
-	return first, rest
+	assert(false, "unable to parse key:", str)
 end
 
 -- input: { { "mods" }, "key" }
