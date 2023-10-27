@@ -448,23 +448,13 @@ end
 
 -- update entries (desc, cond, etc.)
 function popup:refresh_entries()
-	-- after execution some important global vars in awesome aren't defined yet
-	-- (e.g. client.focus), resulting in incorrect cond() of entries.
-	-- therefore we add a small delay to circumvent race conditions
-	gears.timer({
-		timeout = 0.025, -- 25ms
-		callback = function()
-			local entries = self.entries_widget
-			if not entries then
-				return
-			end
-			for _, v in pairs(entries) do
-				v:update()
-			end
-		end,
-		autostart = true,
-		single_shot = true,
-	})
+	local entries = self.entries_widget
+	if not entries then
+		return
+	end
+	for _, v in pairs(entries) do
+		v:update()
+	end
 end
 
 local function show(t)
