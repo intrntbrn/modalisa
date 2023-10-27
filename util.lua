@@ -41,9 +41,13 @@ function M.keyname(k, aliases)
 		k = escaped
 	end
 
+	local count
 	if aliases then
 		for s, v in pairs(aliases) do
-			k = string.gsub(k, s, v)
+			k, count = string.gsub(k, s, v)
+			if count ~= 0 then
+				break
+			end
 		end
 	end
 
