@@ -639,6 +639,9 @@ function trunner:keyreleased_callback()
 end
 
 local function run_tree(t, parsed_keybind)
+	-- remove any temp successors that have not been cleaned from previous runs
+	t:remove_temp_successors()
+
 	local ok = trunner:set(t, parsed_keybind)
 	if not ok then
 		return
