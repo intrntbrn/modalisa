@@ -35,6 +35,7 @@ local defaults = {
 	hints = {
 		enabled = true,
 		delay = 0, -- ms
+		show_header = true,
 		show_disabled_keys = true,
 		sort = "group", -- group | id | nil
 		key_aliases = {
@@ -79,6 +80,7 @@ local defaults = {
 		font = "Monospace Bold 12",
 		font_separator = "Monospace Bold 12",
 		font_desc = "Monospace 12",
+		font_header = "Monospace 12",
 		group_colors = {
 			["menu"] = "#BB9AF7",
 		},
@@ -88,6 +90,7 @@ local defaults = {
 		color_desc_fg = nil,
 		color_separator_fg = nil,
 		color_bg = nil,
+		color_header = nil,
 		color_odd_bg = -8, -- color or luminosity
 		color_hover_bg = 20, -- color or luminosity
 	},

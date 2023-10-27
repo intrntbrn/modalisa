@@ -157,11 +157,11 @@ local function calc_pixel_count(property, v, s)
 	return v
 end
 
-function M.get_pixel_width(v, s)
+function M.get_screen_pixel_width(v, s)
 	return calc_pixel_count("width", v, s)
 end
 
-function M.get_pixel_height(v, s)
+function M.get_screen_pixel_height(v, s)
 	return calc_pixel_count("width", v, s)
 end
 

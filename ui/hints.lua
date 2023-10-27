@@ -118,9 +118,16 @@ function popup:update(t)
 		end
 	end
 
+	local header_text = t:desc()
+	local header_height = 0
+	if hopts.show_header then
+		header_height = beautiful.get_font_height(hopts.font_header)
+	end
+
 	-- calculations
-	local max_width = util.get_pixel_width(hopts.width, s)
-	local max_height = util.get_pixel_height(hopts.height, s)
+	local max_width = util.get_screen_pixel_width(hopts.width, s)
+	local max_height = util.get_screen_pixel_height(hopts.height, s)
+	max_height = max_height - header_height
 
 	local font = hopts.font or hopts.font_desc or hopts.font_separator
 	local font_desc = hopts.font_desc or font
@@ -323,6 +330,26 @@ function popup:update(t)
 		self.entries_widget = entries_widget
 	end
 
+	local widget = layout_columns
+	if hopts.show_header then
+		local header_color = hopts.color_header or opts.theme.accent
+		widget = wibox.widget.base.make_widget_declarative({
+			{
+				{
+					markup = util.markup.fg(header_color, header_text),
+					font = hopts.font_header,
+					valign = "center",
+					halign = "center",
+					widget = wibox.widget.textbox,
+				},
+				forced_height = header_height,
+				widget = wibox.container.place,
+			},
+			layout_columns,
+			layout = wibox.layout.fixed.vertical,
+		})
+	end
+
 	local margin_left
 	local margin_right
 	if hopts.fill_remaining_space then
@@ -337,9 +364,9 @@ function popup:update(t)
 	local bg = hopts.color_bg or opts.theme.bg
 	local border_color = hopts.color_border or opts.theme.border
 
-	local widget = wibox.widget.base.make_widget_declarative({
+	local base_widget = wibox.widget.base.make_widget_declarative({
 		{
-			layout_columns,
+			widget,
 			right = margin_right,
 			left = margin_left,
 			widget = wibox.container.margin,
@@ -353,7 +380,7 @@ function popup:update(t)
 	})
 
 	-- update the popup
-	self.popup.widget = widget
+	self.popup.widget = base_widget
 	self.popup.screen = s
 	if placement then
 		self.popup.placement = placement
