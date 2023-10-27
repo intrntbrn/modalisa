@@ -175,6 +175,9 @@ function M.layout_master_count_decrease()
 	return mt({
 		group = "layout.master.count",
 		desc = "master count decrease",
+		cond = function()
+			return awful.screen.focused().selected_tag.master_count > 0
+		end,
 		result = { master_count = helper.get_current_tag_master_count },
 		fn = function(opts, self)
 			awm.layout_master_count_decrease()
@@ -197,6 +200,9 @@ function M.layout_column_count_decrease()
 	return mt({
 		group = "layout.column.count",
 		desc = "column count decrease",
+		cond = function()
+			return awful.screen.focused().selected_tag.column_count > 0
+		end,
 		fn = function()
 			awm.layout_master_count_decrease()
 		end,
@@ -742,7 +748,7 @@ end
 
 function M.client_move_smart(dir)
 	return mt({
-		group = "client.layout.move",
+		group = "client.move",
 		cond = function()
 			return client.focus
 		end,

@@ -1,5 +1,6 @@
 local vim = require("motion.lib.vim")
 local util = require("motion.util")
+local dump = require("motion.lib.vim").inspect
 
 ---@diagnostic disable-next-line: unused-local
 local dump = vim.inspect
@@ -33,18 +34,7 @@ end
 -- @param key string|table The key object to be parsed
 -- @param table_index string The key string if the key object does not contain the key string
 local function parse_key(key, table_index)
-	local seq
-	local fn
-	local opts
-	local cond
-	local desc
-	local result
-	local temp
-	local global
-	local fg
-	local hidden
-	local group
-	local continue
+	local seq, fn, opts, cond, desc, result, temp, global, fg, hidden, group, continue
 
 	local t = type(key)
 
@@ -57,26 +47,26 @@ local function parse_key(key, table_index)
 			if t == "string" then
 				-- can be key, desc, without mods
 				if k == "desc" then
-					assert(not desc, "multiple descrptions")
+					assert(not desc, "unable to parse key", dump(key))
 					desc = v
 				elseif k == "global" then
 					global = v
 				elseif k == "fg" then
 					fg = v
 				elseif k == "group" then
-					group = v
+					group = group
 				else
-					assert(not seq, "multiple undeclared strings")
+					assert(not seq, "unable to parse key", dump(key))
 					seq = v
 				end
 			elseif t == "table" then
 				if k == "opts" then
-					assert(not opts, "multiple opts")
+					assert(not opts, "unable to parse key", dump(key))
 					opts = v
 				elseif k == "result" then
 					result = v
 				else
-					assert(not opts, "multiple opts")
+					assert(not opts, "unable to parse key", dump(key))
 					opts = v
 				end
 			elseif t == "function" then
@@ -86,7 +76,7 @@ local function parse_key(key, table_index)
 				elseif k == "desc" then
 					desc = v
 				else
-					assert(not fn, "multiple undeclared functions")
+					assert(not fn, "unable to parse key", dump(key))
 					fn = v
 				end
 			elseif t == "boolean" then

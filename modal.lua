@@ -9,6 +9,7 @@ local M = {}
 -- client label params (before: theme)
 -- fix default clienting floating resize
 -- option picker ("pick a string")
+-- unminimize menu for each tag
 
 -- TODO:
 -- menu indicator in hints
@@ -107,16 +108,17 @@ local function parse_vim_key(k, opts)
 
 	-- punctuation char (e.g. ";")
 	if string.match(k, "^%p$") then
-		-- HACK: awful.keygrabber requires for special keys to also specify shift as
-		-- mods. This is utterly broken, because for some layouts the
-		-- minus key is on the shift layer, but for others layouts not. Therefore we're just
-		-- ignoring the shift state by adding the key with and without shift to the
-		-- map.
 		if opts and not opts.ignore_shift_state_for_special_characters then
 			return {
 				{ key = k, mods = {}, name = k },
 			}
 		end
+
+		-- HACK: awful.keygrabber requires for special keys to also specify shift as
+		-- mods. This is utterly broken, because for some layouts the
+		-- minus key is on the shift layer, but for others layouts not. Therefore we're just
+		-- ignoring the shift state by adding the key with and without shift to the
+		-- map.
 
 		return {
 			{ key = k, mods = {}, name = k },
@@ -220,8 +222,6 @@ local function parse_key_all(key)
 	return nil
 end
 
--- @param m table Map of parsed keys
--- @param k table Parsed key
 local function add_key_to_map(m, k)
 	assert(k.key)
 	assert(k.mods)
@@ -247,8 +247,6 @@ local function keygrabber_init()
 	return grabber
 end
 
--- @param t table A motion (sub)tree
--- @return table Table with tables of keys
 local function keygrabber_keys(t)
 	local opts = t:opts()
 
@@ -375,23 +373,19 @@ function trunner:start()
 	self.keygrabber:start()
 end
 
--- @param t table A motion (sub)tree
 function trunner:on_start()
 	self.is_running = true
 	awesome.emit_signal("motion::started", { tree = self.tree })
 end
 
--- @param t table A motion (sub)tree
 function trunner:on_update()
 	awesome.emit_signal("motion::updated", { tree = self.tree })
 end
 
--- @param t table A motion (sub)tree
 function trunner:on_exec(t, result)
 	awesome.emit_signal("motion::executed", { tree = t, result = result })
 end
 
--- @param t table A motion (sub)tree
 function trunner:on_stop()
 	print("motion::stop")
 	self.is_running = false
@@ -823,7 +817,6 @@ function M.setup(opts)
 	end)
 
 	awesome.connect_signal("motion::tree::remove", function(old)
-		print("motion::tree::remove")
 		global_keybinding_remove(old)
 	end)
 

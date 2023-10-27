@@ -23,7 +23,7 @@ local function sort_entries_by_group(entries)
 			if a.desc() == b.desc() then
 				return a.id < b.id
 			else
-				return (a.desc() or "") < (b.desc() or "")
+				return a.desc() < b.desc()
 			end
 		else
 			return a.group < b.group
@@ -56,7 +56,7 @@ local function make_entries(keys, opts)
 						return key:cond()
 					end,
 					desc = function()
-						return key:desc()
+						return key:desc() or ""
 					end,
 					id = key:id(),
 					fg = key:fg(),
