@@ -240,6 +240,19 @@ function M:strikethrough()
 	return highlight and highlight.strikethrough
 end
 
+function M:add_opts(opts)
+	local merged_raw = util.merge_opts(self._data.opts_raw or {}, opts)
+	self._data.opts_raw = merged_raw
+	local merged_merged = util.merge_opts(self._data.opts_merged, merged_raw)
+	self._data.opts_merged = merged_merged
+
+	self:update_succ_opts()
+end
+
+function M:set_continue(v)
+	self._data.continue = v
+end
+
 function M:continue()
 	return self._data.continue
 end
@@ -405,7 +418,7 @@ function M:add(value, seq)
 	return add(self, value, seq, self:opts(), self:pred())
 end
 
-function M:update_opts()
+function M:update_succ_opts()
 	return add(self, nil, "", self:opts(), self:pred())
 end
 
