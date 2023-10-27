@@ -9,10 +9,6 @@ local dump = require("motion.lib.vim").inspect
 
 local M = {}
 
--- TODO:
--- group colors
--- header
-
 local popup = {}
 local timer
 
@@ -37,17 +33,32 @@ local function sort_entries_by_id(entries)
 	end)
 end
 
+local function get_group_color(key, group_colors)
+	local group = key:group()
+	if not group or string.len(group) == 0 then
+		return
+	end
+	for regex, color in pairs(group_colors) do
+		if string.match(group, regex) then
+			return color
+		end
+	end
+	return nil
+end
+
 local function make_entries(keys, opts)
 	local hopts = opts.hints
 	local entries = {}
 
-	local aliases = hopts and hopts.key_aliases
+	local aliases = hopts.key_aliases
+	local group_colors = hopts.group_colors
 	local show_disabled = hopts.show_disabled_keys
 	for k, key in pairs(keys) do
 		if show_disabled or key:cond() then
 			local kopts = key:opts()
 			if not kopts or not key:hidden() then
 				local keyname = util.keyname(k, aliases)
+				local group_color = get_group_color(key, group_colors)
 				table.insert(entries, {
 					key_unescaped = k,
 					key = keyname,
@@ -60,6 +71,7 @@ local function make_entries(keys, opts)
 					end,
 					id = key:id(),
 					fg = key:fg(),
+					group_color = group_color,
 					run = function()
 						key:fn(kopts)
 					end,
@@ -252,8 +264,8 @@ function popup:update(t)
 				local fg_desc
 				local fg_separator
 				if entry.cond() then
-					fg = entry.fg or hopts.color_fg or opts.theme.fg
-					fg_desc = entry.fg or hopts.color_desc_fg or opts.theme.fg
+					fg = entry.fg or entry.group_color or hopts.color_fg or opts.theme.fg
+					fg_desc = entry.fg or entry.group_color or hopts.color_desc_fg or opts.theme.fg
 					fg_separator = hopts.color_separator_fg or opts.theme.accent
 				else
 					fg = hopts.color_disabled_fg or opts.theme.grey

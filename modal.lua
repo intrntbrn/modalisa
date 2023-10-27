@@ -10,12 +10,13 @@ local M = {}
 -- fix default clienting floating resize
 -- option picker ("pick a string")
 -- unminimize menu for each tag
+-- add audio/brightness to default_keys
+-- hints header
 
 -- TODO:
 -- menu indicator in hints
 -- keyname tester
 -- tests for key parser
--- group colors
 -- notify for duplicate keys
 -- cache tree keymap (~3ms)
 

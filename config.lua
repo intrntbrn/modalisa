@@ -80,7 +80,7 @@ local defaults = {
 		font_separator = "Monospace Bold 12",
 		font_desc = "Monospace 12",
 		group_colors = {
-			["menu"] = "#FF00FF",
+			["menu"] = "#BB9AF7",
 		},
 		color_border = nil,
 		color_fg = nil,
