@@ -62,7 +62,7 @@ function M.create_popup(c, text)
 end
 
 function M.setup(_)
-	awesome.connect_signal("motion::stop", function()
+	awesome.connect_signal("motion::stopped", function()
 		M.hide_labels()
 	end)
 end
