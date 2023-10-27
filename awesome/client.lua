@@ -95,7 +95,7 @@ function M.client_picker(opts, fn, filter)
 
 	for i, c in ipairs(clients) do
 		local label = util.index_to_label(i, opts.labels)
-		clabel.show_label(c, label)
+		clabel.show_label_parent(c, label, opts)
 		-- create menu
 		table.insert(menu, {
 			label,

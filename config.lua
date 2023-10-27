@@ -176,6 +176,18 @@ local defaults = {
 		color_cursor_bg = nil,
 	},
 
+	label = {
+		font = "Monospace Bold 40",
+		shape = gears.shape.rounded_rect,
+		border_width = beautiful.border_width or dpi(1),
+		bg = nil,
+		fg = nil,
+		border_color = nil,
+		width = dpi(100),
+		height = dpi(100),
+		opacity = 1,
+	},
+
 	-- awesome
 	auto_select_the_only_choice = false,
 	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",

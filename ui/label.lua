@@ -1,67 +1,95 @@
 local awful = require("awful")
-local gears = require("gears")
 local wibox = require("wibox")
-local util = require("motion.util")
-local dpi = require("beautiful").xresources.apply_dpi
+local config = require("motion.config")
 
 local M = {}
-
+local popup = {}
 local popups = {}
 
-function M.hide_labels()
-	if #popups == 0 then
-		return
-	end
+function popup:new()
+	local inst = {}
 
-	for _, p in pairs(popups) do
-		p.visible = false
-	end
-
-	popups = {}
-end
-
-function M.show_label(parent, label)
-	local p = M.create_popup(parent, string.format("%s", label))
-	p.visible = true
-	-- TODO: fix offset
-	awful.placement.centered(p, { parent = parent, offset = { x = -50, y = -50 } })
-	table.insert(popups, p)
-end
-
-function M.create_popup(c, text)
-	text = text or ""
-
-	local popup = awful.popup({
-		hide_on_rightclick = true,
-		screen = awful.screen.focused(),
-		visible = true,
+	inst.popup = awful.popup({
+		visible = false,
 		ontop = true,
 		above = true,
 
 		widget = wibox.widget({
 			{
 				{
-					text = text,
-					font = "JetBrainsMono Nerd Font Bold 40",
+					id = "textbox",
 					widget = wibox.widget.textbox,
 				},
 				widget = wibox.container.place,
 			},
-			fg = "#000000",
-			bg = "#FCA7EA",
-			forced_width = dpi(100),
-			forced_height = dpi(100),
-			border_color = "#383F5A",
-			border_width = dpi(0),
-			shape = gears.shape.rounded_rect,
+			id = "background",
 			widget = wibox.container.background,
 		}),
 	})
 
-	return popup
+	return setmetatable(inst, {
+		__index = popup,
+	})
 end
 
+function popup:is_visible()
+	return self.popup.visible
+end
+
+function popup:set_visible(value)
+	self.popup.visible = value
+end
+
+function popup:set(text, placement, opts)
+	local lopts = opts.label
+	local widget = self.popup.widget
+	local bg = widget:get_children_by_id("background")[1]
+	local tb = widget:get_children_by_id("textbox")[1]
+
+	tb.markup = text
+	tb.font = lopts.font
+
+	bg.fg = lopts.fg or opts.theme.bg
+	bg.bg = lopts.bg or opts.theme.accent
+	bg.forced_width = lopts.width
+	bg.forced_height = lopts.height
+	bg.border_color = lopts.border_color or opts.theme.border
+	bg.border_width = lopts.border_width
+	bg.shape = lopts.shape
+	bg.opacity = lopts.opacity
+
+	self.popup.placement = placement
+end
+
+function M.hide_labels()
+	for _, p in pairs(popups) do
+		p:set_visible(false)
+	end
+	popups = {}
+end
+
+function M.show_label_parent(parent, label, opts)
+	local placement = function(x)
+		awful.placement.centered(x, { parent = parent })
+	end
+	return M.show_label(placement, label, opts)
+end
+
+function M.show_label(placement, label, opts)
+	opts = opts or config.get()
+	label = label or ""
+
+	local p = popup:new()
+	p:set(label, placement, opts)
+	p:set_visible(true)
+	table.insert(popups, p)
+end
+
+local once
 function M.setup(_)
+	assert(once == nil, "label is already setup")
+	once = true
+
 	awesome.connect_signal("motion::stopped", function()
 		M.hide_labels()
 	end)
