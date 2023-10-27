@@ -21,7 +21,6 @@ local defaults = {
 	stop_on_unknown_key = false,
 	ignore_shift_state_for_special_characters = true,
 	timeout = 0, -- ms
-	unique = {},
 
 	theme = {
 		fg = beautiful.fg_focus or "#eceffc",

@@ -12,21 +12,14 @@ M.labels_qwerty = "asdfghjklwertyuiozxcvbnmpqASDFGHJKLQWERTYUIOPZXCVBNM123456789
 M.labels_numericalpha = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 function M.merge_opts(a, b)
-	a = a or {}
-	b = b or {}
-	local uniques = vim.tbl_deep_extend("force", a.unique or {}, b.unique or {})
-
-	for _, k in pairs(uniques) do
-		if a[k] then
-			a[k] = nil
-		end
+	if not b then
+		return vim.deepcopy(a)
 	end
 
-	local all = { a, b }
-	local ret = vim.tbl_deep_extend("force", unpack(all))
-	ret = vim.deepcopy(ret)
+	local merged = vim.tbl_deep_extend("force", a, b)
+	merged = vim.deepcopy(merged)
 
-	return ret
+	return merged
 end
 
 function M.keyname(k, aliases)
