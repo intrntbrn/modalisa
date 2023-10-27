@@ -1148,6 +1148,20 @@ function M.tag_last()
 	})
 end
 
+function M.tag_rename()
+	return mt({
+		desc = "rename tag",
+		function(opts)
+			local fn = function(s)
+				awful.tag.selected().name = s
+			end
+			local initial = awful.tag.selected().name
+			local header = "rename tag:"
+			require("motion.ui.prompt").run(fn, initial, header, opts)
+		end,
+	})
+end
+
 function helper.tagname_by_index(i)
 	local s = awful.screen.focused()
 	local t = s.tags[i]

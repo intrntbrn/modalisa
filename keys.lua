@@ -36,7 +36,6 @@ local keys = {
 	["xp"] = ps.spawn("pavucontrol"),
 	-- gui editors
 	["xc"] = ps.spawn("code"),
-	["xh"] = ps.spawn("helix"),
 	["xn"] = ps.spawn("neovide"),
 	-- image
 	["xi"] = ps.spawn("gimp"),
@@ -64,12 +63,12 @@ local keys = {
 	["<S-Up>"] = ps.client_floating_size_decrease("up"),
 	["<S-Right>"] = ps.client_floating_size_decrease("right"),
 
-	["<"] = ps.layout_column_count_decrease() + { opts = { continue = true } },
-	[">"] = ps.layout_column_count_increase() + { opts = { continue = true } },
-	["+"] = ps.layout_master_count_increase() + { opts = { continue = true } },
-	["-"] = ps.layout_master_count_decrease() + { opts = { continue = true } },
-	["]"] = ps.layout_master_width_increase() + { opts = { continue = true } },
-	["["] = ps.layout_master_width_decrease() + { opts = { continue = true } },
+	["<"] = ps.layout_column_count_decrease() + { continue = true },
+	[">"] = ps.layout_column_count_increase() + { continue = true },
+	["+"] = ps.layout_master_count_increase() + { continue = true },
+	["-"] = ps.layout_master_count_decrease() + { continue = true },
+	["]"] = ps.layout_master_width_increase() + { continue = true },
+	["["] = ps.layout_master_width_decrease() + { continue = true },
 
 	["1"] = ps.tag_view_only(1) + { hidden = false },
 	["2"] = ps.tag_view_only(2) + { hidden = false },
@@ -108,7 +107,7 @@ local keys = {
 	-- tag
 	["t"] = { desc = "tag", opts = { group = "menu.tag" } },
 	["tD"] = ps.tag_delete(),
-	["tr"] = { desc = "rename tag" }, -- TODO
+	["tr"] = ps.tag_rename(),
 	["tn"] = { desc = "new tag" }, -- TODO
 	["tp"] = ps.tag_toggle_policy(),
 	["tt"] = ps.tag_toggle_menu() + { opts = { hints = { enabled = true, delay = 0 } } },
