@@ -45,7 +45,7 @@ local function create_progressbar(value, opts, font, fg, width)
 			shape = popts.shape,
 			border_width = popts.border_width,
 			bar_border_width = popts.bar_border_width,
-			margins = popts.margins,
+			margins = popts.margin,
 			paddings = popts.paddings,
 			opacity = popts.opacity,
 			widget = wibox.widget.progressbar,

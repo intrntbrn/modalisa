@@ -72,7 +72,7 @@ local defaults = {
 			left = 0,
 			right = 0,
 		},
-		margins = {
+		margin = {
 			top = 0,
 			bottom = 0,
 			left = 0,
@@ -142,7 +142,7 @@ local defaults = {
 			background_color = nil,
 			border_color = nil,
 			bar_border_color = nil,
-			margins = {
+			margin = {
 				left = dpi(5),
 				right = dpi(5),
 				top = dpi(5),

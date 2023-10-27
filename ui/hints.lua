@@ -126,14 +126,14 @@ function popup:update(t)
 
 	local width_outer = 0
 	local height_outer = 0
-	local margins_outer = hopts.margins
+	local margins_outer = hopts.margin
 	if margins_outer then
 		width_outer = width_outer + margins_outer.left
 		width_outer = width_outer + margins_outer.right
 		height_outer = height_outer + margins_outer.top
 		height_outer = height_outer + margins_outer.bottom
 	end
-	local padding_outer = hopts.paddings
+	local padding_outer = hopts.padding
 	if padding_outer then
 		width_outer = width_outer + padding_outer.left
 		width_outer = width_outer + padding_outer.right
@@ -401,7 +401,7 @@ function popup:update(t)
 			opacity = hopts.opacity,
 			widget = wibox.container.background,
 		},
-		margins = hopts.margins,
+		margins = hopts.margin,
 		widget = wibox.container.margin,
 	})
 
