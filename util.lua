@@ -125,6 +125,34 @@ M.markup = {}
 function M.markup.fg(color, text)
 	return string.format("<span foreground='%s'>%s</span>", color, text)
 end
+function M.markup.bold(text)
+	return string.format("<b>%s</b>", text)
+end
+function M.markup.italic(text)
+	return string.format("<i>%s</i>", text)
+end
+function M.markup.strikethrough(text)
+	return string.format("<s>%s</s>", text)
+end
+function M.markup.underline(text)
+	return string.format("<u>%s</u>", text)
+end
+
+function M.apply_highlight(text, highlight)
+	if not highlight then
+		return text
+	end
+	for k, v in pairs(highlight) do
+		if type(v) == "boolean" and v then
+			local m = M.markup[k]
+			if m then
+				text = m(text)
+			end
+		end
+	end
+
+	return text
+end
 
 -- https://stackoverflow.com/questions/9790688/escaping-strings-for-gsub/20778724#20778724
 local quotepattern = "([" .. ("%^$().[]*+-?"):gsub("(.)", "%%%1") .. "])"

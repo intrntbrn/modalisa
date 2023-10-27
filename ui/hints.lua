@@ -71,6 +71,8 @@ local function make_entries(keys, opts)
 					end,
 					id = key:id(),
 					fg = key:fg(),
+					bg = key:bg(),
+					highlight = key:highlight(),
 					group_color = group_color,
 					run = function()
 						key:fn(kopts)
@@ -217,7 +219,7 @@ function popup:update(t)
 				end
 			end
 
-			local bg = hopts.color_bg or opts.theme.bg
+			local bg = entry.bg or hopts.color_bg or opts.theme.bg
 			local bg_hover = util.color_or_luminosity(hopts.color_hover_bg, bg)
 
 			local odd_style = hopts.odd_style
@@ -281,26 +283,31 @@ function popup:update(t)
 					return
 				end
 				local tb_key = widget:get_children_by_id("textbox_key")[1]
-				local tb_desc = widget:get_children_by_id("textbox_desc")[1]
 				local tb_separator = widget:get_children_by_id("textbox_separator")[1]
+				local tb_desc = widget:get_children_by_id("textbox_desc")[1]
 				local bg_entry = widget:get_children_by_id("background_entry")[1]
 
-				local fg
-				local fg_desc
+				local fg_key
 				local fg_separator
+				local fg_desc
 				if entry.cond() then
-					fg = entry.fg or entry.group_color or hopts.color_fg or opts.theme.fg
-					fg_desc = entry.fg or entry.group_color or hopts.color_desc_fg or opts.theme.fg
+					fg_key = hopts.color_fg or opts.theme.fg
 					fg_separator = hopts.color_separator_fg or opts.theme.accent
+					fg_desc = entry.fg or entry.group_color or hopts.color_desc_fg or opts.theme.fg
 				else
-					fg = hopts.color_disabled_fg or opts.theme.grey
-					fg_desc = hopts.color_disabled_fg or opts.theme.grey
+					fg_key = hopts.color_disabled_fg or opts.theme.grey
 					fg_separator = hopts.color_disabled_fg or opts.theme.grey
+					fg_desc = hopts.color_disabled_fg or opts.theme.grey
 				end
-				bg_entry.fg = fg
+				bg_entry.fg = fg_key
 
-				tb_key.markup = util.markup.fg(fg, entry.key)
-				tb_desc.markup = util.markup.fg(fg_desc, entry.desc())
+				local markup_desc = entry.desc()
+				markup_desc = util.markup.fg(fg_desc, markup_desc)
+				markup_desc = util.apply_highlight(markup_desc, entry.highlight)
+				tb_desc.markup = markup_desc
+
+				local markup_key = util.markup.fg(fg_key, entry.key)
+				tb_key.markup = markup_key
 				tb_separator.markup = util.markup.fg(fg_separator, hopts.separator)
 			end
 

@@ -12,13 +12,6 @@ local M = {}
 -- unminimize menu for each tag
 -- add audio/brightness to default_keys
 
--- TODO:
--- menu indicator in hints
--- keyname tester
--- tests for key parser
--- notify for duplicate keys
--- cache tree keymap (~3ms)
-
 local awful = require("awful")
 local lib = require("motion.lib")
 local vim = require("motion.lib.vim")

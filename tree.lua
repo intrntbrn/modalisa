@@ -34,7 +34,7 @@ end
 -- @param key string|table The key object to be parsed
 -- @param table_index string The key string if the key object does not contain the key string
 local function parse_key(key, table_index)
-	local seq, fn, opts, cond, desc, result, temp, global, fg, hidden, group, continue
+	local seq, fn, opts, cond, desc, result, temp, global, hidden, group, continue, highlight
 
 	local t = type(key)
 
@@ -51,8 +51,6 @@ local function parse_key(key, table_index)
 					desc = v
 				elseif k == "global" then
 					global = v
-				elseif k == "fg" then
-					fg = v
 				elseif k == "group" then
 					group = v
 				else
@@ -65,6 +63,8 @@ local function parse_key(key, table_index)
 					opts = v
 				elseif k == "result" then
 					result = v
+				elseif k == "highlight" then
+					highlight = v
 				else
 					assert(not opts, "unable to parse key", dump(key))
 					opts = v
@@ -115,8 +115,8 @@ local function parse_key(key, table_index)
 			global = global,
 			hidden = hidden,
 			group = group,
-			fg = fg,
 			continue = continue,
+			highlight = highlight,
 		}
 end
 
@@ -206,12 +206,42 @@ function M:group()
 	return self._data.group or ""
 end
 
-function M:continue()
-	return self._data.continue
+function M:highlight()
+	return self._data.highlight
 end
 
 function M:fg()
-	return self._data.fg
+	local highlight = self._data.highlight
+	return highlight and highlight.fg
+end
+
+function M:bg()
+	local highlight = self._data.highlight
+	return highlight and highlight.bg
+end
+
+function M:underline()
+	local highlight = self._data.highlight
+	return highlight and highlight.underline
+end
+
+function M:bold()
+	local highlight = self._data.highlight
+	return highlight and highlight.bold
+end
+
+function M:italic()
+	local highlight = self._data.highlight
+	return highlight and highlight.italic
+end
+
+function M:strikethrough()
+	local highlight = self._data.highlight
+	return highlight and highlight.strikethrough
+end
+
+function M:continue()
+	return self._data.continue
 end
 
 function M:successors()

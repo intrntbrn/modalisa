@@ -93,7 +93,7 @@ local defaults = {
 		font_desc = "Monospace 12",
 		font_header = "Monospace 12",
 		group_colors = {
-			["menu"] = "#BB9AF7",
+			-- ["menu"] = "#BB9AF7",
 		},
 		color_border = nil,
 		color_fg = nil,
