@@ -128,17 +128,17 @@ function popup:update(t)
 	local height_outer = 0
 	local margins_outer = hopts.margin
 	if margins_outer then
-		width_outer = width_outer + margins_outer.left
-		width_outer = width_outer + margins_outer.right
-		height_outer = height_outer + margins_outer.top
-		height_outer = height_outer + margins_outer.bottom
+		width_outer = width_outer + (margins_outer.left or 0)
+		width_outer = width_outer + (margins_outer.right or 0)
+		height_outer = height_outer + (margins_outer.top or 0)
+		height_outer = height_outer + (margins_outer.bottom or 0)
 	end
 	local padding_outer = hopts.padding
 	if padding_outer then
-		width_outer = width_outer + padding_outer.left
-		width_outer = width_outer + padding_outer.right
-		height_outer = height_outer + padding_outer.top
-		height_outer = height_outer + padding_outer.bottom
+		width_outer = width_outer + (padding_outer.left or 0)
+		width_outer = width_outer + (padding_outer.right or 0)
+		height_outer = height_outer + (padding_outer.top or 0)
+		height_outer = height_outer + (padding_outer.bottom or 0)
 	end
 
 	-- calculations

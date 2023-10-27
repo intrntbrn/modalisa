@@ -11,7 +11,6 @@ local M = {}
 -- option picker ("pick a string")
 -- unminimize menu for each tag
 -- add audio/brightness to default_keys
--- hints header
 
 -- TODO:
 -- menu indicator in hints
