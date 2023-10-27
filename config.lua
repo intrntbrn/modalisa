@@ -66,6 +66,18 @@ local defaults = {
 			left = 0,
 			right = 0,
 		},
+		padding = {
+			top = 0,
+			bottom = 0,
+			left = 0,
+			right = 0,
+		},
+		margins = {
+			top = 0,
+			bottom = 0,
+			left = 0,
+			right = 0,
+		},
 		width = 0.75, -- fraction or abs
 		height = 0.3, -- fraction or abs
 		fill_remaining_space = true,

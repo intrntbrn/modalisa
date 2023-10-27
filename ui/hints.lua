@@ -124,10 +124,28 @@ function popup:update(t)
 		header_height = beautiful.get_font_height(hopts.font_header)
 	end
 
+	local width_outer = 0
+	local height_outer = 0
+	local margins_outer = hopts.margins
+	if margins_outer then
+		width_outer = width_outer + margins_outer.left
+		width_outer = width_outer + margins_outer.right
+		height_outer = height_outer + margins_outer.top
+		height_outer = height_outer + margins_outer.bottom
+	end
+	local padding_outer = hopts.paddings
+	if padding_outer then
+		width_outer = width_outer + padding_outer.left
+		width_outer = width_outer + padding_outer.right
+		height_outer = height_outer + padding_outer.top
+		height_outer = height_outer + padding_outer.bottom
+	end
+
 	-- calculations
 	local max_width = util.get_screen_pixel_width(hopts.width, s)
 	local max_height = util.get_screen_pixel_height(hopts.height, s)
-	max_height = max_height - header_height
+	max_height = max_height - header_height - height_outer
+	max_width = max_width - width_outer
 
 	local font = hopts.font or hopts.font_desc or hopts.font_separator
 	local font_desc = hopts.font_desc or font
@@ -366,17 +384,25 @@ function popup:update(t)
 
 	local base_widget = wibox.widget.base.make_widget_declarative({
 		{
-			widget,
-			right = margin_right,
-			left = margin_left,
-			widget = wibox.container.margin,
+			{
+				{
+					widget,
+					right = margin_right,
+					left = margin_left,
+					widget = wibox.container.margin, -- fill space margin
+				},
+				margins = hopts.padding,
+				widget = wibox.container.margin,
+			},
+			bg = bg,
+			border_width = hopts.border_width,
+			border_color = border_color,
+			shape = hopts.shape,
+			opacity = hopts.opacity,
+			widget = wibox.container.background,
 		},
-		bg = bg,
-		border_width = hopts.border_width,
-		border_color = border_color,
-		shape = hopts.shape,
-		opacity = hopts.opacity,
-		widget = wibox.container.background,
+		margins = hopts.margins,
+		widget = wibox.container.margin,
 	})
 
 	-- update the popup
