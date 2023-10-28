@@ -290,14 +290,19 @@ end
 function M:remove_temp_successors()
 	local succs = self._succs
 	if not succs then
-		return
+		return false
 	end
+
+	local is_remove = false
 
 	for k, succ in pairs(succs) do
 		if succ._data.temp then
+			is_remove = true
 			self:remove(k)
 		end
 	end
+
+	return is_remove
 end
 
 function M:add_successors(succs)

@@ -6,11 +6,10 @@ local M = {}
 -- exposed api
 -- beautiful menu
 -- color themes
--- client label params (before: theme)
 -- fix default clienting floating resize (resize modes)
 -- option picker ("pick a string")
--- unminimize menu for each tag
 -- add audio/brightness to default_keys
+-- modalisa::executed { tree } to list
 
 local awful = require("awful")
 local lib = require("modalisa.lib")
@@ -338,7 +337,7 @@ function trunner:set(t, root_key)
 	if t:is_leaf() then
 		-- running the node might populate itself (e.g. user calls run on an
 		-- dynamic node)
-		self:run(t)
+		self:execute(t)
 
 		if t:is_leaf() then
 			-- there is no point in running an empty tree
@@ -431,6 +430,10 @@ function trunner:stop_maybe(reason)
 			end
 		end
 	elseif reason == "no_next_tree" then
+		if mode == "forever" then
+			return
+		end
+
 		if mode == "hold" or mode == "hybrid" then
 			if self.mm:has_pressed_mods() then
 				return
@@ -438,13 +441,10 @@ function trunner:stop_maybe(reason)
 		end
 
 		if self.continue_key then
-			if mode == "modal" or mode == "hybrid" then
-				return
-			end
-		end
-
-		if mode == "forever" then
+			-- FIXME: test this in hold mode
+			-- if mode == "modal" or mode == "hybrid" then
 			return
+			-- end
 		end
 	elseif reason == "unknown_key" then
 		if not opts.stop_on_unknown_key then
@@ -453,41 +453,43 @@ function trunner:stop_maybe(reason)
 	end
 
 	self:stop()
+	return true
 end
 
-function trunner:run(t)
-	assert(t, "run: tree is nil")
-	local opts = t:opts()
+function trunner:execute(t)
+	assert(t, "execute: tree is nil")
 
-	-- run fn
-	local list
-
-	if t:cond() then
-		list = t:exec(opts)
-
-		-- make results
-		local result = t:result()
-		if result then
-			local eval = {}
-			for k, v in pairs(result) do
-				if type(v) == "function" then
-					eval[k] = v()
-				else
-					eval[k] = v
-				end
-			end
-			result = eval
-		end
-
-		self:on_exec(t, result)
+	if not t:cond() then
+		-- should this count as a run?
+		-- self.ran_once = true
+		return
 	end
 
-	if list then
-		-- dynamically created list
-		if type(list) ~= "table" or vim.tbl_count(list) == 0 then
-			return
+	local opts = t:opts()
+	local dynamic_list = t:exec(opts)
+
+	-- make results
+	local result = t:result()
+	if result then
+		local eval = {}
+		for k, v in pairs(result) do
+			if type(v) == "function" then
+				eval[k] = v()
+			else
+				eval[k] = v
+			end
 		end
-		t:add_temp_successors(list)
+		result = eval
+	end
+
+	self:on_exec(t, result)
+
+	if dynamic_list then
+		if type(dynamic_list) ~= "table" or vim.tbl_isempty(dynamic_list) then
+			return nil
+		end
+		t:remove_temp_successors()
+		t:add_temp_successors(dynamic_list)
 
 		return t
 	end
@@ -530,7 +532,7 @@ function trunner:input(key)
 	node:remove_temp_successors()
 
 	if node:is_leaf() then
-		next_tree = self:run(node)
+		next_tree = self:execute(node)
 	else
 		next_tree = node
 	end
@@ -549,9 +551,20 @@ function trunner:input(key)
 		self.continue_key = true
 	end
 
-	self:stop_maybe("no_next_tree")
+	local stopped = self:stop_maybe("no_next_tree")
+	if stopped then
+		return
+	end
 
 	self.continue_external = false
+
+	local has_changed = tree:remove_temp_successors()
+	if has_changed then
+		if tree:is_leaf() then
+			return self:execute(tree)
+		end
+		self:set_tree(tree)
+	end
 end
 
 function trunner:keypressed_callback()
