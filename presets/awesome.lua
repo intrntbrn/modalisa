@@ -287,7 +287,7 @@ function M.client_select_picker(multi_window, include_focused_client)
 		end,
 		desc = "select client picker",
 		fn = function(opts, t)
-			local filter = awm.client_create_filter(multi_window, include_focused_client)
+			local filter = awm.client_create_filter(multi_window, false, include_focused_client)
 			local fn = function(c)
 				c:activate({ raise = true, context = "client.focus.bydirection" })
 			end
@@ -313,7 +313,7 @@ function M.client_swap_picker()
 		desc = "swap client picker",
 		fn = function(opts)
 			local include_focused_client = false
-			local filter = awm.client_create_filter(false, include_focused_client)
+			local filter = awm.client_create_filter(false, false, include_focused_client)
 			local fn = function(c)
 				client.focus:swap(c)
 			end
@@ -823,39 +823,26 @@ function M.client_floating_size_decrease(dir)
 	})
 end
 
-function M.client_unminimize_menu()
+function M.client_unminimize_menu(multi_tag)
 	return mt({
 		group = "client.property.unminimize",
-		cond = function()
-			local s = awful.screen.focused()
-			for _, t in ipairs(s.tags) do
-				for _, c in ipairs(t:clients()) do
-					if c.minimized then
-						return true
-					end
-				end
-			end
-			return false
-		end,
-		desc = "unminimize client(s)",
+		desc = "unminimize clients",
 		fn = function(opts)
-			local s = awful.screen.focused()
 			local ret = {}
 			local i = 1
-			for _, t in ipairs(s.tags) do
-				for _, c in ipairs(t:clients()) do
-					if c.minimized then
-						table.insert(ret, {
-							util.index_to_label(i, opts.labels),
-							desc = function()
-								return helper.clientname(c, i)
-							end,
-							fn = function()
-								awm.client_unminmize(c)
-							end,
-						})
-						i = i + 1
-					end
+			local filter = awm.client_create_filter(false, multi_tag, false)
+			for _, c in ipairs(client.get()) do
+				if filter(c) and c.minimized then
+					table.insert(ret, {
+						util.index_to_label(i, opts.labels),
+						desc = function()
+							return helper.clientname(c, i)
+						end,
+						fn = function()
+							awm.client_unminmize(c)
+						end,
+					})
+					i = i + 1
 				end
 			end
 

@@ -9,7 +9,7 @@ local M = {}
 local default_resize_delta = dpi(32)
 local default_resize_factor = 0.05
 
-function M.client_create_filter(multi_screen, include_focused_client)
+function M.client_create_filter(multi_screen, multi_tag, include_focused_client)
 	return function(c)
 		if not c then
 			return false
@@ -39,6 +39,10 @@ function M.client_create_filter(multi_screen, include_focused_client)
 			end
 		else
 			table.insert(scrs, awful.screen.focused())
+		end
+
+		if multi_tag then
+			return true
 		end
 
 		-- check tag selection

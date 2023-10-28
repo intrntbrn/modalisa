@@ -7,7 +7,7 @@ local M = {}
 -- beautiful menu
 -- color themes
 -- client label params (before: theme)
--- fix default clienting floating resize
+-- fix default clienting floating resize (resize modes)
 -- option picker ("pick a string")
 -- unminimize menu for each tag
 -- add audio/brightness to default_keys

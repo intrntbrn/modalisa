@@ -87,7 +87,7 @@ local keys = {
 	["f"] = ps.client_focus_toggle_fullscreen(),
 	["m"] = ps.client_focus_toggle_maximize(),
 	["n"] = ps.client_focus_minimize(),
-	["u"] = ps.client_unminimize_menu() + { opts = { hints = { delay = 0 }, labels = util.labels_qwerty } },
+	["u"] = ps.client_unminimize_menu(false) + { opts = { hints = { delay = 0 }, labels = util.labels_qwerty } },
 	["<Tab>"] = ps.client_focus_prev(),
 
 	-- apps
@@ -150,7 +150,7 @@ local keys = {
 	["c "] = ps.client_focus_toggle_floating(),
 	["co"] = ps.client_focus_toggle_ontop(),
 	["cy"] = ps.client_focus_toggle_sticky(),
-	["cu"] = ps.client_unminimize_menu(),
+	["cu"] = ps.client_unminimize_menu(false),
 	["cp"] = ps.client_focus_prev(),
 	["c<Tab>"] = ps.client_swap_master_smart(),
 	["c<Return>"] = ps.client_move_to_master(),
