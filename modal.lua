@@ -313,6 +313,10 @@ function trunner:init()
 	self.timer = gears.timer({
 		timeout = 0,
 		callback = function()
+			local t = self.tree
+			if t then
+				self:execute(t)
+			end
 			self:stop()
 		end,
 		autostart = false,
@@ -333,6 +337,9 @@ function trunner:start(t, root_key)
 	end
 
 	self:reset()
+
+	-- remove previously generated successors
+	t:remove_temp_successors()
 
 	if t:is_leaf() then
 		-- running the node might populate itself (e.g. user calls run on an
@@ -425,7 +432,6 @@ end
 
 function trunner:stop()
 	self.keygrabber:stop()
-	self.is_running = false
 end
 
 function trunner:stop_maybe(reason)
@@ -528,9 +534,6 @@ function trunner:step_into(node)
 
 	if node:is_leaf() then
 		next_tree = self:execute(node)
-		if next_tree then
-			print("****** DYNAMIC LIST GENERATED ***** FIXME")
-		end
 	else
 		next_tree = node
 	end
@@ -680,9 +683,6 @@ function trunner:keyreleased_callback()
 end
 
 local function run_tree(t, parsed_keybind)
-	-- remove any temp successors that have not been cleaned from previous runs
-	t:remove_temp_successors()
-
 	local ok = trunner:start(t, parsed_keybind)
 	if not ok then
 		return
