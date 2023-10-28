@@ -322,7 +322,7 @@ function trunner:init()
 	self:reset()
 end
 
-function trunner:set(t, root_key)
+function trunner:start(t, root_key)
 	assert(not trunner.is_running, "keygrabber is already running")
 	assert(not vim.tbl_isempty(t:opts()), "trunner:new t opts are empty")
 
@@ -346,6 +346,7 @@ function trunner:set(t, root_key)
 	end
 
 	self:set_tree(t)
+	self:start_keygrabber()
 
 	return self
 end
@@ -361,7 +362,7 @@ function trunner:reset()
 	self.continue_key = false
 end
 
-function trunner:start()
+function trunner:start_keygrabber()
 	self.keygrabber:start()
 end
 
@@ -655,11 +656,10 @@ local function run_tree(t, parsed_keybind)
 	-- remove any temp successors that have not been cleaned from previous runs
 	t:remove_temp_successors()
 
-	local ok = trunner:set(t, parsed_keybind)
+	local ok = trunner:start(t, parsed_keybind)
 	if not ok then
 		return
 	end
-	trunner:start()
 end
 
 local function run_root_tree(seq, parsed_keybind)
@@ -688,11 +688,7 @@ function M.run_tree(tree, opts, name)
 	local t = require("modalisa.tree"):new(opts, name)
 	assert(t)
 	t:add_successors(tree)
-	local ok = trunner:set(t)
-	if not ok then
-		return
-	end
-	trunner:start()
+	trunner:start(t)
 end
 
 -- run keyroot_tree with a keybind (opt)
