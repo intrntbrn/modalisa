@@ -1,6 +1,6 @@
 local awful = require("awful")
 local wibox = require("wibox")
-local config = require("motion.config")
+local config = require("modalisa.config")
 
 local M = {}
 local popup = {}
@@ -90,7 +90,7 @@ function M.setup(_)
 	assert(once == nil, "label is already setup")
 	once = true
 
-	awesome.connect_signal("motion::stopped", function()
+	awesome.connect_signal("modalisa::stopped", function()
 		M.hide_labels()
 	end)
 end

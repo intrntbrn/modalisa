@@ -1,6 +1,6 @@
-local vim = require("motion.lib.vim")
-local util = require("motion.util")
-local dump = require("motion.lib.vim").inspect
+local vim = require("modalisa.lib.vim")
+local util = require("modalisa.util")
+local dump = require("modalisa.lib.vim").inspect
 
 ---@diagnostic disable-next-line: unused-local
 local dump = vim.inspect
@@ -23,11 +23,11 @@ local function mt(obj)
 end
 
 local function on_update(t, old_t)
-	awesome.emit_signal("motion::tree::update", t, old_t)
+	awesome.emit_signal("modalisa::tree::update", t, old_t)
 end
 
 local function on_remove(t)
-	awesome.emit_signal("motion::tree::remove", t)
+	awesome.emit_signal("modalisa::tree::remove", t)
 end
 
 -- parse a loosely defined key

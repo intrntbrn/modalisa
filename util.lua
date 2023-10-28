@@ -4,8 +4,8 @@ local unpack = unpack or table.unpack
 
 local gstring = require("gears.string")
 local awful = require("awful")
-local vim = require("motion.lib.vim")
-local lighten = require("motion.lib.lighten")
+local vim = require("modalisa.lib.vim")
+local lighten = require("modalisa.lib.lighten")
 local glib = require("lgi").GLib
 
 M.labels_qwerty = "asdfghjklwertyuiozxcvbnmpqASDFGHJKLQWERTYUIOPZXCVBNM1234567890"

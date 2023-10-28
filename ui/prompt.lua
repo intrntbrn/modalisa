@@ -1,11 +1,11 @@
-local config = require("motion.config")
-local util = require("motion.util")
+local config = require("modalisa.config")
+local util = require("modalisa.util")
 local wibox = require("wibox")
 local awful = require("awful")
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
 ---@diagnostic disable-next-line: unused-local
-local dump = require("motion.lib.vim").inspect
+local dump = require("modalisa.lib.vim").inspect
 
 local M = {}
 
@@ -162,7 +162,7 @@ function M.setup(opts)
 	popup:init(opts)
 
 	---@diagnostic disable-next-line: redefined-local
-	awesome.connect_signal("motion::prompt", function(fn, initial, header, opts)
+	awesome.connect_signal("modalisa::prompt", function(fn, initial, header, opts)
 		run(fn, initial, header, opts)
 	end)
 end

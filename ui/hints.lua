@@ -1,11 +1,11 @@
-local util = require("motion.util")
+local util = require("modalisa.util")
 local gears = require("gears")
 local wibox = require("wibox")
 local awful = require("awful")
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
 ---@diagnostic disable-next-line: unused-local
-local dump = require("motion.lib.vim").inspect
+local dump = require("modalisa.lib.vim").inspect
 
 local M = {}
 
@@ -313,11 +313,11 @@ function popup:update(t)
 
 			local function mouse_button_handler(_, _, _, button)
 				if button == 1 then -- left click
-					awesome.emit_signal("motion::fake_input", entry.key_unescaped, false)
+					awesome.emit_signal("modalisa::fake_input", entry.key_unescaped, false)
 					return
 				end
 				if button == 3 then -- rightclick
-					awesome.emit_signal("motion::fake_input", entry.key_unescaped, true)
+					awesome.emit_signal("modalisa::fake_input", entry.key_unescaped, true)
 					return
 				end
 			end
@@ -432,11 +432,11 @@ function popup:new(hopts)
 
 	pop:connect_signal("button::press", function(_, _, _, button)
 		if button == 2 then -- middle click
-			awesome.emit_signal("motion::fake_input", "stop")
+			awesome.emit_signal("modalisa::fake_input", "stop")
 			return
 		end
 		if button == 8 then -- back click
-			awesome.emit_signal("motion::fake_input", "back")
+			awesome.emit_signal("modalisa::fake_input", "back")
 			return
 		end
 	end)
@@ -504,19 +504,19 @@ function M.setup(opts)
 	assert(once == nil, "hints are already setup")
 	once = popup:new(opts.hints)
 
-	awesome.connect_signal("motion::executed", function(_)
+	awesome.connect_signal("modalisa::executed", function(_)
 		util.run_on_idle(function()
 			popup:refresh_entries()
 		end)
 	end)
 
-	awesome.connect_signal("motion::updated", function(args)
+	awesome.connect_signal("modalisa::updated", function(args)
 		util.run_on_idle(function()
 			show(args.tree)
 		end)
 	end)
 
-	awesome.connect_signal("motion::stopped", function(_)
+	awesome.connect_signal("modalisa::stopped", function(_)
 		util.run_on_idle(function()
 			if timer then
 				timer:stop()

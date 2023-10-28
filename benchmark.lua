@@ -1,5 +1,5 @@
-local lib = require("motion.lib")
-local modal = require("motion.modal")
+local lib = require("modalisa.lib")
+local modal = require("modalisa.modal")
 local M = {}
 
 function M.benchmark(n)

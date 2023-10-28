@@ -798,7 +798,7 @@ function vim.defaulttable(create)
 	})
 end
 
-vim.inspect = require("motion.lib.inspect")
+vim.inspect = require("modalisa.lib.inspect")
 
 return vim
 -- vim:sw=2 ts=2 et

@@ -1,7 +1,7 @@
 WIP
 
 ```
-require("motion").setup({
+require("modalisa").setup({
 	key = "<Super_L>",
 	stop_keys = { "<Escape>" },
 	back_keys = { "<BackSpace>" },

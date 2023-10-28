@@ -1,5 +1,5 @@
 local M = {}
-local vim = require("motion.lib.vim")
+local vim = require("modalisa.lib.vim")
 local dump = vim.inspect
 local dpi = require("beautiful").xresources.apply_dpi
 local awful = require("awful")
@@ -202,8 +202,8 @@ local options
 
 local function on_update(key)
 	local value = rawget(options, key)
-	print("motion::config: ", key, " = ", vim.inspect(value))
-	awesome.emit_signal("motion::config", key, value)
+	print("modalisa::config: ", key, " = ", vim.inspect(value))
+	awesome.emit_signal("modalisa::config", key, value)
 end
 
 function M.get(...)

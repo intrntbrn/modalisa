@@ -1,6 +1,6 @@
-local tree = require("motion.tree")
-local config = require("motion.config")
-local vim = require("motion.lib.vim")
+local tree = require("modalisa.tree")
+local config = require("modalisa.config")
+local vim = require("modalisa.lib.vim")
 
 local M = {}
 
@@ -29,9 +29,9 @@ end
 
 function M.setup(opts)
 	assert(root_tree == nil, "root is already setup")
-	root_tree = tree:new(opts, "motion root")
+	root_tree = tree:new(opts, "modalisa root")
 
-	awesome.connect_signal("motion::config", function(_, _)
+	awesome.connect_signal("modalisa::config", function(_, _)
 		-- when config has been updated, we have to merge all opts again
 		local new_opts = config.get()
 		root_tree._data.opts_raw = new_opts

@@ -1,7 +1,7 @@
 local M = {}
 
-M.echo = require("motion.echo")
-M.hints = require("motion.hints")
-M.label = require("motion.label")
+M.echo = require("modalisa.echo")
+M.hints = require("modalisa.hints")
+M.label = require("modalisa.label")
 
 return M

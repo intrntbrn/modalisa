@@ -1,6 +1,6 @@
-local motion = require("motion")
-local ps = require("motion.presets.awesome")
-local util = require("motion.util")
+local modalisa = require("modalisa")
+local ps = require("modalisa.presets.awesome")
+local util = require("modalisa.util")
 
 local M = {}
 
@@ -157,7 +157,7 @@ local keys = {
 }
 
 function M.setup(_)
-	motion.add_keys(keys)
+	modalisa.add_keys(keys)
 end
 
 return setmetatable(M, {

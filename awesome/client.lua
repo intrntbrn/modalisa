@@ -1,8 +1,8 @@
 local awful = require("awful")
 local dpi = require("beautiful").xresources.apply_dpi
 local grect = require("gears.geometry").rectangle
-local clabel = require("motion.ui.label")
-local util = require("motion.util")
+local clabel = require("modalisa.ui.label")
+local util = require("modalisa.util")
 
 local M = {}
 

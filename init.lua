@@ -1,9 +1,9 @@
 local M = {}
 
-local dump = require("motion.lib.vim").inspect
-local root_tree = require("motion.root")
-local modal = require("motion.modal")
-local config = require("motion.config")
+local dump = require("modalisa.lib.vim").inspect
+local root_tree = require("modalisa.root")
+local modal = require("modalisa.modal")
+local config = require("modalisa.config")
 
 -- run key sequence on root
 function M.run(...)
@@ -67,7 +67,7 @@ local mt = {
 local function gen_signals()
 	for k, v in pairs(M) do
 		if type(v) == "function" then
-			local name = string.format("motion::%s", k)
+			local name = string.format("modalisa::%s", k)
 			awesome.connect_signal(name, function(...)
 				v(...)
 			end)
@@ -77,29 +77,29 @@ end
 
 local once
 function M.setup(opts)
-	assert(once == nil, "motion is already setup")
+	assert(once == nil, "modalisa is already setup")
 	once = true
 	config.setup(opts)
 	opts = config.get() or {}
 
 	print(dump(opts))
 
-	require("motion.root").setup(opts)
-	require("motion.modal").setup(opts)
+	require("modalisa.root").setup(opts)
+	require("modalisa.modal").setup(opts)
 
-	require("motion.ui.hints").setup(opts)
-	require("motion.ui.label").setup(opts)
-	require("motion.ui.echo").setup(opts)
-	require("motion.ui.prompt").setup(opts)
+	require("modalisa.ui.hints").setup(opts)
+	require("modalisa.ui.label").setup(opts)
+	require("modalisa.ui.echo").setup(opts)
+	require("modalisa.ui.prompt").setup(opts)
 
 	-- default keys
 	if opts.include_default_keys then
-		require("motion.keys").setup(opts)
+		require("modalisa.keys").setup(opts)
 	end
 
 	-- user defined keys
-	if pcall(require, "motion_keys") then
-		require("motion_keys").setup(opts)
+	if pcall(require, "modalisa_keys") then
+		require("modalisa_keys").setup(opts)
 	end
 
 	gen_signals()

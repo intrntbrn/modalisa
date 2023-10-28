@@ -13,14 +13,14 @@ local M = {}
 -- add audio/brightness to default_keys
 
 local awful = require("awful")
-local lib = require("motion.lib")
-local vim = require("motion.lib.vim")
-local dump = require("motion.lib").inspect
-local root_tree = require("motion.root")
-local modmap = require("motion.modmap")
+local lib = require("modalisa.lib")
+local vim = require("modalisa.lib.vim")
+local dump = require("modalisa.lib").inspect
+local root_tree = require("modalisa.root")
+local modmap = require("modalisa.modmap")
 local akeygrabber = require("awful.keygrabber")
 local gears = require("gears")
-local config = require("motion.config")
+local config = require("modalisa.config")
 
 local trunner = {}
 
@@ -368,21 +368,21 @@ end
 
 function trunner:on_start()
 	self.is_running = true
-	awesome.emit_signal("motion::started", { tree = self.tree })
+	awesome.emit_signal("modalisa::started", { tree = self.tree })
 end
 
 function trunner:on_update()
-	awesome.emit_signal("motion::updated", { tree = self.tree })
+	awesome.emit_signal("modalisa::updated", { tree = self.tree })
 end
 
 function trunner:on_exec(t, result)
-	awesome.emit_signal("motion::executed", { tree = t, result = result })
+	awesome.emit_signal("modalisa::executed", { tree = t, result = result })
 end
 
 function trunner:on_stop()
-	print("motion::stop")
+	print("modalisa::stop")
 	self.is_running = false
-	awesome.emit_signal("motion::stopped", { tree = self.tree })
+	awesome.emit_signal("modalisa::stopped", { tree = self.tree })
 end
 
 function trunner:start_timer()
@@ -672,7 +672,7 @@ end
 -- run inline table
 function M.run_tree(tree, opts, name)
 	opts = config.get(opts)
-	local t = require("motion.tree"):new(opts, name)
+	local t = require("modalisa.tree"):new(opts, name)
 	assert(t)
 	t:add_successors(tree)
 	local ok = trunner:set(t)
@@ -807,12 +807,12 @@ function M.setup(opts)
 
 	trunner:init()
 
-	awesome.connect_signal("motion::tree::update", function(new, old)
+	awesome.connect_signal("modalisa::tree::update", function(new, old)
 		global_keybinding_remove(old)
 		global_keybinding_add(new)
 	end)
 
-	awesome.connect_signal("motion::tree::remove", function(old)
+	awesome.connect_signal("modalisa::tree::remove", function(old)
 		global_keybinding_remove(old)
 	end)
 

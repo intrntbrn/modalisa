@@ -1,8 +1,8 @@
 local awful = require("awful")
-local util = require("motion.util")
-local dump = require("motion.lib.vim").inspect
-local awm = require("motion.awesome")
-local mt = require("motion.presets.metatable")
+local util = require("modalisa.util")
+local dump = require("modalisa.lib.vim").inspect
+local awm = require("modalisa.awesome")
+local mt = require("modalisa.presets.metatable")
 
 local M = {}
 local helper = {}
@@ -1144,7 +1144,7 @@ function M.tag_rename()
 			end
 			local initial = awful.tag.selected().name
 			local header = "rename tag:"
-			require("motion.ui.prompt").run(fn, initial, header, opts)
+			require("modalisa.ui.prompt").run(fn, initial, header, opts)
 		end,
 	})
 end
