@@ -320,6 +320,9 @@ function M.client_swap_picker()
 			end
 			return awm.client_picker(opts, fn, filter)
 		end,
+		on_leave = function()
+			label.hide_labels()
+		end,
 	})
 end
 

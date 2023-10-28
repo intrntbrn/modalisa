@@ -1,7 +1,6 @@
 local M = {}
 
 -- TODO: MAJOR:
--- find a new name
 -- config menu
 -- exposed api
 -- beautiful menu
@@ -558,14 +557,6 @@ function trunner:step_into(node)
 	end
 
 	self.continue_external = false
-
-	-- local has_changed = tree:remove_temp_successors()
-	-- if has_changed then
-	-- 	if tree:is_leaf() then
-	-- 		return self:execute(tree)
-	-- 	end
-	-- 	self:set_tree(tree)
-	-- end
 end
 
 function trunner:input(key)

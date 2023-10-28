@@ -89,10 +89,6 @@ local once
 function M.setup(_)
 	assert(once == nil, "label is already setup")
 	once = true
-
-	awesome.connect_signal("modalisa::stopped", function()
-		M.hide_labels()
-	end)
 end
 
 return M
