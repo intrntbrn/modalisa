@@ -156,6 +156,10 @@ local keys = {
 	["c<Return>"] = ps.client_move_to_master(),
 }
 
+function M.get_keys()
+	return keys
+end
+
 function M.setup(_)
 	modalisa.add_keys(keys)
 end
@@ -163,5 +167,8 @@ end
 return setmetatable(M, {
 	__call = function(_, ...)
 		return M.setup(...)
+	end,
+	__index = function(_, k)
+		return keys[k]
 	end,
 })
