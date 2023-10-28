@@ -105,6 +105,7 @@ function M.client_picker(opts, fn, filter)
 			label,
 			fn = function()
 				fn(c)
+				clabel.hide_labels()
 			end,
 		})
 	end
