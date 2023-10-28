@@ -413,8 +413,12 @@ local function remove(tree, seq)
 end
 
 -- @param[opt=nil] seq
-function M:add(value, seq)
+-- @param[opt=nil] prefix
+function M:add(value, seq, prefix)
 	seq, value = parse_key(value, seq)
+	if prefix then
+		seq = prefix .. seq
+	end
 	return add(self, value, seq, self:opts(), self:pred())
 end
 

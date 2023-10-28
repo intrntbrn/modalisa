@@ -11,9 +11,10 @@ function M.add(key, seq)
 	root_tree:add(key, seq)
 end
 
-function M.add_keys(keys)
+-- @param[opt=""] prefix
+function M.add_keys(keys, prefix)
 	for k, v in pairs(keys) do
-		root_tree:add(v, k)
+		root_tree:add(v, k, prefix)
 	end
 end
 
@@ -29,7 +30,7 @@ end
 
 function M.setup(opts)
 	assert(root_tree == nil, "root is already setup")
-	root_tree = tree:new(opts, "modalisa root")
+	root_tree = tree:new(opts, "modalisa")
 
 	awesome.connect_signal("modalisa::config", function(_, _)
 		-- when config has been updated, we have to merge all opts again
