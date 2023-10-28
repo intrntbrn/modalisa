@@ -103,9 +103,11 @@ function M.client_picker(opts, fn, filter)
 		-- create menu
 		table.insert(menu, {
 			label,
+			desc = function()
+				return require("modalisa.presets.awesome").util.clientname(c, i)
+			end,
 			fn = function()
 				fn(c)
-				clabel.hide_labels()
 			end,
 		})
 	end
@@ -113,7 +115,6 @@ function M.client_picker(opts, fn, filter)
 	-- only 1 client
 	if opts.auto_select_the_only_choice then
 		if #menu == 1 then
-			clabel.hide_labels()
 			menu[1].fn()
 			return
 		end

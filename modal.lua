@@ -356,6 +356,7 @@ function trunner:set_keygrabber(keygrabber)
 end
 
 function trunner:reset()
+	self.tree = nil
 	self.is_running = false
 	self.ran_once = false
 	self.continue_external = false
@@ -367,22 +368,37 @@ function trunner:start_keygrabber()
 end
 
 function trunner:on_start()
+	-- called by keygrabber
+	local t = self.tree
 	self.is_running = true
-	awesome.emit_signal("modalisa::started", { tree = self.tree })
+	print("on::start", t:desc())
+	awesome.emit_signal("modalisa::event::start", t)
 end
 
-function trunner:on_update()
-	awesome.emit_signal("modalisa::updated", { tree = self.tree })
+function trunner:on_enter(t)
+	print("on::enter", t:desc())
+	t:exec_on_enter()
+	awesome.emit_signal("modalisa::updated", t)
+end
+
+function trunner:on_leave(t)
+	print("on::leave", t:desc())
+	t:exec_on_leave()
+	awesome.emit_signal("modalisa::event::leave", t)
 end
 
 function trunner:on_exec(t, result)
-	awesome.emit_signal("modalisa::executed", { tree = t, result = result })
+	print("on::executed", t:desc())
+	awesome.emit_signal("modalisa::executed", t, result)
 end
 
 function trunner:on_stop()
-	print("modalisa::stop")
+	-- called by keygrabber
+	local t = self.tree
 	self.is_running = false
-	awesome.emit_signal("modalisa::stopped", { tree = self.tree })
+	self:on_leave(t) -- also emit leave event
+	print("on::stop", t:desc())
+	awesome.emit_signal("modalisa::stopped", t)
 end
 
 function trunner:start_timer()
@@ -396,10 +412,15 @@ function trunner:start_timer()
 end
 
 function trunner:set_tree(t)
+	local old_tree = self.tree
 	self.tree = t
 	self.keybinds = keygrabber_keys(t)
 	self:start_timer()
-	self:on_update()
+
+	if old_tree then
+		self:on_leave(old_tree)
+	end
+	self:on_enter(t)
 end
 
 function trunner:stop()
@@ -489,7 +510,6 @@ function trunner:execute(t)
 		if type(dynamic_list) ~= "table" or vim.tbl_isempty(dynamic_list) then
 			return nil
 		end
-		t:remove_temp_successors()
 		t:add_temp_successors(dynamic_list)
 
 		return t
@@ -499,6 +519,50 @@ function trunner:execute(t)
 	self.ran_once = true
 
 	return nil
+end
+
+function trunner:step_into(node)
+	local next_tree
+
+	node:remove_temp_successors()
+
+	if node:is_leaf() then
+		next_tree = self:execute(node)
+		if next_tree then
+			print("****** DYNAMIC LIST GENERATED ***** FIXME")
+		end
+	else
+		next_tree = node
+	end
+
+	if next_tree then
+		-- wait for the next input
+		self:set_tree(next_tree)
+		return
+	end
+
+	-- there is no next tree
+	-- determine if we should keep on running the current tree
+
+	self.continue_key = false
+	if node:continue() then
+		self.continue_key = true
+	end
+
+	local stopped = self:stop_maybe("no_next_tree")
+	if stopped then
+		return
+	end
+
+	self.continue_external = false
+
+	-- local has_changed = tree:remove_temp_successors()
+	-- if has_changed then
+	-- 	if tree:is_leaf() then
+	-- 		return self:execute(tree)
+	-- 	end
+	-- 	self:set_tree(tree)
+	-- end
 end
 
 function trunner:input(key)
@@ -528,44 +592,7 @@ function trunner:input(key)
 		return
 	end
 
-	local next_tree
-
-	node:remove_temp_successors()
-
-	if node:is_leaf() then
-		next_tree = self:execute(node)
-	else
-		next_tree = node
-	end
-
-	if next_tree then
-		-- wait for the next input
-		self:set_tree(next_tree)
-		return
-	end
-
-	-- there is no next tree
-	-- determine if we should keep on running the current tree
-
-	self.continue_key = false
-	if node:continue() then
-		self.continue_key = true
-	end
-
-	local stopped = self:stop_maybe("no_next_tree")
-	if stopped then
-		return
-	end
-
-	self.continue_external = false
-
-	local has_changed = tree:remove_temp_successors()
-	if has_changed then
-		if tree:is_leaf() then
-			return self:execute(tree)
-		end
-		self:set_tree(tree)
-	end
+	self:step_into(node)
 end
 
 function trunner:keypressed_callback()

@@ -3,6 +3,7 @@ local util = require("modalisa.util")
 local dump = require("modalisa.lib.vim").inspect
 local awm = require("modalisa.awesome")
 local mt = require("modalisa.presets.metatable")
+local label = require("modalisa.ui.label")
 
 local M = {}
 local helper = {}
@@ -277,9 +278,6 @@ function M.client_select_picker(multi_window, include_focused_client)
 	return mt({
 		group = "client.menu.focus",
 		opts = {
-			hints = {
-				enabled = false,
-			},
 			labels = util.labels_qwerty,
 		},
 		cond = function()
@@ -294,6 +292,9 @@ function M.client_select_picker(multi_window, include_focused_client)
 			local list = awm.client_picker(opts, fn, filter)
 
 			return list
+		end,
+		on_leave = function()
+			label.hide_labels()
 		end,
 	})
 end
@@ -772,11 +773,11 @@ function M.client_resize_smart(dir)
 			something = helper.get_current_tag_column_count(),
 		},
 		desc = function()
-			-- local c = client.focus
-			-- local layout = awful.layout.get(awful.screen.focused()).name
-			-- if layout == "floating" or c.floating then
-			-- 	return string.format("increase client size %s", dir)
-			-- end
+			local c = client.focus
+			local layout = awful.layout.get(awful.screen.focused()).name
+			if layout == "floating" or (c.floating and not c.fullscreen) then
+				return string.format("increase client size %s", dir)
+			end
 			return string.format("resize client smart %s", dir)
 		end,
 		fn = function(opts)
@@ -790,7 +791,8 @@ function M.client_floating_size_increase(dir)
 		group = "client.layout.resize",
 		cond = function()
 			local layout = awful.layout.get(awful.screen.focused()).name
-			return layout == "floating" or client.focus and client.focus.floating
+			local c = client.focus
+			return layout == "floating" or c and c.floating and not c.fullscreen
 		end,
 		desc = function()
 			return string.format("increase client size %s", dir)
@@ -809,7 +811,8 @@ function M.client_floating_size_decrease(dir)
 		group = "client.layout.resize",
 		cond = function()
 			local layout = awful.layout.get(awful.screen.focused()).name
-			return layout == "floating" or client.focus and client.focus.floating
+			local c = client.focus
+			return layout == "floating" or c and c.floating and not c.fullscreen
 		end,
 		desc = function()
 			return string.format("decrease client size %s", dir)

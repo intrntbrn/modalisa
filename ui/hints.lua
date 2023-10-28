@@ -510,9 +510,9 @@ function M.setup(opts)
 		end)
 	end)
 
-	awesome.connect_signal("modalisa::updated", function(args)
+	awesome.connect_signal("modalisa::updated", function(t)
 		util.run_on_idle(function()
-			show(args.tree)
+			show(t)
 		end)
 	end)
 

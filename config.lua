@@ -108,7 +108,7 @@ local defaults = {
 
 	echo = {
 		enabled = true,
-		show_percentage_as_progressbar = true,
+		show_percentage_as_progressbar = false,
 		placement = "centered",
 		timeout = 1000, -- ms
 		orientation = "vertical", -- vertical | horizontal
