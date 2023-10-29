@@ -197,34 +197,61 @@ function popup:update(t)
 	if num_entries < max_entries then
 		-- all entries fit
 		-- prefer width or height?
-		if hopts.fill_strategy == "horizontal" then
+		if hopts.expand_horizontal then
 			-- fill columns first
-			num_columns = max_columns
+			num_columns = math.min(max_columns, num_entries)
 			num_rows = math.ceil(num_entries / num_columns)
 		else
 			-- fill rows first
-			num_rows = max_rows
+			num_rows = math.min(max_rows, num_entries)
 			num_columns = math.ceil(num_entries / num_rows)
 		end
 	end
 
-	local layout_columns = wibox.layout.fixed.horizontal({})
+	local layout_c = "horizontal"
+	local layout_r = "vertical"
+	local fill_c = hopts.stretch_horizontal
+	local fill_r = hopts.stretch_vertical
+
+	local invert = hopts.flow_horizontal
+	if invert then
+		-- turn rows into columns and vice versa
+		layout_c = "vertical"
+		layout_r = "horizontal"
+		num_columns, num_rows = num_rows, num_columns
+		fill_c, fill_r = fill_r, fill_c
+	end
+
+	-- print("num_entries: ", num_entries)
+	-- print("num_rows: ", num_rows)
+	-- print("num_columns: ", num_columns)
+	-- print("max_rows: ", max_rows)
+	-- print("max_columns: ", max_columns)
+	-- print("max_width: ", max_width)
+	-- print("max_height: ", max_height)
+
+	local layout_columns = wibox.layout.fixed[layout_c]({})
 	local entries_widget = {}
 	local i = 1
+	local done = false
 	for c = 1, num_columns do
-		local column = wibox.layout.fixed.vertical({})
-		layout_columns:add(column)
+		if done then
+			break
+		end
+		local row = wibox.layout.fixed[layout_r]({})
+		layout_columns:add(row)
 
 		for r = 1, num_rows do
 			local entry = entries[i]
 			if not entry then
-				if hopts.fill_remaining_space then
-					entry = {
-						is_dummy = true,
-					}
-				else
+				-- add dummy entry to continue the odd pattern
+				done = true
+				if c == 1 then
 					break
 				end
+				entry = {
+					is_dummy = true,
+				}
 			end
 
 			local bg = entry.bg or hopts.color_bg or opts.theme.bg
@@ -232,9 +259,11 @@ function popup:update(t)
 
 			local odd_style = hopts.odd_style
 			if odd_style and (odd_style == "row" or odd_style == "column" or odd_style == "checkered") then
-				local odd_source = r
-				if odd_style == "column" then
-					odd_source = c
+				local odd_source = 0
+				if odd_style == "row" then
+					odd_source = invert and c or r
+				elseif odd_style == "column" then
+					odd_source = invert and r or c
 				elseif odd_style == "checkered" then
 					odd_source = r + c
 				end
@@ -357,7 +386,7 @@ function popup:update(t)
 
 			entries_widget[i] = widget
 
-			column:add(widget)
+			row:add(widget)
 			i = i + 1
 		end
 		self.entries_widget = entries_widget
@@ -383,12 +412,19 @@ function popup:update(t)
 		})
 	end
 
-	local margin_left
-	local margin_right
-	if hopts.fill_remaining_space then
-		local width_remaining = max_width - (num_columns * entry_width)
-		margin_left = math.floor(width_remaining / 2)
-		margin_right = width_remaining - margin_left
+	local stretch_margin_left, stretch_margin_right, stretch_margin_top, stretch_margin_bottom
+	if hopts.stretch_horizontal then
+		local count = invert and num_rows or num_columns
+		local width_remaining = max_width - (count * entry_width)
+		stretch_margin_left = math.floor(width_remaining / 2)
+		stretch_margin_right = width_remaining - stretch_margin_left
+	end
+
+	if hopts.stretch_vertical then
+		local count = invert and num_columns or num_rows
+		local height_remaining = max_height - (count * entry_height)
+		stretch_margin_top = math.floor(height_remaining / 2)
+		stretch_margin_bottom = math.floor(height_remaining - stretch_margin_top)
 	end
 
 	-- compute size
@@ -402,8 +438,10 @@ function popup:update(t)
 			{
 				{
 					widget,
-					right = margin_right,
-					left = margin_left,
+					top = stretch_margin_top,
+					bottom = stretch_margin_bottom,
+					right = stretch_margin_right,
+					left = stretch_margin_left,
 					widget = wibox.container.margin, -- fill space margin
 				},
 				margins = hopts.padding,

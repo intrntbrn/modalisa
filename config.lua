@@ -36,7 +36,7 @@ local defaults = {
 		delay = 0, -- ms
 		show_header = false,
 		show_disabled_keys = true,
-		sort = "group", -- group | id | key | none
+		sort = "key", -- group | id | key | none
 		key_aliases = {
 			[" "] = "space",
 			Left = "←",
@@ -77,11 +77,13 @@ local defaults = {
 			left = 0,
 			right = 0,
 		},
-		width = 0.75, -- fraction or abs
-		height = 0.3, -- fraction or abs
-		fill_remaining_space = true,
-		fill_strategy = "horizontal", -- horizontal | vertical
-		placement = function(h)
+		width = 0.75, -- fraction or abs pixel count
+		height = 0.3, -- fraction or abs pixel count
+		stretch_vertical = false, -- use all available height
+		stretch_horizontal = false, -- use all available width
+		flow_horizontal = false, -- fill from left to right
+		expand_horizontal = true, -- fill columns first
+		placement = function(h) -- function or placement (e.g. "centered")
 			awful.placement.bottom(h, { honor_workarea = true })
 		end,
 		border_width = beautiful.border_width or dpi(1),
