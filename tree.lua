@@ -192,7 +192,12 @@ function M:result()
 	return self._data.result
 end
 
-function M:set_result(key, value)
+function M:reset_result()
+	self._data.result = {}
+end
+
+function M:add_result(key, value)
+	print("add result")
 	if not self._data.result then
 		self._data.result = {}
 	end
@@ -267,7 +272,6 @@ function M:add_opts(opts)
 	self._data.opts_raw = merged_raw
 	local merged_merged = util.merge_opts(self._data.opts_merged, merged_raw)
 	self._data.opts_merged = merged_merged
-
 	self:update_succ_opts()
 end
 

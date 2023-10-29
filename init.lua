@@ -54,8 +54,8 @@ function M.get(k)
 end
 
 -- get complete config
-function M.get_config()
-	return config.get_config()
+function M.get_config(opts)
+	return config.get_config(opts)
 end
 
 local mt = {

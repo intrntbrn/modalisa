@@ -12,7 +12,7 @@ local defaults = {
 	-- keys
 	root_key = "<M-y>",
 	back_keys = "<BackSpace>",
-	stop_keys = { "<Escape>" },
+	stop_keys = "<Escape>",
 	include_default_keys = true,
 
 	-- core
@@ -223,6 +223,13 @@ function M.get_config(...)
 	local ret = vim.tbl_deep_extend("force", unpack(all))
 
 	return ret
+end
+
+function M.set_config(...)
+	-- TODO: determine changed params and emit property signals
+	local new = M.get_config(...)
+	options = vim.deepcopy(new)
+	awesome.emit_signal("modalisa::config")
 end
 
 function M.get(k)
