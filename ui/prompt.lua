@@ -130,6 +130,10 @@ local function run(fn, initial_text, header_text, opts)
 	opts = opts or config.get_config()
 	header_text = header_text or ""
 
+	if type(initial_text) ~= "string" then
+		initial_text = string.format("%s", initial_text)
+	end
+
 	local popts = opts.prompt
 
 	local widget = create_widget(header_text, opts)
