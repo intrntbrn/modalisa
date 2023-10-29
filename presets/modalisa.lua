@@ -7,23 +7,6 @@ local config = require("modalisa.config")
 
 local M = {}
 
-M.cfg = {
-	mode = { "modal", "hold", "hybrid", "forever" },
-	smart_modifiers = true,
-	stop_on_unknown_key = true,
-	timeout = 0,
-	-- back_keys = "text",
-	-- stop_keys = "text",
-	hints = {
-		enabled = true,
-		delay = 0,
-	},
-
-	-- awesome
-	labels = "text",
-	resize_delta = 0,
-}
-
 local function find_key(key, tbl, labels)
 	local first_char = string.sub(key, 1, 1)
 	if not tbl[first_char] then
@@ -169,7 +152,7 @@ function M.generate()
 			local entries = {}
 			local labels = util.labels_qwerty
 
-			for param, template in pairs(M.cfg) do
+			for param, template in pairs(root_config) do
 				local index = find_key(param, entries, labels)
 				local entry = M.generate_entry(param, template, root_config, root_config, labels)
 				entries[index] = entry
