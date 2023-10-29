@@ -91,7 +91,9 @@ local function create_key_value_widget(opts, key, value)
 
 	local tb_value
 	if value ~= nil then
-		tb_value = create_element(value, opts, font, fg, width)
+		if type(value) ~= "string" or string.len(value) > 0 then
+			tb_value = create_element(value, opts, font, fg, width)
+		end
 	end
 
 	local layout
