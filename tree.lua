@@ -2,9 +2,6 @@ local vim = require("modalisa.lib.vim")
 local util = require("modalisa.util")
 local dump = require("modalisa.lib.vim").inspect
 
----@diagnostic disable-next-line: unused-local
-local dump = vim.inspect
-
 local M = {}
 
 local global_id = 0
@@ -17,7 +14,7 @@ local function mt(obj)
 	return setmetatable(obj, {
 		__index = M,
 		__tostring = function(t)
-			return vim.inspect(t)
+			return dump(t)
 		end,
 	})
 end
@@ -197,7 +194,6 @@ function M:reset_result()
 end
 
 function M:add_result(key, value)
-	print("add result")
 	if not self._data.result then
 		self._data.result = {}
 	end
@@ -357,7 +353,7 @@ function M:new(opts, name)
 	local obj = setmetatable(inst, {
 		__index = M,
 		__tostring = function(obj)
-			return vim.inspect(obj)
+			return dump(obj)
 		end,
 	})
 
@@ -379,11 +375,12 @@ local function add(tree, value, seq, prev_opts, prev_tree)
 		return add(tree._succs[key], value, next_seq, merged_opts, tree)
 	end
 
-	local opts_raw = value and value.opts_raw
-	local merged_opts = util.merge_opts(prev_opts, opts_raw)
-
+	local merged_opts
 	-- insert
 	if value then
+		local opts_raw = value and value.opts_raw
+		merged_opts = util.merge_opts(prev_opts, opts_raw)
+
 		local old = tree and vim.deepcopy(tree)
 		if old then
 			old = mt(old)
@@ -396,8 +393,13 @@ local function add(tree, value, seq, prev_opts, prev_tree)
 		on_update(mt(tree), old)
 	else
 		-- value == nil is used to refresh merged_opts on updates
-		tree._prev = prev_tree
+		if tree._data and tree._data.opts_raw then
+			merged_opts = util.merge_opts(prev_opts, tree._data.opts_raw)
+		else
+			merged_opts = prev_opts
+		end
 		tree._data.opts_merged = merged_opts
+		tree._prev = prev_tree
 	end
 
 	-- update merged_opts for all successors

@@ -27,8 +27,8 @@ local function make_config(cfg)
 	return cfg
 end
 
-local function find_key(key, tbl, labels)
-	local first_char = string.sub(key, 1, 1)
+local function find_index(name, tbl, labels)
+	local first_char = string.sub(name, 1, 1)
 	if not tbl[first_char] then
 		return first_char
 	end
@@ -40,7 +40,7 @@ local function find_key(key, tbl, labels)
 		end
 	end
 
-	error("unable to find key")
+	error("unable to find index")
 end
 
 local function generate_option_list(param, value, root_config, sub_config, labels)
@@ -48,8 +48,8 @@ local function generate_option_list(param, value, root_config, sub_config, label
 		desc = string.format("%s", param),
 		fn = function(_)
 			local param_options = {}
-			for _, v in ipairs(value) do
-				local idx = find_key(v, param_options, labels)
+			for _, v in vim.spairs(value) do
+				local idx = find_index(v, param_options, labels)
 				param_options[idx] = {
 					desc = string.format("%s", v),
 					fn = function(_, t)
@@ -67,8 +67,8 @@ end
 local function generate_sub_menu(param, value, root_config, sub_config, labels)
 	local entries = {}
 	local subconfig = sub_config[param]
-	for k, v in pairs(value) do
-		local index = find_key(k, entries, labels)
+	for k, v in vim.spairs(value) do
+		local index = find_index(k, entries, labels)
 		local entry = M.generate_entry(k, v, root_config, subconfig, labels)
 		entries[index] = entry
 	end
@@ -173,8 +173,8 @@ function M.generate()
 
 			local cfg = make_config(root_config)
 
-			for param, template in pairs(cfg) do
-				local index = find_key(param, entries, labels)
+			for param, template in vim.spairs(cfg) do
+				local index = find_index(param, entries, labels)
 				local entry = M.generate_entry(param, template, root_config, root_config, labels)
 				entries[index] = entry
 			end
