@@ -33,6 +33,12 @@ local function sort_entries_by_id(entries)
 	end)
 end
 
+local function sort_entries_by_key(entries)
+	table.sort(entries, function(a, b)
+		return a.key < b.key
+	end)
+end
+
 local function get_group_color(key, group_colors)
 	local group = key:group()
 	if not group or string.len(group) == 0 then
@@ -113,6 +119,8 @@ function popup:update(t)
 			fn = sort_entries_by_id
 		elseif sort == "group" then
 			fn = sort_entries_by_group
+		elseif sort == "key" then
+			fn = sort_entries_by_key
 		end
 
 		if fn then
