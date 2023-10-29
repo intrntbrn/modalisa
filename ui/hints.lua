@@ -11,6 +11,7 @@ local M = {}
 
 local popup = {}
 local timer
+local current_tree
 
 local function sort_entries_by_group(entries)
 	-- sort by group, desc, id
@@ -511,6 +512,7 @@ function popup:refresh_entries()
 end
 
 local function show(t)
+	current_tree = t
 	local hopts = t:opts().hints
 
 	if timer then
@@ -559,6 +561,20 @@ function M.setup(opts)
 	awesome.connect_signal("modalisa::updated", function(t)
 		util.run_on_idle(function()
 			show(t)
+		end)
+	end)
+
+	-- live update on config change
+	awesome.connect_signal("modalisa::config", function(_, _)
+		util.run_on_idle(function()
+			if not current_tree then
+				return
+			end
+			if not popup:is_visible() then
+				return
+			end
+
+			show(current_tree)
 		end)
 	end)
 
