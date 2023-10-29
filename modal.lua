@@ -1,13 +1,14 @@
 local M = {}
 
 -- TODO: MAJOR:
--- config menu
 -- exposed api
 -- beautiful menu
 -- color themes
 -- fix default clienting floating resize (resize modes)
--- option picker ("pick a string")
 -- add audio/brightness to default_keys
+-- configuration: "nil" color params
+-- move awesome param from root
+-- solution for option pickers
 -- modalisa::executed { tree } to list
 
 local awful = require("awful")

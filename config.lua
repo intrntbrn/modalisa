@@ -200,6 +200,18 @@ local defaults = {
 	app_menu = "rofi -show drun || dmenu_run",
 }
 
+local parameter_options = {
+	mode = { "modal", "hold", "hybrid", "forever" },
+	hints = {
+		sort = { "group", "id", "key", "nil" },
+		odd_style = { "row", "column", "checkered", "none" },
+	},
+
+	echo = {
+		entry_width_strategy = { "min", "max", "exact" },
+	},
+}
+
 local options
 
 local function on_update(key)
@@ -254,6 +266,10 @@ function M.set(k, v)
 
 	options = merged
 	on_update(k)
+end
+
+function M.get_options()
+	return parameter_options
 end
 
 function M.setup(opts)

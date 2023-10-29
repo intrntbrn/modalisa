@@ -7,6 +7,26 @@ local config = require("modalisa.config")
 
 local M = {}
 
+local function make_config(cfg)
+	cfg = vim.deepcopy(cfg)
+
+	-- blocked parameter
+	cfg.root_key = nil
+	cfg.back_keys = nil
+	cfg.stop_keys = nil
+	cfg.include_default_keys = nil
+	cfg.ignore_shift_state_for_special_characters = nil
+
+	local hints = cfg.hints
+	hints.key_aliases = nil
+	hints.group_colors = nil
+
+	local param_opts = config.get_options()
+	cfg = vim.tbl_deep_extend("force", cfg, param_opts)
+
+	return cfg
+end
+
 local function find_key(key, tbl, labels)
 	local first_char = string.sub(key, 1, 1)
 	if not tbl[first_char] then
@@ -103,7 +123,7 @@ local function generate_string(param, root_config, sub_config)
 	return {
 		desc = string.format("%s", param),
 		fn = function(opts)
-			local current_value = sub_config[param]
+			local current_value = sub_config[param] or ""
 			assert(type(current_value) == "string", "config parameter is not a string: ", param)
 			local header = param
 			local initial = current_value
@@ -152,7 +172,9 @@ function M.generate()
 			local entries = {}
 			local labels = util.labels_qwerty
 
-			for param, template in pairs(root_config) do
+			local cfg = make_config(root_config)
+
+			for param, template in pairs(cfg) do
 				local index = find_key(param, entries, labels)
 				local entry = M.generate_entry(param, template, root_config, root_config, labels)
 				entries[index] = entry
