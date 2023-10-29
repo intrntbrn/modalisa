@@ -30,11 +30,6 @@ local function find_key(key, tbl, labels)
 		return first_char
 	end
 
-	-- local second_char = string.sub(key, 2, 2)
-	-- if not tbl[second_char] then
-	-- 	return second_char
-	-- end
-
 	for i = 1, string.len(labels) do
 		local c = string.sub(labels, i, i)
 		if not tbl[c] then
@@ -45,7 +40,7 @@ local function find_key(key, tbl, labels)
 	error("unable to find key")
 end
 
-local function generate_option_list(param, value, tbl, root_config, sub_config, labels)
+local function generate_option_list(param, value, root_config, sub_config, labels)
 	return {
 		desc = string.format("%s", param),
 		fn = function(_)
@@ -66,21 +61,23 @@ local function generate_option_list(param, value, tbl, root_config, sub_config, 
 	}
 end
 
-local function generate_sub_menu(param, value, tbl, root_config, sub_config, labels)
-	local deep_tbl = {}
-	local subconfig = root_config[param]
+local function generate_sub_menu(param, value, root_config, sub_config, labels)
+	local entries = {}
+	local subconfig = sub_config[param]
 	for k, v in pairs(value) do
-		M.generate_entry(k, v, deep_tbl, root_config, subconfig, labels)
+		local index = find_key(k, entries, labels)
+		local entry = M.generate_entry(k, v, root_config, subconfig, labels)
+		entries[index] = entry
 	end
 	return {
 		desc = string.format("%s", param),
 		fn = function()
-			return deep_tbl
+			return entries
 		end,
 	}
 end
 
-local function generate_boolean_toggle(param, value, tbl, root_config, sub_config, labels)
+local function generate_boolean_toggle(param, root_config, sub_config)
 	return {
 		desc = string.format("%s", param),
 		fn = function(_, tree)
@@ -94,7 +91,7 @@ local function generate_boolean_toggle(param, value, tbl, root_config, sub_confi
 	}
 end
 
-local function generate_number(param, value, tbl, root_config, sub_config, labels)
+local function generate_number(param, root_config, sub_config)
 	return {
 		desc = string.format("%s", param),
 		fn = function(opts)
@@ -119,7 +116,7 @@ local function generate_number(param, value, tbl, root_config, sub_config, label
 	}
 end
 
-local function generate_string(param, value, tbl, root_config, sub_config, labels)
+local function generate_string(param, root_config, sub_config)
 	return {
 		desc = string.format("%s", param),
 		fn = function(opts)
@@ -139,38 +136,27 @@ local function generate_string(param, value, tbl, root_config, sub_config, label
 	}
 end
 
-function M.generate_entry(param, value, tbl, root_config, sub_config, labels)
-	local param_type = type(value)
-	local index = find_key(param, tbl, labels)
+function M.generate_entry(param, template, root_config, sub_config, labels)
+	local param_type = type(template)
 
 	if param_type == "table" then
-		if vim.tbl_islist(value) then
-			local element = generate_option_list(param, value, tbl, root_config, sub_config, labels)
-			tbl[index] = element
-			return
+		if vim.tbl_islist(template) then
+			return generate_option_list(param, template, root_config, sub_config, labels)
 		end
 
-		local element = generate_sub_menu(param, value, tbl, root_config, sub_config, labels)
-		tbl[index] = element
-		return
+		return generate_sub_menu(param, template, root_config, sub_config, labels)
 	end
 
 	if param_type == "boolean" then
-		local element = generate_boolean_toggle(param, value, tbl, root_config, sub_config, labels)
-		tbl[index] = element
-		return
+		return generate_boolean_toggle(param, root_config, sub_config)
 	end
 
 	if param_type == "number" then
-		local element = generate_number(param, value, tbl, root_config, sub_config, labels)
-		tbl[index] = element
-		return
+		return generate_number(param, root_config, sub_config)
 	end
 
 	if param_type == "string" then
-		local element = generate_number(param, value, tbl, root_config, sub_config, labels)
-		tbl[index] = element
-		return
+		return generate_string(param, root_config, sub_config)
 	end
 end
 
@@ -179,12 +165,14 @@ function M.generate()
 		desc = "modalisa configuration",
 		group = "modalisa",
 		fn = function(_)
-			local opts = config.get_config()
+			local root_config = config.get_config()
 			local entries = {}
 			local labels = util.labels_qwerty
 
-			for k, v in pairs(M.cfg) do
-				M.generate_entry(k, v, entries, opts, opts, labels)
+			for param, template in pairs(M.cfg) do
+				local index = find_key(param, entries, labels)
+				local entry = M.generate_entry(param, template, root_config, root_config, labels)
+				entries[index] = entry
 			end
 
 			return entries
