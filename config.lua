@@ -208,7 +208,7 @@ local function on_update(key)
 	awesome.emit_signal("modalisa::config", key, value)
 end
 
-function M.get(...)
+function M.get_config(...)
 	assert(options)
 
 	local all = { {}, options }
@@ -223,6 +223,17 @@ function M.get(...)
 	local ret = vim.tbl_deep_extend("force", unpack(all))
 
 	return ret
+end
+
+function M.get(k)
+	assert(options)
+	assert(type(k) == "string", "key is not a string")
+
+	if not options[k] then
+		return nil
+	end
+
+	return vim.deepcopy(options[k])
 end
 
 function M.set(k, v)
@@ -241,7 +252,7 @@ end
 function M.setup(opts)
 	assert(not options, "config is already setup")
 	options = defaults
-	options = M.get(opts or {})
+	options = M.get_config(opts or {})
 end
 
 return setmetatable(M, {

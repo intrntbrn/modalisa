@@ -34,7 +34,7 @@ function M.setup(opts)
 
 	awesome.connect_signal("modalisa::config", function(_, _)
 		-- when config has been updated, we have to merge all opts again
-		local new_opts = config.get()
+		local new_opts = config.get_config()
 		root_tree._data.opts_raw = new_opts
 		root_tree._data.opts_merged = new_opts
 		root_tree:update_opts() -- update all merged opts

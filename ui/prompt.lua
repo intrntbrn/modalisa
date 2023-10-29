@@ -127,7 +127,7 @@ end
 
 local function run(fn, initial_text, header_text, opts)
 	assert(fn)
-	opts = opts or config.get()
+	opts = opts or config.get_config()
 	header_text = header_text or ""
 
 	local popts = opts.prompt

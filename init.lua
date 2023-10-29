@@ -55,7 +55,7 @@ end
 
 -- get complete config
 function M.get_config()
-	return config.get()
+	return config.get_config()
 end
 
 local mt = {
@@ -80,7 +80,7 @@ function M.setup(opts)
 	assert(once == nil, "modalisa is already setup")
 	once = true
 	config.setup(opts)
-	opts = config.get() or {}
+	opts = config.get_config() or {}
 
 	print(dump(opts))
 

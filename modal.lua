@@ -702,7 +702,7 @@ end
 
 -- run inline table
 function M.run_tree(tree, opts, name)
-	opts = config.get(opts)
+	opts = config.get_config(opts)
 	local t = require("modalisa.tree"):new(opts, name)
 	assert(t)
 	t:add_successors(tree)

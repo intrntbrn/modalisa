@@ -76,7 +76,7 @@ function M.show_label_parent(parent, label, opts)
 end
 
 function M.show_label(placement, label, opts)
-	opts = opts or config.get()
+	opts = opts or config.get_config()
 	label = label or ""
 
 	local p = popup:new()

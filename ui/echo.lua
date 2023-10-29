@@ -233,7 +233,7 @@ local function transform(kvs)
 end
 
 local function run(kvs, opts)
-	opts = opts or config.get()
+	opts = opts or config.get_config()
 	local eopts = opts.echo
 
 	local list = transform(kvs)
