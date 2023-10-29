@@ -85,12 +85,12 @@ local function create_key_value_widget(opts, key, value)
 	local width = font_width * eopts.entry_width
 
 	local tb_key
-	if key then
+	if key ~= nil then
 		tb_key = create_element(key, opts, font_key, fg_key, width)
 	end
 
 	local tb_value
-	if value then
+	if value ~= nil then
 		tb_value = create_element(value, opts, font, fg, width)
 	end
 
@@ -243,13 +243,11 @@ local function run(kvs, opts)
 	set_timer(eopts)
 end
 
-local function handle_signal(args)
-	local results = args.result
+local function handle_signal(t, results)
 	if not results then
 		return
 	end
 
-	local t = args.tree
 	if not t then
 		return
 	end
@@ -294,8 +292,8 @@ function M.setup(opts)
 		run(kvs, opts)
 	end)
 
-	awesome.connect_signal("modalisa::executed", function(args)
-		handle_signal(args)
+	awesome.connect_signal("modalisa::executed", function(tree, result)
+		handle_signal(tree, result)
 	end)
 end
 
