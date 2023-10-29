@@ -46,9 +46,9 @@ local function make_prompt(opts, header_text)
 
 	local layout
 	if popts.vertical_layout then
-		layout = wibox.layout.fixed.horizontal({})
-	else
 		layout = wibox.layout.fixed.vertical({})
+	else
+		layout = wibox.layout.fixed.horizontal({})
 	end
 
 	local base = wibox.widget.base.make_widget_declarative({
