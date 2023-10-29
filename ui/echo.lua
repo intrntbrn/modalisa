@@ -147,13 +147,6 @@ local function create_widget(opts, kvs)
 		layout = wibox.layout.fixed.vertical({})
 	end
 
-	-- local orientation = eopts.orientation
-	-- if orientation == "vertical" then
-	-- 	layout = wibox.layout.fixed.horizontal({})
-	-- elseif orientation == "horizontal" then
-	-- 	layout = wibox.layout.fixed.vertical({})
-	-- end
-
 	for _, kv in ipairs(widgets) do
 		layout:add(kv)
 	end

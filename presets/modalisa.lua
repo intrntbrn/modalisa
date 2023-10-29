@@ -82,7 +82,7 @@ end
 
 local function generate_boolean_toggle(param, root_config, sub_config)
 	return {
-		desc = string.format("%s", param),
+		desc = string.format("toggle %s", param),
 		fn = function(_, tree)
 			local current_value = sub_config[param]
 			assert(type(current_value) == "boolean", "config parameter is not a boolean: ", param)
@@ -111,7 +111,6 @@ local function generate_number(param, root_config, sub_config)
 					return
 				end
 				sub_config[param] = number
-				print("cfg_scope: ", dump(sub_config))
 				config.set_config(root_config)
 			end
 			require("modalisa.ui.prompt").run(fn, initial, header, opts)
