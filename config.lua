@@ -156,7 +156,7 @@ local defaults = {
 
 	prompt = {
 		placement = "centered",
-		orientation = "vertical",
+		vertical_layout = true,
 		width = 20, -- chars
 		padding = {
 			top = dpi(5),
