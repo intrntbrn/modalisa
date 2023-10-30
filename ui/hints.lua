@@ -158,18 +158,18 @@ function popup:update(t)
 	max_height = max_height - header_height - height_outer
 	max_width = max_width - width_outer
 
-	local font = hopts.font or hopts.font_desc or hopts.font_separator
-	local font_desc = hopts.font_desc or font
-	local font_separator = hopts.font_separator or font
+	local font_key = hopts.font_key
+	local font_desc = hopts.font_desc
+	local font_separator = hopts.font_separator
 
 	local cell_height = dpi(
 		math.max(
-			beautiful.get_font_height(font),
+			beautiful.get_font_height(font_key),
 			beautiful.get_font_height(font_desc),
 			beautiful.get_font_height(font_separator)
 		)
 	)
-	local cell_width = dpi(util.get_font_width(font))
+	local cell_width = dpi(util.get_font_width(font_key))
 
 	local width_padding = 0
 	local height_padding = 0
@@ -282,7 +282,7 @@ function popup:update(t)
 								{
 									id = "textbox_key",
 									halign = "right",
-									font = font,
+									font = font_key,
 									widget = wibox.widget.textbox,
 								},
 								strategy = "exact",
