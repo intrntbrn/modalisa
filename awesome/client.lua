@@ -46,7 +46,7 @@ function M.client_create_filter(multi_screen, multi_tag, include_focused_client)
 		end
 
 		-- check tag selection
-		for i, scr in ipairs(scrs) do
+		for _, scr in ipairs(scrs) do
 			local tags = scr.tags
 			for _, t in ipairs(tags) do
 				if t.selected then

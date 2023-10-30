@@ -1,9 +1,10 @@
 local awful = require("awful")
 local util = require("modalisa.util")
-local dump = require("modalisa.lib.vim").inspect
 local awm = require("modalisa.awesome")
 local mt = require("modalisa.presets.metatable")
 local label = require("modalisa.ui.label")
+---@diagnostic disable-next-line: unused-local
+local dump = require("modalisa.lib.vim").inspect
 
 local M = {}
 local helper = {}
@@ -180,7 +181,7 @@ function M.layout_master_count_decrease()
 			return awful.screen.focused().selected_tag.master_count > 0
 		end,
 		result = { master_count = helper.get_current_tag_master_count },
-		fn = function(opts, self)
+		fn = function()
 			awm.layout_master_count_decrease()
 		end,
 	})
@@ -284,7 +285,7 @@ function M.client_select_picker(multi_window, include_focused_client)
 			return client.focus
 		end,
 		desc = "select client picker",
-		fn = function(opts, t)
+		fn = function(opts)
 			local filter = awm.client_create_filter(multi_window, false, include_focused_client)
 			local fn = function(c)
 				c:activate({ raise = true, context = "client.focus.bydirection" })

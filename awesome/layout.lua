@@ -1,5 +1,4 @@
 local awful = require("awful")
-local dpi = require("beautiful").xresources.apply_dpi
 
 local M = {}
 

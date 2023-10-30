@@ -30,7 +30,7 @@ local function create_textbox(text, eopts, font, fg, width)
 	return tb
 end
 
-local function create_progressbar(value, opts, font, fg, width)
+local function create_progressbar(value, opts, font, _, width)
 	local eopts = opts.echo
 	local popts = eopts.progressbar
 	local tb = wibox.widget.base.make_widget_declarative({
