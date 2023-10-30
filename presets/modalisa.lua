@@ -16,22 +16,25 @@ local function make_config(cfg)
 	local label = cfg.label
 	local prompt = cfg.prompt
 
-	-- blocked parameter
+	-- do not show these params:
 	cfg.root_key = nil
 	cfg.back_keys = nil
 	cfg.stop_keys = nil
 	cfg.include_default_keys = nil
 	cfg.ignore_shift_state_for_special_characters = nil
-
 	hints.key_aliases = nil
 	hints.group_colors = nil
 
-	-- show nil parameters
+	-- show optional parameters that are nil
 	echo.color_border = "nil"
 	echo.color_bg = "nil"
 	echo.color_fg = "nil"
 	echo.color_header_fg = "nil"
 	echo.font_header = "nil"
+	echo.progressbar.color = "nil"
+	echo.progressbar.background_color = "nil"
+	echo.progressbar.border_color = "nil"
+	echo.progressbar.bar_border_color = "nil"
 	hints.color_border = "nil"
 	hints.color_fg = "nil"
 	hints.color_disabled_fg = "nil"
