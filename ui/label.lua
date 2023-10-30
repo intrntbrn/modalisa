@@ -49,11 +49,11 @@ function popup:set(text, placement, opts)
 	tb.markup = text
 	tb.font = lopts.font
 
-	bg.fg = lopts.fg or opts.theme.bg
-	bg.bg = lopts.bg or opts.theme.accent
+	bg.fg = lopts.color_fg or opts.theme.bg
+	bg.bg = lopts.color_bg or opts.theme.accent
 	bg.forced_width = lopts.width
 	bg.forced_height = lopts.height
-	bg.border_color = lopts.border_color or opts.theme.border
+	bg.border_color = lopts.color_border or opts.theme.border
 	bg.border_width = lopts.border_width
 	bg.shape = lopts.shape
 	bg.opacity = lopts.opacity
