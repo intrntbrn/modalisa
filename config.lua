@@ -90,10 +90,11 @@ local defaults = {
 		opacity = 1,
 		shape = nil,
 		odd_style = "row", -- row  | column | checkered | none
-		font_key = "Monospace Bold 12",
-		font_separator = "Monospace Bold 12",
-		font_desc = "Monospace 12",
-		font_header = "Monospace 12",
+		font = "Monospace 12",
+		font_key = nil,
+		font_separator = nil,
+		font_desc = nil,
+		font_header = nil,
 		group_colors = {
 			-- ["menu"] = "#BB9AF7",
 		},

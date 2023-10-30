@@ -131,8 +131,9 @@ function popup:update(t)
 
 	local header_text = t:desc()
 	local header_height = 0
+	local header_font = hopts.font_header or hopts.font
 	if hopts.show_header then
-		header_height = beautiful.get_font_height(hopts.font_header)
+		header_height = beautiful.get_font_height(header_font)
 	end
 
 	local width_outer = 0
@@ -158,18 +159,27 @@ function popup:update(t)
 	max_height = max_height - header_height - height_outer
 	max_width = max_width - width_outer
 
-	local font_key = hopts.font_key
-	local font_desc = hopts.font_desc
-	local font_separator = hopts.font_separator
+	local font = hopts.font
+	local font_key = hopts.font_key or font
+	local font_desc = hopts.font_desc or font
+	local font_separator = hopts.font_separator or font
 
 	local cell_height = dpi(
 		math.max(
+			beautiful.get_font_height(font),
 			beautiful.get_font_height(font_key),
 			beautiful.get_font_height(font_desc),
 			beautiful.get_font_height(font_separator)
 		)
 	)
-	local cell_width = dpi(util.get_font_width(font_key))
+	local cell_width = dpi(
+		math.max(
+			util.get_font_width(font),
+			util.get_font_width(font_key),
+			util.get_font_width(font_desc),
+			util.get_font_width(font_separator)
+		)
+	)
 
 	local width_padding = 0
 	local height_padding = 0
@@ -400,7 +410,7 @@ function popup:update(t)
 			{
 				{
 					markup = util.markup.fg(header_color, header_text),
-					font = hopts.font_header,
+					font = header_font,
 					valign = "center",
 					halign = "center",
 					widget = wibox.widget.textbox,
