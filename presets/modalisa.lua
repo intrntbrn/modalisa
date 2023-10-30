@@ -10,6 +10,11 @@ local M = {}
 local function make_config(cfg)
 	cfg = vim.deepcopy(cfg)
 
+	local echo = cfg.echo
+	local hints = cfg.hints
+	local label = cfg.label
+	local prompt = cfg.prompt
+
 	-- blocked parameter
 	cfg.root_key = nil
 	cfg.back_keys = nil
@@ -17,9 +22,30 @@ local function make_config(cfg)
 	cfg.include_default_keys = nil
 	cfg.ignore_shift_state_for_special_characters = nil
 
-	local hints = cfg.hints
 	hints.key_aliases = nil
 	hints.group_colors = nil
+
+	-- show nil parameters
+	echo.color_border = "nil"
+	echo.color_bg = "nil"
+	echo.color_fg = "nil"
+	echo.color_header_fg = "nil"
+	hints.color_border = "nil"
+	hints.color_fg = "nil"
+	hints.color_disabled_fg = "nil"
+	hints.color_desc_fg = "nil"
+	hints.color_separator_fg = "nil"
+	hints.color_bg = "nil"
+	hints.color_header = "nil"
+	label.color_fg = "nil"
+	label.color_bg = "nil"
+	label.color_border = "nil"
+	prompt.color_border = "nil"
+	prompt.color_bg = "nil"
+	prompt.color_fg = "nil"
+	prompt.color_header_fg = "nil"
+	prompt.color_cursor_fg = "nil"
+	prompt.color_cursor_bg = "nil"
 
 	local param_opts = config.get_options()
 	cfg = vim.tbl_deep_extend("force", cfg, param_opts)

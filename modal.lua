@@ -6,11 +6,8 @@ local M = {}
 -- color themes
 -- fix default clienting floating resize (resize modes)
 -- add audio/brightness to default_keys
--- configuration: "nil" color params
 -- move awesome param from root
--- solution for option pickers
 -- modalisa::executed { tree } to list
--- hints do not show on empty tag
 -- huge font in hints goes out of bounds
 
 local awful = require("awful")
