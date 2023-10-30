@@ -10,8 +10,8 @@ local M = {}
 -- move awesome param from root
 -- solution for option pickers
 -- modalisa::executed { tree } to list
--- why is forever mode leaving?
 -- hints do not show on empty tag
+-- huge font in hints goes out of bounds
 
 local awful = require("awful")
 local lib = require("modalisa.lib")

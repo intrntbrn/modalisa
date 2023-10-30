@@ -778,7 +778,7 @@ function M.client_resize_smart(dir)
 		desc = function()
 			local c = client.focus
 			local layout = awful.layout.get(awful.screen.focused()).name
-			if layout == "floating" or (c.floating and not c.fullscreen) then
+			if layout == "floating" or c and (c.floating and not c.fullscreen) then
 				return string.format("increase client size %s", dir)
 			end
 			return string.format("resize client smart %s", dir)
