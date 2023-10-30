@@ -33,7 +33,7 @@ end
 local function make_prompt(opts, header_text)
 	local popts = opts.prompt
 	local font = popts.font
-	local font_header = popts.font_header
+	local font_header = popts.font_header or font
 	local fg_header = popts.color_header_fg or opts.theme.accent
 
 	local font_width = dpi(math.max(util.get_font_width(font), util.get_font_width(font_header)))

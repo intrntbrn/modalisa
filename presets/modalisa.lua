@@ -45,6 +45,7 @@ local function make_config(cfg)
 	label.color_fg = "nil"
 	label.color_bg = "nil"
 	label.color_border = "nil"
+	prompt.font_header = "nil"
 	prompt.color_border = "nil"
 	prompt.color_bg = "nil"
 	prompt.color_fg = "nil"
