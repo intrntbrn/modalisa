@@ -150,9 +150,11 @@ local function run(fn, initial_text, header_text, opts)
 		done_callback = function()
 			popup:set_visible(false)
 		end,
+		textbox = prompt.widget,
+		exe_callback = fn,
 	}
 
-	awful.prompt.run(pargs, prompt.widget, fn)
+	awful.prompt.run(pargs)
 end
 
 local once
