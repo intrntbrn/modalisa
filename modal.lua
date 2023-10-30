@@ -849,8 +849,15 @@ function M.setup(opts)
 
 	generate_mod_conversion_maps()
 
-	if opts.root_key then
-		M.add_globalkey_run_root(opts.root_key, "")
+	local root_keys = opts.root_keys
+	if root_keys then
+		if type(root_keys) == "string" then
+			M.add_globalkey_run_root(root_keys, "")
+		end
+	elseif type(root_keys) == "table" then
+		for _, key in ipairs(root_keys) do
+			M.add_globalkey_run_root(key, "")
+		end
 	end
 end
 
