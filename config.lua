@@ -124,8 +124,8 @@ local defaults = {
 			right = dpi(5),
 		},
 		spacing = 0,
-		font_header = "Monospace Bold 20",
 		font = "Monospace 20",
+		font_header = nil,
 		border_width = beautiful.border_width or dpi(1),
 		odd = 0, -- luminosity or color
 		shape = nil,

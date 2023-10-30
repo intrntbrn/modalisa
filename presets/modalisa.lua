@@ -31,6 +31,7 @@ local function make_config(cfg)
 	echo.color_bg = "nil"
 	echo.color_fg = "nil"
 	echo.color_header_fg = "nil"
+	echo.font_header = "nil"
 	hints.color_border = "nil"
 	hints.color_fg = "nil"
 	hints.color_disabled_fg = "nil"

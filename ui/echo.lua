@@ -78,7 +78,7 @@ local function create_key_value_widget(opts, key, value)
 	local eopts = opts.echo
 	local font = eopts.font
 	local fg = eopts.color_fg or opts.theme.fg
-	local font_key = eopts.font_header
+	local font_key = eopts.font_header or font
 	local fg_key = eopts.color_header_fg or opts.theme.accent
 
 	local font_width = dpi(math.max(util.get_font_width(font), util.get_font_width(font_key)))
