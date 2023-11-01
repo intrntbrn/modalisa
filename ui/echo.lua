@@ -179,6 +179,10 @@ function popup:init(eopts)
 		widget = wibox.widget.base.make_widget_declarative({}),
 	})
 
+	pop:connect_signal("button::press", function(_, _, _, _)
+		pop.visible = false
+	end)
+
 	self.popup = pop
 	return pop
 end
