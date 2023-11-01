@@ -37,32 +37,36 @@ local defaults = {
 		show_header = false,
 		show_disabled_keys = true,
 		sort = "key", -- group | id | key | none
-		key_aliases = {
-			[" "] = "space",
-			Left = "←",
-			Right = "→",
-			["^Up"] = "↑",
-			["[%-]Up"] = "↑",
-			["^Down"] = "↓",
-			["[%-]Down"] = "↓",
-			XF86MonBrightnessUp = "󰃝 +",
-			XF86MonBrightnessDown = "󰃝 -",
-			XF86AudioRaiseVolume = "󰝝",
-			XF86AudioLowerVolume = "󰝞",
-			XF86AudioMute = "󰝟",
-			XF86AudioPlay = "󰐊",
-			XF86AudioPrev = "󰒮",
-			XF86AudioNext = "󰒭",
-			XF86AudioStop = "󰓛",
-			-- XF86MonBrightnessUp = "🔅+",
-			-- XF86MonBrightnessDown = "🔅-",
-			-- XF86AudioRaiseVolume = "🕩+",
-			-- XF86AudioLowerVolume = "🕩-",
-			-- XF86AudioMute = "🔇",
-			-- XF86AudioPlay = "⏯",
-			-- XF86AudioPrev = "⏮",
-			-- XF86AudioNext = "⏭",
-			-- XF86AudioStop = "⏹",
+		color_border = nil,
+		color_bg = nil,
+		color_odd_bg = -8, -- color or luminosity
+		color_hover_bg = 20, -- color or luminosity
+		color_disabled_fg = nil,
+		font_header = nil,
+		color_header_fg = nil,
+		highlights = {
+			key = {
+				font = "Monospace 12",
+			},
+			desc = {
+				font = "Monospace 12",
+				italic = true,
+			},
+			separator = {
+				font = "Monospace 12",
+			},
+		},
+		menu_highlight = {
+			separator = {
+				fg = "#FF00FF",
+			},
+		},
+		group_highlights = {
+			-- ["^awesome"] = {
+			-- 	desc = {
+			-- 		underline = true,
+			-- 	},
+			-- },
 		},
 		separator = " ➜ ",
 		entry_key_width = 5, -- chars
@@ -99,23 +103,33 @@ local defaults = {
 		opacity = 1,
 		shape = nil,
 		odd_style = "row", -- row  | column | checkered | none
-		font = "Monospace 12",
-		font_key = nil,
-		font_separator = nil,
-		font_desc = nil,
-		font_header = nil,
-		group_colors = {
-			-- ["menu"] = "#BB9AF7",
+		key_aliases = {
+			[" "] = "space",
+			Left = "←",
+			Right = "→",
+			["^Up"] = "↑",
+			["[%-]Up"] = "↑",
+			["^Down"] = "↓",
+			["[%-]Down"] = "↓",
+			XF86MonBrightnessUp = "󰃝 +",
+			XF86MonBrightnessDown = "󰃝 -",
+			XF86AudioRaiseVolume = "󰝝",
+			XF86AudioLowerVolume = "󰝞",
+			XF86AudioMute = "󰝟",
+			XF86AudioPlay = "󰐊",
+			XF86AudioPrev = "󰒮",
+			XF86AudioNext = "󰒭",
+			XF86AudioStop = "󰓛",
+			-- XF86MonBrightnessUp = "🔅+",
+			-- XF86MonBrightnessDown = "🔅-",
+			-- XF86AudioRaiseVolume = "🕩+",
+			-- XF86AudioLowerVolume = "🕩-",
+			-- XF86AudioMute = "🔇",
+			-- XF86AudioPlay = "⏯",
+			-- XF86AudioPrev = "⏮",
+			-- XF86AudioNext = "⏭",
+			-- XF86AudioStop = "⏹",
 		},
-		color_border = nil,
-		color_fg = nil,
-		color_disabled_fg = nil,
-		color_desc_fg = nil,
-		color_separator_fg = nil,
-		color_bg = nil,
-		color_header = nil,
-		color_odd_bg = -8, -- color or luminosity
-		color_hover_bg = 20, -- color or luminosity
 	},
 
 	echo = {

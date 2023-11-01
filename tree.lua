@@ -229,38 +229,12 @@ function M:group()
 	return self._data.group or ""
 end
 
+function M:is_menu()
+	return self:is_leaf() or self._data.is_menu
+end
+
 function M:highlight()
 	return self._data.highlight
-end
-
-function M:fg()
-	local highlight = self._data.highlight
-	return highlight and highlight.fg
-end
-
-function M:bg()
-	local highlight = self._data.highlight
-	return highlight and highlight.bg
-end
-
-function M:underline()
-	local highlight = self._data.highlight
-	return highlight and highlight.underline
-end
-
-function M:bold()
-	local highlight = self._data.highlight
-	return highlight and highlight.bold
-end
-
-function M:italic()
-	local highlight = self._data.highlight
-	return highlight and highlight.italic
-end
-
-function M:strikethrough()
-	local highlight = self._data.highlight
-	return highlight and highlight.strikethrough
 end
 
 function M:add_opts(opts)

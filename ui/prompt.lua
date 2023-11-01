@@ -16,7 +16,7 @@ local prompt
 local function make_textbox(popts, text, font, fg, width)
 	local tb = wibox.widget.base.make_widget_declarative({
 		{
-			markup = util.markup.fg(fg, text),
+			markup = util.markup.fg(text, fg),
 			font = font,
 			valign = "center",
 			halign = "center",

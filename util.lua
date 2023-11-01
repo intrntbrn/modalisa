@@ -122,7 +122,7 @@ function M.confirmation_menu(fn, desc_yes, desc_no)
 end
 
 M.markup = {}
-function M.markup.fg(color, text)
+function M.markup.fg(text, color)
 	return string.format("<span foreground='%s'>%s</span>", color, text)
 end
 function M.markup.bold(text)
