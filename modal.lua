@@ -8,7 +8,9 @@ local M = {}
 -- add audio/brightness to default_keys
 -- move awesome param from root
 -- modalisa::executed { tree } to list
--- huge font in hints goes out of bounds
+-- event names
+-- mouse button cfg: mouse_back = "8", mouse_stop = "3"
+-- key alternatives
 
 local awful = require("awful")
 local lib = require("modalisa.lib")
