@@ -394,11 +394,11 @@ function popup:update(t)
 			end
 
 			local function mouse_button_handler(_, _, _, button)
-				if button == 1 then -- left click
+				if button == hopts.mouse_button_select then
 					awesome.emit_signal("modalisa::fake_input", entry.key_unescaped, false)
 					return
 				end
-				if button == 3 then -- rightclick
+				if button == hopts.mouse_button_select_continue then
 					awesome.emit_signal("modalisa::fake_input", entry.key_unescaped, true)
 					return
 				end
@@ -529,11 +529,17 @@ function popup:new(hopts)
 	})
 
 	pop:connect_signal("button::press", function(_, _, _, button)
-		if button == 2 then -- middle click
+		print("button::press", button)
+		local t = current_tree
+		if not t or not t:opts() then
+			return
+		end
+		local current_hopts = t:opts().hints
+		if button == current_hopts.mouse_button_stop then
 			awesome.emit_signal("modalisa::fake_input", "stop")
 			return
 		end
-		if button == 8 then -- back click
+		if button == current_hopts.mouse_button_back then
 			awesome.emit_signal("modalisa::fake_input", "back")
 			return
 		end

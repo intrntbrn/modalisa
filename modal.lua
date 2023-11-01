@@ -3,7 +3,6 @@ local M = {}
 -- TODO: MAJOR:
 -- exposed api
 -- beautiful menu
--- color themes
 -- fix default clienting floating resize (resize modes)
 -- add audio/brightness to default_keys
 -- move awesome param from root
@@ -11,6 +10,7 @@ local M = {}
 -- event names
 -- mouse button cfg: mouse_back = "8", mouse_stop = "3"
 -- key alternatives
+-- fix hints flow
 
 local awful = require("awful")
 local lib = require("modalisa.lib")
