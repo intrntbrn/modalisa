@@ -443,11 +443,18 @@ function popup:update(t)
 		widget = wibox.widget.base.make_widget_declarative({
 			{
 				{
-					markup = util.markup.fg(header_text, header_color),
-					font = header_font,
-					valign = "center",
-					halign = "center",
-					widget = wibox.widget.textbox,
+					{
+						markup = util.markup.fg(header_text, header_color),
+						font = header_font,
+						valign = "center",
+						halign = "center",
+						widget = wibox.widget.textbox,
+					},
+					left = entry_padding.left,
+					right = entry_padding.right,
+					top = entry_padding.top,
+					bottom = entry_padding.bottom,
+					widget = wibox.container.margin,
 				},
 				forced_height = header_height,
 				widget = wibox.container.place,
