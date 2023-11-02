@@ -41,7 +41,26 @@ local function make_config(cfg)
 	hints.color_disabled_fg = "nil"
 	hints.font_header = "nil"
 	hints.color_header_fg = "nil"
+
 	hints.highlights.bg = "nil"
+
+	hints.highlights.key.fg = "nil"
+	hints.highlights.key.italic = false
+	hints.highlights.key.bold = false
+	hints.highlights.key.underline = false
+	hints.highlights.key.strikethrough = false
+
+	hints.highlights.desc.fg = "nil"
+	hints.highlights.desc.italic = false
+	hints.highlights.desc.bold = false
+	hints.highlights.desc.underline = false
+	hints.highlights.desc.strikethrough = false
+
+	hints.highlights.separator.fg = "nil"
+	hints.highlights.separator.italic = false
+	hints.highlights.separator.bold = false
+	hints.highlights.separator.underline = false
+	hints.highlights.separator.strikethrough = false
 
 	label.color_fg = "nil"
 	label.color_bg = "nil"
@@ -120,7 +139,9 @@ local function generate_boolean_toggle(param, root_config, sub_config)
 		desc = string.format("toggle %s", param),
 		fn = function(_, tree)
 			local current_value = sub_config[param]
-			assert(type(current_value) == "boolean", "config parameter is not a boolean: ", param)
+			if current_value then
+				assert(type(current_value) == "boolean", "config parameter is not a boolean: ", param)
+			end
 			local new_value = not current_value
 			sub_config[param] = new_value
 			config.set_config(root_config)
