@@ -293,7 +293,7 @@ function popup:update(t)
 	local highlight = hopts.highlight
 	local default_bg = highlight.bg or theme.bg
 
-	local bg_hover = util.color_or_luminosity(hopts.color_hover_bg, default_bg)
+	local default_bg_hover = util.color_or_luminosity(hopts.color_hover_bg, default_bg)
 
 	local layout_columns = wibox.layout.fixed[layout_c]({})
 	local entries_widget = {}
@@ -338,6 +338,7 @@ function popup:update(t)
 			end
 
 			local bg = default_bg
+			local bg_hover = default_bg_hover
 			if entry.custom_bg then
 				bg = entry.custom_bg
 				bg_hover = util.color_or_luminosity(hopts.color_hover_bg, bg)
