@@ -8,7 +8,6 @@ local M = {}
 -- move awesome param from root
 -- event names
 -- key alternatives
--- fix hints flow
 -- toggle desc symbols
 -- is_menu
 

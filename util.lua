@@ -8,8 +8,8 @@ local vim = require("modalisa.lib.vim")
 local lighten = require("modalisa.lib.lighten")
 local glib = require("lgi").GLib
 
-M.labels_qwerty = "asdfghjklwertyuiozxcvbnmpqASDFGHJKLQWERTYUIOPZXCVBNM1234567890"
-M.labels_numericalpha = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+M.labels_qwerty = "asdfghjklwertyuiozxcvbnmpqASDFGHJKLQWERTYUIOPZXCVBNM1234567890!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~"
+M.labels_numericalpha = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~"
 
 function M.merge_opts(a, b)
 	if not b then

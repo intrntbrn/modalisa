@@ -225,7 +225,7 @@ local defaults = {
 
 	-- awesome
 	auto_select_the_only_choice = false,
-	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~",
 	resize_delta = dpi(32),
 	resize_factor = 0.025,
 	browser = "firefox || chromium || google-chrome-stable || qutebrowser",
