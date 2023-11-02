@@ -31,7 +31,7 @@ end
 -- @param key string|table The key object to be parsed
 -- @param table_index string The key string if the key object does not contain the key string
 local function parse_key(key, table_index)
-	local seq, fn, opts, cond, desc, result, temp, global, hidden, group, continue, highlight, on_enter, on_leave
+	local seq, fn, opts, cond, desc, result, temp, global, hidden, group, continue, highlight, on_enter, on_leave, is_menu
 
 	local t = type(key)
 
@@ -87,6 +87,8 @@ local function parse_key(key, table_index)
 					global = v
 				elseif k == "hidden" then
 					hidden = v
+				elseif k == "is_menu" then
+					is_menu = v
 				elseif k == "continue" then
 					continue = v
 				else
@@ -114,6 +116,7 @@ local function parse_key(key, table_index)
 			result = result,
 			temp = temp,
 			global = global,
+			is_menu = is_menu,
 			hidden = hidden,
 			group = group,
 			continue = continue,
@@ -230,7 +233,10 @@ function M:group()
 end
 
 function M:is_menu()
-	return self:is_leaf() or self._data.is_menu
+	if not self:is_leaf() then
+		return true
+	end
+	return self._data.is_menu
 end
 
 function M:highlight()

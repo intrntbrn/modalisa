@@ -17,7 +17,7 @@ local function make_config(cfg)
 	local prompt = cfg.prompt
 
 	-- do not show these params:
-	cfg.root_key = nil
+	cfg.root_keys = nil
 	cfg.back_keys = nil
 	cfg.stop_keys = nil
 	cfg.include_default_keys = nil
@@ -35,17 +35,13 @@ local function make_config(cfg)
 	echo.progressbar.background_color = "nil"
 	echo.progressbar.border_color = "nil"
 	echo.progressbar.bar_border_color = "nil"
+
 	hints.color_border = "nil"
-	hints.color_fg = "nil"
-	hints.color_disabled_fg = "nil"
-	hints.color_desc_fg = "nil"
-	hints.color_separator_fg = "nil"
 	hints.color_bg = "nil"
-	hints.color_header = "nil"
-	hints.font_key = "nil"
-	hints.font_desc = "nil"
+	hints.color_disabled_fg = "nil"
 	hints.font_header = "nil"
-	hints.font_separator = "nil"
+	hints.color_header_fg = "nil"
+
 	label.color_fg = "nil"
 	label.color_bg = "nil"
 	label.color_border = "nil"
@@ -82,6 +78,7 @@ end
 local function generate_option_list(param, value, root_config, sub_config, labels)
 	return {
 		desc = string.format("%s", param),
+		is_menu = true,
 		fn = function(_)
 			local param_options = {}
 			for _, v in vim.spairs(value) do
@@ -110,6 +107,7 @@ local function generate_sub_menu(param, value, root_config, sub_config, labels)
 	end
 	return {
 		desc = string.format("%s", param),
+		is_menu = true,
 		fn = function()
 			return entries
 		end,
@@ -202,6 +200,7 @@ function M.generate()
 	return mt({
 		desc = "modalisa configuration",
 		group = "modalisa",
+		is_menu = true,
 		fn = function(_)
 			local root_config = config.get_config()
 			local entries = {}

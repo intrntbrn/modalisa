@@ -248,6 +248,7 @@ function M.layout_select_menu()
 	return mt({
 		group = "layout.menu.select",
 		desc = "select a layout",
+		is_menu = true,
 		fn = function(opts)
 			local s = awful.screen.focused()
 			local t = s.selected_tag
@@ -278,6 +279,7 @@ end
 function M.client_select_picker(multi_window, include_focused_client)
 	return mt({
 		group = "client.menu.focus",
+		is_menu = true,
 		opts = {
 			labels = util.labels_qwerty,
 		},
@@ -303,6 +305,7 @@ end
 function M.client_swap_picker()
 	return mt({
 		group = "client.swap",
+		is_menu = true,
 		opts = {
 			hints = {
 				enabled = false,
@@ -834,6 +837,7 @@ function M.client_unminimize_menu(multi_tag)
 	return mt({
 		group = "client.property.unminimize",
 		desc = "unminimize clients",
+		is_menu = true,
 		fn = function(opts)
 			local ret = {}
 			local i = 1
@@ -868,6 +872,7 @@ end
 
 function M.client_toggle_tag_menu()
 	return mt({
+		is_menu = true,
 		group = "client.tags.toggle",
 		cond = function()
 			return client.focus
@@ -933,6 +938,7 @@ end
 function M.move_client_to_tag_menu(c)
 	assert(c)
 	return mt({
+		is_menu = true,
 		group = "tag.client.move",
 		cond = function()
 			return c and c.valid
@@ -960,6 +966,7 @@ end
 
 function M.tag_move_all_clients_to_tag_menu()
 	return mt({
+		is_menu = true,
 		group = "tag.client.move.all",
 		cond = function()
 			return client.focus
@@ -996,6 +1003,7 @@ end
 
 function M.tag_toggle_menu()
 	return mt({
+		is_menu = true,
 		group = "tag.toggle",
 		cond = function()
 			return client.focus
@@ -1053,6 +1061,7 @@ end
 
 function M.tag_view_only_menu()
 	return mt({
+		is_menu = true,
 		group = "tag.view",
 		desc = "view only tag",
 		fn = function(opts)

@@ -94,7 +94,7 @@ local function make_entries(keys, opts)
 					local group_highlight = get_group_highlight(key, group_highlights)
 					if group_highlight then
 						highlight = group_highlight
-					elseif not key:is_menu() then
+					elseif key:is_menu() then
 						highlight = menu_highlight
 					end
 				end
