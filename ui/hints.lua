@@ -300,7 +300,6 @@ function popup:update(t)
 	local i = 1
 	local done = false
 	local skip
-	local entry
 	local j -- logical i
 	for c = 1, num_columns do
 		if done then
@@ -311,6 +310,7 @@ function popup:update(t)
 		layout_columns:add(row)
 
 		for r = 1, num_rows do
+			local entry
 			if invert then
 				j = (num_columns * (c - 1)) + r
 			else
@@ -460,7 +460,7 @@ function popup:update(t)
 			widget.update = update
 			widget.teardown = teardown
 
-			entries_widget[i] = widget
+			table.insert(entries_widget, widget)
 
 			row:add(widget)
 			if not skip then
