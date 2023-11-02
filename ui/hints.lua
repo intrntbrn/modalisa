@@ -291,24 +291,42 @@ function popup:update(t)
 	local entries_widget = {}
 	local i = 1
 	local done = false
+	local skip
+	local entry
+	local j -- logical i
 	for c = 1, num_columns do
 		if done then
-			-- break
+			-- no more entries
+			break
 		end
 		local row = wibox.layout.fixed[layout_r]({})
 		layout_columns:add(row)
 
 		for r = 1, num_rows do
-			local entry = entries[i]
-			if not entry then
-				-- add dummy entry to continue the odd pattern
-				done = true
-				if c == 1 then
-					break
-				end
+			if invert then
+				j = (num_columns * (c - 1)) + r
+			else
+				j = (num_columns * (r - 1)) + c
+			end
+
+			skip = j > num_entries
+
+			if skip then
 				entry = {
 					is_dummy = true,
 				}
+			else
+				entry = entries[i]
+
+				if not entry then
+					done = true
+					if c == 1 then
+						break -- don't increase column- or row count because of dummies
+					end
+					entry = {
+						is_dummy = true,
+					}
+				end
 			end
 
 			local bg = default_bg
@@ -432,7 +450,9 @@ function popup:update(t)
 			entries_widget[i] = widget
 
 			row:add(widget)
-			i = i + 1
+			if not skip then
+				i = i + 1
+			end
 		end
 		self.entries_widget = entries_widget
 	end

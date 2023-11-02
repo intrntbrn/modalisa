@@ -99,7 +99,7 @@ local defaults = {
 		stretch_vertical = false, -- use all available height
 		stretch_horizontal = false, -- use all available width
 		flow_horizontal = false, -- fill from left to right
-		expand_horizontal = true, -- fill columns first
+		expand_horizontal = true, -- use all available columns first
 		placement = function(h) -- function or placement (e.g. "centered")
 			awful.placement.bottom(h, { honor_workarea = true })
 		end,
