@@ -65,14 +65,16 @@ local function make_entries(keys, opts)
 	local hl = hopts.highlights
 	local theme = opts.theme
 
+	local default_bg = hl.bg or theme.bg
+
 	local hl_default = {
 		fg = theme.fg,
-		bg = theme.bg,
+		bg = default_bg,
 	}
 
 	local hl_default_separator = {
 		fg = theme.accent,
-		bg = theme.bg,
+		bg = default_bg,
 	}
 
 	local default_hl_key = vim.tbl_deep_extend("force", hl_default, hl.key)
@@ -86,6 +88,7 @@ local function make_entries(keys, opts)
 				local hl_key = vim.deepcopy(default_hl_key)
 				local hl_separator = vim.deepcopy(default_hl_separator)
 				local hl_desc = vim.deepcopy(default_hl_desc)
+				local custom_bg
 
 				local keyname = util.keyname(k, aliases)
 				local highlight = key:highlight()
@@ -100,6 +103,9 @@ local function make_entries(keys, opts)
 				end
 
 				if highlight then
+					if highlight.bg then
+						custom_bg = highlight.bg
+					end
 					if highlight.key then
 						hl_key = vim.tbl_deep_extend("force", hl_key, highlight.key)
 					end
@@ -125,6 +131,7 @@ local function make_entries(keys, opts)
 					run = function()
 						key:fn(kopts)
 					end,
+					custom_bg = custom_bg,
 					highlight_key = hl_key,
 					highlight_separator = hl_separator,
 					highlight_desc = hl_desc,
@@ -283,7 +290,8 @@ function popup:update(t)
 
 	local theme = opts.theme
 	local odd_style = hopts.odd_style
-	local default_bg = hopts.color_bg or theme.bg
+	local highlights = hopts.highlights
+	local default_bg = highlights.bg or theme.bg
 
 	local bg_hover = util.color_or_luminosity(hopts.color_hover_bg, default_bg)
 
@@ -330,18 +338,22 @@ function popup:update(t)
 			end
 
 			local bg = default_bg
-			local odd_source = nil
-			if odd_style == "row" then
-				odd_source = invert and c or r
-			elseif odd_style == "column" then
-				odd_source = invert and r or c
-			elseif odd_style == "checkered" then
-				odd_source = r + c
-			end
-			if odd_source then
-				local odd = (odd_source % 2) == 0
-				if odd then
-					bg = util.color_or_luminosity(hopts.color_odd_bg, default_bg)
+			if entry.custom_bg then
+				bg = entry.custom_bg
+			else
+				local odd_source = nil
+				if odd_style == "row" then
+					odd_source = invert and c or r
+				elseif odd_style == "column" then
+					odd_source = invert and r or c
+				elseif odd_style == "checkered" then
+					odd_source = r + c
+				end
+				if odd_source then
+					local odd = (odd_source % 2) == 0
+					if odd then
+						bg = util.color_or_luminosity(hopts.color_odd_bg, default_bg)
+					end
 				end
 			end
 

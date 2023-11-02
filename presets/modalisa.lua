@@ -38,10 +38,10 @@ local function make_config(cfg)
 	echo.progressbar.bar_border_color = "nil"
 
 	hints.color_border = "nil"
-	hints.color_bg = "nil"
 	hints.color_disabled_fg = "nil"
 	hints.font_header = "nil"
 	hints.color_header_fg = "nil"
+	hints.highlights.bg = "nil"
 
 	label.color_fg = "nil"
 	label.color_bg = "nil"

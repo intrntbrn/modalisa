@@ -36,13 +36,13 @@ local defaults = {
 		delay = 0, -- ms
 		show_header = false,
 		show_disabled_keys = true,
-		sort = "key", -- group | id | key | none
+		sort = "group", -- group | id | key | none
 		mouse_button_select = 1, -- left click
 		mouse_button_select_continue = 3, -- right click
 		mouse_button_stop = 2, -- middle click
 		mouse_button_back = 8, -- back click
 		color_border = nil,
-		color_bg = nil,
+		-- color_bg = nil,
 		color_odd_bg = -8, -- color or luminosity
 		color_hover_bg = 20, -- color or luminosity
 		color_disabled_fg = nil,
@@ -50,6 +50,7 @@ local defaults = {
 		color_header_fg = nil,
 		color_header_bg = nil,
 		highlights = {
+			bg = nil,
 			key = {
 				font = "Monospace 12",
 			},
@@ -62,6 +63,7 @@ local defaults = {
 			},
 		},
 		menu_highlight = {
+			bg = "#5513FF",
 			separator = {
 				fg = "#FF00FF",
 			},
