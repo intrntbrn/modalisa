@@ -459,23 +459,31 @@ function popup:update(t)
 
 	local widget = layout_columns
 	if hopts.show_header then
-		local header_color = hopts.color_header_fg or opts.theme.accent
+		local header_fg = hopts.color_header_fg or opts.theme.accent
+		local header_bg = hopts.color_header_bg or default_bg
 		widget = wibox.widget.base.make_widget_declarative({
 			{
 				{
 					{
-						markup = util.markup.fg(header_text, header_color),
-						font = header_font,
-						valign = "center",
-						halign = "center",
-						widget = wibox.widget.textbox,
+						{
+							markup = util.markup.fg(header_text, header_fg),
+							font = header_font,
+							valign = "center",
+							halign = "center",
+							widget = wibox.widget.textbox,
+						},
+						left = entry_padding.left,
+						right = entry_padding.right,
+						top = entry_padding.top,
+						bottom = entry_padding.bottom,
+						widget = wibox.container.margin,
 					},
-					left = entry_padding.left,
-					right = entry_padding.right,
-					top = entry_padding.top,
-					bottom = entry_padding.bottom,
-					widget = wibox.container.margin,
+					bg = header_bg,
+					widget = wibox.container.background,
 				},
+				fill_horizontal = true,
+				content_fill_vertical = true,
+				content_fill_horizontal = true,
 				forced_height = header_height,
 				widget = wibox.container.place,
 			},
@@ -526,6 +534,7 @@ function popup:update(t)
 				border_color = border_color,
 				shape = hopts.shape,
 				opacity = hopts.opacity,
+				bg = default_bg,
 				widget = wibox.container.background,
 			},
 			width = max_width - width_remaining,

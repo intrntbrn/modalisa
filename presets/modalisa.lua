@@ -30,6 +30,7 @@ local function make_config(cfg)
 	echo.color_bg = "nil"
 	echo.color_fg = "nil"
 	echo.color_header_fg = "nil"
+	echo.color_header_bg = "nil"
 	echo.font_header = "nil"
 	echo.progressbar.color = "nil"
 	echo.progressbar.background_color = "nil"

@@ -48,6 +48,7 @@ local defaults = {
 		color_disabled_fg = nil,
 		font_header = nil,
 		color_header_fg = nil,
+		color_header_bg = nil,
 		highlights = {
 			key = {
 				font = "Monospace 12",
