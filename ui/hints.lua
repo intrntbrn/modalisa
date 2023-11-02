@@ -340,6 +340,7 @@ function popup:update(t)
 			local bg = default_bg
 			if entry.custom_bg then
 				bg = entry.custom_bg
+				bg_hover = util.color_or_luminosity(hopts.color_hover_bg, bg)
 			else
 				local odd_source = nil
 				if odd_style == "row" then
