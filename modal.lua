@@ -9,7 +9,6 @@ local M = {}
 -- event names
 -- key alternatives
 -- toggle desc symbols
--- is_menu
 
 local awful = require("awful")
 local lib = require("modalisa.lib")

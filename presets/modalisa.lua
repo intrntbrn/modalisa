@@ -42,25 +42,25 @@ local function make_config(cfg)
 	hints.font_header = "nil"
 	hints.color_header_fg = "nil"
 
-	hints.highlights.bg = "nil"
+	hints.highlight.bg = "nil"
 
-	hints.highlights.key.fg = "nil"
-	hints.highlights.key.italic = false
-	hints.highlights.key.bold = false
-	hints.highlights.key.underline = false
-	hints.highlights.key.strikethrough = false
+	hints.highlight.key.fg = "nil"
+	hints.highlight.key.italic = false
+	hints.highlight.key.bold = false
+	hints.highlight.key.underline = false
+	hints.highlight.key.strikethrough = false
 
-	hints.highlights.desc.fg = "nil"
-	hints.highlights.desc.italic = false
-	hints.highlights.desc.bold = false
-	hints.highlights.desc.underline = false
-	hints.highlights.desc.strikethrough = false
+	hints.highlight.desc.fg = "nil"
+	hints.highlight.desc.italic = false
+	hints.highlight.desc.bold = false
+	hints.highlight.desc.underline = false
+	hints.highlight.desc.strikethrough = false
 
-	hints.highlights.separator.fg = "nil"
-	hints.highlights.separator.italic = false
-	hints.highlights.separator.bold = false
-	hints.highlights.separator.underline = false
-	hints.highlights.separator.strikethrough = false
+	hints.highlight.separator.fg = "nil"
+	hints.highlight.separator.italic = false
+	hints.highlight.separator.bold = false
+	hints.highlight.separator.underline = false
+	hints.highlight.separator.strikethrough = false
 
 	label.color_fg = "nil"
 	label.color_bg = "nil"

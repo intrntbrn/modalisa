@@ -62,7 +62,7 @@ local function make_entries(keys, opts)
 	local show_disabled = hopts.show_disabled_keys
 	local menu_highlight = hopts.menu_highlight
 
-	local hl = hopts.highlights
+	local hl = hopts.highlight
 	local theme = opts.theme
 
 	local default_bg = hl.bg or theme.bg
@@ -212,7 +212,7 @@ function popup:update(t)
 	max_height = max_height - header_height - height_outer
 	max_width = max_width - width_outer
 
-	local hl = hopts.highlights
+	local hl = hopts.highlight
 	local hl_key = hl.key
 	local hl_separator = hl.separator
 	local hl_desc = hl.desc
@@ -290,8 +290,8 @@ function popup:update(t)
 
 	local theme = opts.theme
 	local odd_style = hopts.odd_style
-	local highlights = hopts.highlights
-	local default_bg = highlights.bg or theme.bg
+	local highlight = hopts.highlight
+	local default_bg = highlight.bg or theme.bg
 
 	local bg_hover = util.color_or_luminosity(hopts.color_hover_bg, default_bg)
 
