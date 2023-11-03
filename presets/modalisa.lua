@@ -39,23 +39,18 @@ local function make_config(cfg)
 
 	hints.color_border = "nil"
 	hints.color_disabled_fg = "nil"
-	hints.font_header = "nil"
 	hints.color_header_fg = "nil"
-
 	hints.highlight.bg = "nil"
-
 	hints.highlight.key.fg = "nil"
 	hints.highlight.key.italic = false
 	hints.highlight.key.bold = false
 	hints.highlight.key.underline = false
 	hints.highlight.key.strikethrough = false
-
 	hints.highlight.desc.fg = "nil"
 	hints.highlight.desc.italic = false
 	hints.highlight.desc.bold = false
 	hints.highlight.desc.underline = false
 	hints.highlight.desc.strikethrough = false
-
 	hints.highlight.separator.fg = "nil"
 	hints.highlight.separator.italic = false
 	hints.highlight.separator.bold = false

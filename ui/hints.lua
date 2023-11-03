@@ -187,6 +187,7 @@ function popup:update(t)
 	local header_font = hopts.font_header or hopts.font
 	if hopts.show_header then
 		header_height = beautiful.get_font_height(header_font)
+		print("header_height: ", header_height)
 	end
 
 	local width_outer = 0
@@ -206,11 +207,14 @@ function popup:update(t)
 		height_outer = height_outer + (padding_outer.bottom or 0)
 	end
 
+	print("height_outer: ", height_outer)
+	print("width_outer: ", width_outer)
+
 	-- calculations
-	local max_width = util.get_screen_pixel_width(hopts.width, s)
-	local max_height = util.get_screen_pixel_height(hopts.height, s)
-	max_height = max_height - header_height - height_outer
-	max_width = max_width - width_outer
+	local total_max_width = util.get_screen_pixel_width(hopts.width, s)
+	local total_max_height = util.get_screen_pixel_height(hopts.height, s)
+	local max_height = total_max_height - header_height - height_outer
+	local max_width = total_max_width - width_outer
 
 	local hl = hopts.highlight
 	local hl_key = hl.key
@@ -239,6 +243,7 @@ function popup:update(t)
 		width_padding = width_padding + (entry_padding.right or 0)
 		height_padding = height_padding + (entry_padding.top or 0)
 		height_padding = height_padding + (entry_padding.bottom or 0)
+		header_height = header_height + height_padding
 	end
 
 	local entry_height = cell_height + height_padding
@@ -269,6 +274,14 @@ function popup:update(t)
 		end
 	end
 
+	print("num_entries: ", num_entries)
+	print("num_rows: ", num_rows)
+	print("num_columns: ", num_columns)
+	print("max_rows: ", max_rows)
+	print("max_columns: ", max_columns)
+	print("max_width: ", max_width)
+	print("max_height: ", max_height)
+
 	local layout_c = "horizontal"
 	local layout_r = "vertical"
 
@@ -279,14 +292,6 @@ function popup:update(t)
 		layout_r = "horizontal"
 		num_columns, num_rows = num_rows, num_columns
 	end
-
-	print("num_entries: ", num_entries)
-	print("num_rows: ", num_rows)
-	print("num_columns: ", num_columns)
-	print("max_rows: ", max_rows)
-	print("max_columns: ", max_columns)
-	print("max_width: ", max_width)
-	print("max_height: ", max_height)
 
 	local theme = opts.theme
 	local odd_style = hopts.odd_style
@@ -312,14 +317,15 @@ function popup:update(t)
 		for r = 1, num_rows do
 			local entry
 			if invert then
-				j = (num_rows * (c - 1)) + r
+				j = (num_rows * (c - 1)) + (r - 1)
 			else
-				j = (num_columns * (r - 1)) + c
+				j = (num_columns * (r - 1)) + (c - 1)
 			end
 
 			skip = j > num_entries
 
 			if skip then
+				print("create dummy skip", j, c, r)
 				entry = {
 					is_dummy = true,
 				}
@@ -331,6 +337,7 @@ function popup:update(t)
 					if c == 1 then
 						break -- don't increase column- or row count because of dummies
 					end
+					print("create dummy", c, r)
 					entry = {
 						is_dummy = true,
 					}
@@ -373,27 +380,23 @@ function popup:update(t)
 				{
 					{
 						{
-							{
-								widget_tb_key,
-								strategy = "exact",
-								width = hopts.entry_key_width * cell_width,
-								widget = wibox.container.constraint,
-							},
-							widget_tb_separator,
-							widget_tb_desc,
-							layout = wibox.layout.fixed.horizontal(),
+							widget_tb_key,
+							strategy = "exact",
+							width = hopts.entry_key_width * cell_width,
+							widget = wibox.container.constraint,
 						},
-						margins = hopts.entry_padding,
-						widget = wibox.container.margin,
+						widget_tb_separator,
+						widget_tb_desc,
+						layout = wibox.layout.fixed.horizontal(),
 					},
-					bg = bg,
-					id = "background_entry",
-					widget = wibox.container.background,
+					margins = hopts.entry_padding,
+					widget = wibox.container.margin,
 				},
-				strategy = "exact",
-				width = entry_width,
-				height = entry_height,
-				widget = wibox.container.constraint,
+				bg = bg,
+				id = "background_entry",
+				forced_height = entry_height,
+				forced_width = entry_width,
+				widget = wibox.container.background,
 			})
 
 			local update = function()
@@ -508,7 +511,7 @@ function popup:update(t)
 
 	local stretch_margin_left, stretch_margin_right, stretch_margin_top, stretch_margin_bottom
 	local entry_count_x = invert and num_rows or num_columns
-	local width_remaining = max_width - (entry_count_x * entry_width)
+	local width_remaining = total_max_width - (entry_count_x * entry_width) - width_outer
 	if hopts.stretch_horizontal then
 		print("stretch horizontal: ", width_remaining, entry_count_x)
 		stretch_margin_left = math.floor(width_remaining / 2)
@@ -517,10 +520,12 @@ function popup:update(t)
 	end
 
 	local entry_count_y = invert and num_columns or num_rows
-	local height_remaining = max_height - (entry_count_y * entry_height)
+	local height_remaining = total_max_height - (entry_count_y * entry_height) - header_height - height_outer
 	if hopts.stretch_vertical then
+		print("stretch vertical: ", height_remaining, entry_count_y)
 		stretch_margin_top = math.floor(height_remaining / 2)
-		stretch_margin_bottom = math.floor(height_remaining - stretch_margin_top)
+		stretch_margin_bottom = height_remaining - stretch_margin_top
+		print("stretch_margin_bottom: ", stretch_margin_bottom)
 		height_remaining = 0
 	end
 
@@ -551,8 +556,8 @@ function popup:update(t)
 				bg = default_bg,
 				widget = wibox.container.background,
 			},
-			width = max_width - width_remaining,
-			height = max_height,
+			width = total_max_width - (margins_outer.left or 0) - (margins_outer.right or 0) - width_remaining,
+			height = total_max_height - (margins_outer.top or 0) - (margins_outer.bottom or 0) - height_remaining,
 			strategy = "max",
 			widget = wibox.container.constraint,
 		},
