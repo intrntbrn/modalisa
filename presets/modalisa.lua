@@ -23,7 +23,7 @@ local function make_config(cfg)
 	cfg.include_default_keys = nil
 	cfg.ignore_shift_state_for_special_characters = nil
 	hints.key_aliases = nil
-	hints.group_colors = nil
+	hints.group_highlights = nil
 
 	-- show optional parameters that are nil
 	echo.color_border = "nil"

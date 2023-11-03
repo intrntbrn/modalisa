@@ -44,7 +44,7 @@ local defaults = {
 		color_border = nil,
 		-- color_bg = nil,
 		color_odd_bg = -8, -- color or luminosity
-		color_hover_bg = 20, -- color or luminosity
+		color_hover_bg = 15, -- color or luminosity
 		color_disabled_fg = nil,
 		font_header = nil,
 		color_header_fg = nil,
@@ -63,9 +63,9 @@ local defaults = {
 			},
 		},
 		menu_highlight = {
-			bg = "#5513FF",
-			separator = {
-				fg = "#FF00FF",
+			-- bg = "#485077",
+			desc = {
+				fg = "#F9E2AF",
 			},
 		},
 		group_highlights = {
@@ -103,7 +103,7 @@ local defaults = {
 		stretch_horizontal = false, -- use all available width
 		flow_horizontal = false, -- fill from left to right
 		expand_horizontal = true, -- use all available columns first
-		placement = function(h) -- function or placement (e.g. "centered")
+		placement = function(h) -- function, placement (e.g. "centered") or false (last position)
 			awful.placement.bottom(h, { honor_workarea = true })
 		end,
 		border_width = beautiful.border_width or dpi(1),

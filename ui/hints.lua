@@ -312,7 +312,7 @@ function popup:update(t)
 		for r = 1, num_rows do
 			local entry
 			if invert then
-				j = (num_columns * (c - 1)) + r
+				j = (num_rows * (c - 1)) + r
 			else
 				j = (num_columns * (r - 1)) + c
 			end

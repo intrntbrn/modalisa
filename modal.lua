@@ -9,6 +9,7 @@ local M = {}
 -- event names
 -- key alternatives
 -- toggle desc symbols
+-- stretch vertical is broken
 
 local awful = require("awful")
 local lib = require("modalisa.lib")
