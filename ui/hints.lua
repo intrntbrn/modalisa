@@ -187,7 +187,6 @@ function popup:update(t)
 	local header_font = hopts.font_header or hopts.font
 	if hopts.show_header then
 		header_height = beautiful.get_font_height(header_font)
-		print("header_height: ", header_height)
 	end
 
 	local width_outer = 0
@@ -206,9 +205,6 @@ function popup:update(t)
 		height_outer = height_outer + (padding_outer.top or 0)
 		height_outer = height_outer + (padding_outer.bottom or 0)
 	end
-
-	print("height_outer: ", height_outer)
-	print("width_outer: ", width_outer)
 
 	-- calculations
 	local total_max_width = util.get_screen_pixel_width(hopts.width, s)
@@ -274,13 +270,13 @@ function popup:update(t)
 		end
 	end
 
-	print("num_entries: ", num_entries)
-	print("num_rows: ", num_rows)
-	print("num_columns: ", num_columns)
-	print("max_rows: ", max_rows)
-	print("max_columns: ", max_columns)
-	print("max_width: ", max_width)
-	print("max_height: ", max_height)
+	-- print("num_entries: ", num_entries)
+	-- print("num_rows: ", num_rows)
+	-- print("num_columns: ", num_columns)
+	-- print("max_rows: ", max_rows)
+	-- print("max_columns: ", max_columns)
+	-- print("max_width: ", max_width)
+	-- print("max_height: ", max_height)
 
 	local layout_c = "horizontal"
 	local layout_r = "vertical"
@@ -513,7 +509,6 @@ function popup:update(t)
 	local entry_count_x = invert and num_rows or num_columns
 	local width_remaining = total_max_width - (entry_count_x * entry_width) - width_outer
 	if hopts.stretch_horizontal then
-		print("stretch horizontal: ", width_remaining, entry_count_x)
 		stretch_margin_left = math.floor(width_remaining / 2)
 		stretch_margin_right = width_remaining - stretch_margin_left
 		width_remaining = 0
@@ -522,10 +517,8 @@ function popup:update(t)
 	local entry_count_y = invert and num_columns or num_rows
 	local height_remaining = total_max_height - (entry_count_y * entry_height) - header_height - height_outer
 	if hopts.stretch_vertical then
-		print("stretch vertical: ", height_remaining, entry_count_y)
 		stretch_margin_top = math.floor(height_remaining / 2)
 		stretch_margin_bottom = height_remaining - stretch_margin_top
-		print("stretch_margin_bottom: ", stretch_margin_bottom)
 		height_remaining = 0
 	end
 
@@ -584,7 +577,6 @@ function popup:new(hopts)
 	})
 
 	pop:connect_signal("button::press", function(_, _, _, button)
-		print("button::press", button)
 		local t = current_tree
 		if not t or not t:opts() then
 			return

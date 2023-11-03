@@ -180,7 +180,7 @@ function M.get_screen_pixel_width(v, s)
 end
 
 function M.get_screen_pixel_height(v, s)
-	return calc_pixel_count("width", v, s)
+	return calc_pixel_count("height", v, s)
 end
 
 function M.color_or_luminosity(v, other_color)
