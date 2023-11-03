@@ -315,29 +315,29 @@ function popup:update(t)
 		layout_columns:add(row)
 
 		for r = 1, num_rows do
-			local entry
-			if invert then
-				j = (num_rows * (c - 1)) + (r - 1)
-			else
-				j = (num_columns * (r - 1)) + (c - 1)
+			local entry = entries[i]
+
+			skip = false
+			if entry and hopts.expand_horizontal then
+				if invert then
+					j = (num_rows * (c - 1)) + r
+				else
+					j = (num_columns * (r - 1)) + c
+				end
+
+				skip = j > num_entries
 			end
 
-			skip = j > num_entries
-
 			if skip then
-				print("create dummy skip", j, c, r)
 				entry = {
 					is_dummy = true,
 				}
 			else
-				entry = entries[i]
-
 				if not entry then
 					done = true
-					if c == 1 then
+					if c == 1 or (invert and r == 1) then
 						break -- don't increase column- or row count because of dummies
 					end
-					print("create dummy", c, r)
 					entry = {
 						is_dummy = true,
 					}
