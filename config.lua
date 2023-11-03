@@ -256,6 +256,20 @@ local function on_update(key)
 	awesome.emit_signal("modalisa::config", key, value)
 end
 
+function M.get_default_config(...)
+	local all = { {}, defaults }
+
+	for i = 1, select("#", ...) do
+		local opts = select(i, ...)
+		if opts then
+			table.insert(all, opts)
+		end
+	end
+
+	local ret = vim.tbl_deep_extend("force", unpack(all))
+	return ret
+end
+
 function M.get_config(...)
 	assert(options)
 
