@@ -635,9 +635,7 @@ local function show(t)
 		timer = gears.timer({
 			timeout = delay / 1000,
 			callback = function()
-				util.run_on_idle(function()
-					popup:update(t)
-				end)
+				popup:update(t)
 			end,
 			autostart = true,
 			single_shot = true,
