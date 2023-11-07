@@ -1,5 +1,6 @@
 local modalisa = require("modalisa")
 local ps = require("modalisa.presets.awesome")
+local pss = require("modalisa.presets.sys")
 local util = require("modalisa.util")
 
 local M = {}
@@ -12,7 +13,6 @@ local keys = {
 	["q"] = nil,
 	["z"] = nil,
 	["g"] = nil,
-	["p"] = nil,
 	["v"] = nil,
 	["d"] = nil,
 	["i"] = nil,
@@ -154,6 +154,14 @@ local keys = {
 	["cp"] = ps.client_focus_prev(),
 	["c<Tab>"] = ps.client_swap_master_smart(),
 	["c<Return>"] = ps.client_move_to_master(),
+
+	-- power menu
+	["p"] = { desc = "power", opts = { hints = { enabled = true }, mode = "hybrid" } },
+	["ps"] = pss.power_shutdown(),
+	["pc"] = pss.power_shutdown_cancel(),
+	["pt"] = pss.power_shutdown_timer(),
+	["pr"] = pss.power_reboot(),
+	["pu"] = pss.power_suspend(),
 }
 
 function M.get_keys()

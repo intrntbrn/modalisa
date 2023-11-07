@@ -244,6 +244,7 @@ function popup:update(t)
 
 	local entry_height = cell_height + height_padding
 	local min_entry_width = (cell_width * hopts.min_entry_width) + width_padding
+	min_entry_width = math.min(min_entry_width, max_width)
 	local max_entry_width = (cell_width * hopts.max_entry_width) + width_padding
 
 	local max_entries = math.floor((max_width * max_height) / (min_entry_width * entry_height))

@@ -4,12 +4,12 @@ local M = {}
 -- exposed api
 -- beautiful menu
 -- fix default clienting floating resize (resize modes)
--- add audio/brightness to default_keys
+-- add audio/brightness, power to default_keys
 -- move awesome param from root
 -- event names
 -- key alternatives
 -- toggle desc symbols
--- stretch vertical is broken
+-- shutdown menu
 
 local awful = require("awful")
 local lib = require("modalisa.lib")

@@ -773,12 +773,6 @@ function M.client_resize_smart(dir)
 		cond = function()
 			return client.focus
 		end,
-		result = {
-			master_width = helper.get_current_tag_master_width_factor(),
-			master_count = helper.get_current_tag_master_count(),
-			column_count = helper.get_current_tag_column_count(),
-			something = helper.get_current_tag_column_count(),
-		},
 		desc = function()
 			local c = client.focus
 			local layout = awful.layout.get(awful.screen.focused()).name

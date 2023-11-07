@@ -1,6 +1,6 @@
-local vim = require("modalisa.lib.vim")
-local awesome = require("modalisa.presets.awesome")
+local M = {}
 
-local M = vim.tbl_extend("error", {}, awesome)
+M.awesome = require("modalisa.presets.awesome")
+M.sys = require("modalisa.presets.sys")
 
 return M
