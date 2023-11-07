@@ -160,6 +160,7 @@ function M.layout_master_width_increase(factor)
 		fn = function()
 			awm.layout_master_width_increase(factor)
 		end,
+		result = { master_width = helper.get_current_tag_master_width_factor },
 	})
 end
 
@@ -170,6 +171,7 @@ function M.layout_master_width_decrease(factor)
 		fn = function()
 			awm.layout_master_width_decrease(factor)
 		end,
+		result = { master_width = helper.get_current_tag_master_width_factor },
 	})
 end
 
@@ -180,10 +182,10 @@ function M.layout_master_count_decrease()
 		cond = function()
 			return awful.screen.focused().selected_tag.master_count > 0
 		end,
-		result = { master_count = helper.get_current_tag_master_count },
 		fn = function()
 			awm.layout_master_count_decrease()
 		end,
+		result = { master_count = helper.get_current_tag_master_count },
 	})
 end
 
@@ -191,10 +193,10 @@ function M.layout_master_count_increase()
 	return mt({
 		group = "layout.master.count",
 		desc = "master count increase",
-		result = { master_count = helper.get_current_tag_master_count },
 		fn = function()
 			awm.layout_master_count_increase()
 		end,
+		result = { master_count = helper.get_current_tag_master_count },
 	})
 end
 
@@ -208,6 +210,7 @@ function M.layout_column_count_decrease()
 		fn = function()
 			awm.layout_master_count_decrease()
 		end,
+		result = { column_count = helper.get_current_tag_column_count },
 	})
 end
 
@@ -219,6 +222,7 @@ function M.layout_column_count_increase()
 			awm.layout_master_count_increase()
 			return "column_count", helper.get_current_tag_column_count()
 		end,
+		result = { column_count = helper.get_current_tag_column_count },
 	})
 end
 
