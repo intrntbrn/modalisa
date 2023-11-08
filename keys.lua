@@ -20,28 +20,20 @@ local keys = {
 
 	-- spawn menu example
 	["x"] = { desc = "execute", opts = { group = "menu.execute" } },
-	-- terminals
 	["xw"] = ps.spawn("wezterm"),
 	["xa"] = ps.spawn("alacritty"),
 	["xx"] = ps.spawn("xterm"),
 	["xk"] = ps.spawn("kitty"),
 	["xt"] = ps.spawn("thunar"),
-	-- browser
 	["xg"] = ps.spawn_with_shell("chromium || google-chrome-stable") + { desc = "google chrome" },
 	["xf"] = ps.spawn("firefox"),
 	["xq"] = ps.spawn("qutebrowser"),
 	["xb"] = ps.spawn("brave"),
-	-- sys
 	["xr"] = ps.spawn("arandr"),
 	["xp"] = ps.spawn("pavucontrol"),
-	-- gui editors
 	["xc"] = ps.spawn("code"),
-	["xn"] = ps.spawn("neovide"),
-	-- image
 	["xi"] = ps.spawn("gimp"),
-	-- messenger
 	["xd"] = ps.spawn("discord"),
-	-- gaming
 	["xs"] = ps.spawn("steam"),
 
 	-- root

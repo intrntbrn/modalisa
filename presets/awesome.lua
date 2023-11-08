@@ -99,10 +99,7 @@ function M.spawn_terminal()
 		group = "spawn",
 		desc = "terminal",
 		fn = function(opts)
-			if not opts.terminal then
-				return
-			end
-			awful.spawn.with_shell(opts.terminal)
+			awful.spawn.with_shell(opts.awesome.terminal)
 		end,
 	})
 end
@@ -112,10 +109,7 @@ function M.spawn_browser()
 		group = "spawn",
 		desc = "browser",
 		fn = function(opts)
-			if not opts.browser then
-				return
-			end
-			awful.spawn.with_shell(opts.browser)
+			awful.spawn.with_shell(opts.awesome.browser)
 		end,
 	})
 end
@@ -145,10 +139,7 @@ function M.spawn_appmenu()
 		group = "spawn",
 		desc = "open app menu",
 		fn = function(opts)
-			if not opts.app_menu then
-				return
-			end
-			awful.spawn.with_shell(opts.app_menu)
+			awful.spawn.with_shell(opts.awesome.app_menu)
 		end,
 	})
 end
@@ -766,7 +757,7 @@ function M.client_move_smart(dir)
 		end,
 		desc = string.format("move client %s", dir),
 		fn = function(opts)
-			awm.client_move_smart(client.focus, dir, opts.resize_delta)
+			awm.client_move_smart(client.focus, dir, opts.awesome.resize_delta)
 		end,
 	})
 end
@@ -786,7 +777,7 @@ function M.client_resize_smart(dir)
 			return string.format("resize client smart %s", dir)
 		end,
 		fn = function(opts)
-			awm.client_resize_smart(client.focus, dir, opts.resize_delta, opts.resize_factor)
+			awm.client_resize_smart(client.focus, dir, opts.awesome.resize_delta, opts.awesome.resize_factor)
 		end,
 	})
 end
@@ -804,7 +795,7 @@ function M.client_floating_size_increase(dir)
 		end,
 		fn = function(opts)
 			local c = client.focus
-			local resize_delta = opts.resize_delta
+			local resize_delta = opts.awesome.resize_delta
 			resize_delta = math.abs(resize_delta)
 			awm.client_floating_resize(c, dir, resize_delta)
 		end,
@@ -824,7 +815,7 @@ function M.client_floating_size_decrease(dir)
 		end,
 		fn = function(opts)
 			local c = client.focus
-			local resize_delta = opts.resize_delta
+			local resize_delta = opts.awesome.resize_delta
 			resize_delta = math.abs(resize_delta) * -1
 			awm.client_floating_resize(c, dir, resize_delta)
 		end,
@@ -855,7 +846,7 @@ function M.client_unminimize_menu(multi_tag)
 				end
 			end
 
-			if opts.auto_select_the_only_choice then
+			if opts.awesome.auto_select_the_only_choice then
 				-- unminimize if there is only 1 client
 				if #ret == 1 then
 					ret[1].fn()

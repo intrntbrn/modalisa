@@ -113,7 +113,7 @@ function M.client_picker(opts, fn, filter)
 	end
 
 	-- only 1 client
-	if opts.auto_select_the_only_choice then
+	if opts.awesome.auto_select_the_only_choice then
 		if #menu == 1 then
 			clabel.hide_labels()
 			menu[1].fn()

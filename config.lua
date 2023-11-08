@@ -21,6 +21,7 @@ local defaults = {
 	stop_on_unknown_key = false,
 	ignore_shift_state_for_special_characters = true,
 	timeout = 0, -- ms
+	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~",
 
 	theme = {
 		fg = beautiful.fg_focus or "#eceffc",
@@ -227,13 +228,14 @@ local defaults = {
 	},
 
 	-- awesome
-	auto_select_the_only_choice = false,
-	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~",
-	resize_delta = dpi(32),
-	resize_factor = 0.025,
-	browser = "firefox || chromium || google-chrome-stable || qutebrowser",
-	terminal = terminal or "alacritty || kitty || wezterm || st || urxvt || xterm",
-	app_menu = "rofi -show drun || dmenu_run",
+	awesome = {
+		auto_select_the_only_choice = false,
+		resize_delta = dpi(32),
+		resize_factor = 0.025,
+		browser = "firefox || chromium || google-chrome-stable || qutebrowser",
+		terminal = terminal or "alacritty || kitty || wezterm || st || urxvt || xterm",
+		app_menu = "rofi -show drun || dmenu_run",
+	},
 }
 
 local parameter_options = {
