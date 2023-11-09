@@ -5,6 +5,54 @@ local dump = require("modalisa.lib.vim").inspect
 
 local M = {}
 
+local function audio_playerctl_cmd(subcmd)
+	return string.format("playerctl %s", subcmd)
+end
+
+function M.audio_next()
+	return mt({
+		group = "audio.inc",
+		desc = "audio next",
+		function()
+			local cmd = audio_playerctl_cmd("next")
+			awful.spawn(cmd)
+		end,
+	})
+end
+
+function M.audio_prev()
+	return mt({
+		group = "audio.inc",
+		desc = "audio prev",
+		function()
+			local cmd = audio_playerctl_cmd("previous")
+			awful.spawn(cmd)
+		end,
+	})
+end
+
+function M.audio_play_pause()
+	return mt({
+		group = "audio",
+		desc = "audio play-pause",
+		function()
+			local cmd = audio_playerctl_cmd("play-pause")
+			awful.spawn(cmd)
+		end,
+	})
+end
+
+function M.audio_stop()
+	return mt({
+		group = "audio",
+		desc = "audio stop",
+		function()
+			local cmd = audio_playerctl_cmd("stop")
+			awful.spawn(cmd)
+		end,
+	})
+end
+
 local function brightness_show(opts)
 	local cmd = [[bash -c 'xbacklight -get']]
 	awful.spawn.easy_async(cmd, function(stdout)
@@ -70,7 +118,7 @@ end
 
 function M.volume_inc(inc)
 	return mt({
-		group = "volume",
+		group = "audio.volume",
 		desc = "volume",
 		opts = {
 			echo = {
@@ -88,7 +136,7 @@ end
 
 function M.volume_mute_toggle()
 	return mt({
-		group = "volume",
+		group = "audio.volume",
 		desc = "mute toggle",
 		opts = {
 			echo = {

@@ -155,12 +155,16 @@ local keys = {
 	["pr"] = pss.power_reboot(),
 	["pu"] = pss.power_suspend(),
 
-	-- audio
+	-- audio (requires amixer and playerctl)
 	["<XF86AudioRaiseVolume>"] = pss.volume_inc(5) + { desc = "volume raise", global = true },
 	["<XF86AudioLowerVolume>"] = pss.volume_inc(-5) + { desc = "volume lower", global = true },
 	["<XF86AudioMute>"] = pss.volume_mute_toggle() + { desc = "mute toggle", global = true },
+	["<XF86AudioNext>"] = pss.audio_next() + { global = true },
+	["<XF86AudioPrev>"] = pss.audio_prev() + { global = true },
+	["<XF86AudioStop>"] = pss.audio_stop() + { global = true },
+	["<XF86AudioPause>"] = pss.audio_play_pause() + { global = true },
 
-	-- brightness
+	-- brightness (requires xbacklight)
 	["<XF86MonBrightnessUp>"] = pss.brightness_inc(10) + { desc = "brightness increase", global = true },
 	["<XF86MonBrightnessDown>"] = pss.brightness_inc(-10) + { desc = "brightness decrease", global = true },
 }
