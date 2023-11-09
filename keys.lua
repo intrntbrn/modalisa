@@ -159,6 +159,10 @@ local keys = {
 	["<XF86AudioRaiseVolume>"] = pss.volume_inc(5) + { desc = "volume raise", global = true },
 	["<XF86AudioLowerVolume>"] = pss.volume_inc(-5) + { desc = "volume lower", global = true },
 	["<XF86AudioMute>"] = pss.volume_mute_toggle() + { desc = "mute toggle", global = true },
+
+	-- brightness
+	["<XF86MonBrightnessUp>"] = pss.brightness_inc(10) + { desc = "brightness increase", global = true },
+	["<XF86MonBrightnessDown>"] = pss.brightness_inc(-10) + { desc = "brightness decrease", global = true },
 }
 
 function M.get_keys()

@@ -5,6 +5,43 @@ local dump = require("modalisa.lib.vim").inspect
 
 local M = {}
 
+local function brightness_show(opts)
+	local cmd = [[bash -c 'xbacklight -get']]
+	awful.spawn.easy_async(cmd, function(stdout)
+		stdout = string.gsub(stdout, "\n", "")
+		local value = tonumber(stdout)
+		require("modalisa.ui.echo").show_simple("brightness", value, opts)
+	end)
+end
+
+local function brightness_cmd(inc)
+	local param = "-inc"
+	if inc < 0 then
+		param = "-dec"
+		inc = math.abs(inc)
+	end
+	local cmd = string.format("xbacklight %s %d", param, inc)
+	return cmd
+end
+
+function M.brightness_inc(inc)
+	return mt({
+		group = "brightness",
+		desc = "brightness",
+		opts = {
+			echo = {
+				show_percentage_as_progressbar = true,
+			},
+		},
+		function(opts)
+			local cmd = brightness_cmd(inc)
+			awful.spawn.easy_async_with_shell(cmd, function()
+				brightness_show(opts)
+			end)
+		end,
+	})
+end
+
 local function volume_show(opts)
 	local amixer_get_master = [[bash -c 'amixer get Master']]
 	awful.spawn.easy_async(amixer_get_master, function(stdout)
