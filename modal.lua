@@ -4,7 +4,6 @@ local M = {}
 -- exposed api
 -- beautiful menu
 -- fix default clienting floating resize (resize modes)
--- add audio/brightness, power to default_keys
 -- event names
 -- key alternatives
 -- toggle desc symbols
