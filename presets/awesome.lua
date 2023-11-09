@@ -1022,6 +1022,7 @@ function M.tag_toggle_policy()
 	return mt({
 		group = "tag.policy",
 		desc = "toggle tag fill policy",
+		result = { fill_policty = helper.get_current_tag_master_fill_policy },
 		fn = function()
 			local s = awful.screen.focused()
 			local t = s.selected_tag

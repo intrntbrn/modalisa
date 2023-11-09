@@ -104,8 +104,8 @@ local keys = {
 	["tp"] = ps.tag_toggle_policy(),
 	["tt"] = ps.tag_toggle_menu() + { opts = { hints = { enabled = true, delay = 0 } } },
 	["ta"] = ps.tag_move_all_clients_to_tag_menu() + { opts = { hints = { enabled = true, delay = 0 } } },
-	["t<Left>"] = ps.tag_previous(),
-	["t<Right>"] = ps.tag_next(),
+	["t<Left>"] = ps.tag_previous() + { continue = true },
+	["t<Right>"] = ps.tag_next() + { continue = true },
 	["t<Tab>"] = ps.tag_last(),
 	["t1"] = ps.tag_move_focused_client_to_tag(1),
 	["t2"] = ps.tag_move_focused_client_to_tag(2),
@@ -121,14 +121,14 @@ local keys = {
 	-- layout
 	["r"] = { desc = "layout", opts = { group = "menu.layout" } },
 	["r "] = ps.layout_select_menu() + { opts = { labels = util.labels_qwerty } },
-	["r<Left>"] = ps.layout_prev(),
-	["r<Right>"] = ps.layout_next(),
-	["rk"] = ps.layout_master_width_increase(),
-	["rj"] = ps.layout_master_width_decrease(),
-	["rl"] = ps.layout_master_count_increase(),
-	["rh"] = ps.layout_master_count_decrease(),
-	["rL"] = ps.layout_column_count_increase(),
-	["rH"] = ps.layout_column_count_decrease(),
+	["r<Left>"] = ps.layout_prev() + { continue = true },
+	["r<Right>"] = ps.layout_next() + { continue = true },
+	["rk"] = ps.layout_master_width_increase() + { continue = true },
+	["rj"] = ps.layout_master_width_decrease() + { continue = true },
+	["rl"] = ps.layout_master_count_increase() + { continue = true },
+	["rh"] = ps.layout_master_count_decrease() + { continue = true },
+	["rL"] = ps.layout_column_count_increase() + { continue = true },
+	["rH"] = ps.layout_column_count_decrease() + { continue = true },
 
 	-- client
 	["c"] = { desc = "client", opts = { group = "menu.client" } },
@@ -154,6 +154,11 @@ local keys = {
 	["pt"] = pss.power_shutdown_timer(),
 	["pr"] = pss.power_reboot(),
 	["pu"] = pss.power_suspend(),
+
+	-- audio
+	["<XF86AudioRaiseVolume>"] = pss.volume_inc(5) + { desc = "volume raise", global = true },
+	["<XF86AudioLowerVolume>"] = pss.volume_inc(-5) + { desc = "volume lower", global = true },
+	["<XF86AudioMute>"] = pss.volume_mute_toggle() + { desc = "mute toggle", global = true },
 }
 
 function M.get_keys()

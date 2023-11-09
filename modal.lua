@@ -5,11 +5,9 @@ local M = {}
 -- beautiful menu
 -- fix default clienting floating resize (resize modes)
 -- add audio/brightness, power to default_keys
--- move awesome param from root
 -- event names
 -- key alternatives
 -- toggle desc symbols
--- shutdown menu
 
 local awful = require("awful")
 local lib = require("modalisa.lib")

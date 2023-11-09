@@ -5,6 +5,68 @@ local dump = require("modalisa.lib.vim").inspect
 
 local M = {}
 
+local function volume_show(opts)
+	local amixer_get_master = [[bash -c 'amixer get Master']]
+	awful.spawn.easy_async(amixer_get_master, function(stdout)
+		local vol, status = string.match(stdout, "([%d]+)%%.*%[([%l]*)")
+		if status == "off" then
+			require("modalisa.ui.echo").show_simple("volume", "muted", opts)
+		else
+			local value = tonumber(vol) / 100
+			require("modalisa.ui.echo").show_simple("volume", value, opts)
+		end
+	end)
+end
+
+local function volume_toggle_cmd()
+	return "amixer -D pulse set Master 1+ toggle"
+end
+
+local function volume_cmd(inc)
+	local sign = "+"
+	if inc < 0 then
+		sign = "-"
+	end
+	local cmd = string.format("amixer set Master %s%%%s > /dev/null 2>&1", inc, sign)
+	return cmd
+end
+
+function M.volume_inc(inc)
+	return mt({
+		group = "volume",
+		desc = "volume",
+		opts = {
+			echo = {
+				show_percentage_as_progressbar = true,
+			},
+		},
+		function(opts)
+			local cmd = volume_cmd(inc)
+			awful.spawn.easy_async_with_shell(cmd, function()
+				volume_show(opts)
+			end)
+		end,
+	})
+end
+
+function M.volume_mute_toggle()
+	return mt({
+		group = "volume",
+		desc = "mute toggle",
+		opts = {
+			echo = {
+				show_percentage_as_progressbar = true,
+			},
+		},
+		function(opts)
+			local cmd = volume_toggle_cmd()
+			awful.spawn.easy_async_with_shell(cmd, function()
+				volume_show(opts)
+			end)
+		end,
+	})
+end
+
 function M.power_shutdown()
 	return mt({
 		group = "power.shutdown",
