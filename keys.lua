@@ -11,12 +11,17 @@ local keys = {
 	[";"] = nil,
 	["y"] = nil,
 	["q"] = nil,
-	["z"] = nil,
 	["g"] = nil,
 	["v"] = nil,
 	["d"] = nil,
-	["i"] = nil,
+	["z"] = nil,
 	["'"] = nil,
+
+	-- interactive configuration of modalisa
+	["i"] = require("modalisa.presets.modalisa").generate() + {
+		highlight = { desc = { fg = "#7DCFFF", bold = true, italic = true } },
+		opts = { hints = { enabled = true }, mode = "forever" },
+	},
 
 	-- spawn menu example
 	["x"] = { desc = "execute", group = "menu.execute" },

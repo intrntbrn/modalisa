@@ -7,6 +7,7 @@ local M = {}
 -- event names
 -- key alternatives
 -- toggle desc symbols
+-- label/prompt/echo highlights
 
 local awful = require("awful")
 local lib = require("modalisa.lib")
@@ -466,10 +467,7 @@ function trunner:stop_maybe(reason)
 		end
 
 		if self.continue_key then
-			-- FIXME: test this in hold mode
-			-- if mode == "modal" or mode == "hybrid" then
 			return
-			-- end
 		end
 	elseif reason == "unknown_key" then
 		if not opts.stop_on_unknown_key then

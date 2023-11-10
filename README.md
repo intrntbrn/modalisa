@@ -114,5 +114,3 @@ require("modalisa").setup({
 ## ⚙️ Configuration
 
 ## 📡 API
-
-## 💡 Examples

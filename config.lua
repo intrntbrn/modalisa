@@ -43,7 +43,6 @@ local defaults = {
 		mouse_button_stop = 2, -- middle click
 		mouse_button_back = 8, -- back click
 		color_border = nil,
-		-- color_bg = nil,
 		color_odd_bg = -8, -- color or luminosity
 		color_hover_bg = 15, -- color or luminosity
 		color_disabled_fg = nil,
@@ -64,9 +63,8 @@ local defaults = {
 			},
 		},
 		menu_highlight = {
-			-- bg = "#485077",
 			desc = {
-				fg = "#F9E2AF",
+				bold = true,
 			},
 		},
 		group_highlights = {
@@ -99,7 +97,7 @@ local defaults = {
 			right = 0,
 		},
 		width = 0.75, -- fraction or abs pixel count
-		height = 0.3, -- fraction or abs pixel count
+		height = 0.35, -- fraction or abs pixel count
 		stretch_vertical = false, -- use all available height
 		stretch_horizontal = false, -- use all available width
 		flow_horizontal = false, -- fill from left to right
@@ -128,15 +126,6 @@ local defaults = {
 			XF86AudioPrev = "󰒮",
 			XF86AudioNext = "󰒭",
 			XF86AudioStop = "󰓛",
-			-- XF86MonBrightnessUp = "🔅+",
-			-- XF86MonBrightnessDown = "🔅-",
-			-- XF86AudioRaiseVolume = "🕩+",
-			-- XF86AudioLowerVolume = "🕩-",
-			-- XF86AudioMute = "🔇",
-			-- XF86AudioPlay = "⏯",
-			-- XF86AudioPrev = "⏮",
-			-- XF86AudioNext = "⏭",
-			-- XF86AudioStop = "⏹",
 		},
 	},
 
@@ -202,7 +191,7 @@ local defaults = {
 			right = dpi(5),
 		},
 		spacing = 0,
-		font = "Monospace Bold 20",
+		font = "Monospace 20",
 		font_header = nil,
 		border_width = beautiful.border_width or dpi(1),
 		shape = nil,
@@ -216,7 +205,7 @@ local defaults = {
 	},
 
 	label = {
-		font = "Monospace Bold 40",
+		font = "Monospace 40",
 		shape = gears.shape.rounded_rect,
 		border_width = beautiful.border_width or dpi(1),
 		color_bg = nil,
