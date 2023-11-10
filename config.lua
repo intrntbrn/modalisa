@@ -15,13 +15,12 @@ local defaults = {
 	stop_keys = { "<Escape>" },
 	include_default_keys = true,
 
-	-- core
 	mode = "hybrid", -- "modal" | "hold" | "hybrid" | "forever"
 	smart_modifiers = true,
 	stop_on_unknown_key = false,
-	ignore_shift_state_for_special_characters = true,
 	timeout = 0, -- ms
 	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~",
+	ignore_shift_state_for_special_characters = true,
 
 	theme = {
 		fg = beautiful.fg_focus or "#eceffc",
@@ -31,7 +30,6 @@ local defaults = {
 		accent = "#82AAFF",
 	},
 
-	-- hints
 	hints = {
 		enabled = true,
 		delay = 0, -- ms
@@ -144,16 +142,24 @@ local defaults = {
 			right = dpi(5),
 		},
 		spacing = 0,
-		font = "Monospace 20",
-		font_header = nil,
 		border_width = beautiful.border_width or dpi(1),
-		odd = 0, -- luminosity or color
 		shape = nil,
 		opacity = 1,
 		color_border = nil,
-		color_bg = nil,
-		color_fg = nil,
-		color_header_fg = nil,
+		highlight = {
+			key = {
+				font = "Monospace 20",
+				bg = nil,
+				fg = nil,
+				italic = true,
+				bold = true,
+			},
+			value = {
+				font = "Monospace 20",
+				bg = nil,
+				fg = nil,
+			},
+		},
 
 		progressbar = {
 			shape = gears.shape.rounded_rect,

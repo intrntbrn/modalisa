@@ -27,11 +27,19 @@ local function make_config(cfg)
 
 	-- show optional parameters that are nil
 	echo.color_border = "nil"
-	echo.color_bg = "nil"
-	echo.color_fg = "nil"
-	echo.color_header_fg = "nil"
-	echo.color_header_bg = "nil"
-	echo.font_header = "nil"
+	echo.highlight.key.bg = "nil"
+	echo.highlight.key.fg = "nil"
+	echo.highlight.key.italic = false
+	echo.highlight.key.bold = false
+	echo.highlight.key.underline = false
+	echo.highlight.key.strikethrough = false
+	echo.highlight.value.bg = "nil"
+	echo.highlight.value.fg = "nil"
+	echo.highlight.value.italic = false
+	echo.highlight.value.bold = false
+	echo.highlight.value.underline = false
+	echo.highlight.value.strikethrough = false
+
 	echo.progressbar.color = "nil"
 	echo.progressbar.background_color = "nil"
 	echo.progressbar.border_color = "nil"

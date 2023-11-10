@@ -13,10 +13,13 @@ local M = {}
 local popup = {}
 local timer
 
-local function create_textbox(text, eopts, font, fg, width)
+local function create_textbox(text, opts, fg, highlight, width)
+	local eopts = opts.echo
+	local font = highlight.font
+	local markup = util.apply_highlight(text, highlight)
 	local tb = wibox.widget.base.make_widget_declarative({
 		{
-			markup = util.markup.fg(text, fg),
+			markup = util.markup.fg(markup, fg),
 			font = font,
 			valign = "center",
 			halign = "center",
@@ -30,9 +33,10 @@ local function create_textbox(text, eopts, font, fg, width)
 	return tb
 end
 
-local function create_progressbar(value, opts, font, _, width)
+local function create_progressbar(value, opts, _, highlight, width)
 	local eopts = opts.echo
 	local popts = eopts.progressbar
+	local font = highlight.font
 	local tb = wibox.widget.base.make_widget_declarative({
 		{
 			max_value = 1,
@@ -58,41 +62,45 @@ local function create_progressbar(value, opts, font, _, width)
 	return tb
 end
 
-local function create_element(value, opts, font, fg, width)
+local function create_element(value, opts, fg, highlight, width)
 	local eopts = opts.echo
 	local t = type(value)
 	if t == "string" then
-		return create_textbox(value, eopts, font, fg, width)
+		return create_textbox(value, opts, fg, highlight, width)
 	end
 	if t == "number" then
 		if eopts.show_percentage_as_progressbar then
 			if value >= 0 and value <= 1.0 then
-				return create_progressbar(value, opts, font, fg, width)
+				return create_progressbar(value, opts, fg, highlight, width)
 			end
 		end
 	end
-	return create_textbox(value, eopts, font, fg, width)
+	return create_textbox(value, opts, fg, highlight, width)
 end
 
 local function create_key_value_widget(opts, key, value)
 	local eopts = opts.echo
-	local font = eopts.font
-	local fg = eopts.color_fg or opts.theme.fg
-	local font_key = eopts.font_header or font
-	local fg_key = eopts.color_header_fg or opts.theme.accent
+	local highlight = eopts.highlight
+	local hl_key = highlight.key
+	local hl_value = highlight.value
 
-	local font_width = dpi(math.max(util.get_font_width(font), util.get_font_width(font_key)))
+	local font_value = hl_value.font
+	local fg_value = hl_value.fg or opts.theme.fg
+	local font_key = hl_key.font or font_value
+	local fg_key = hl_key.fg or opts.theme.accent
+
+	local font_width = dpi(math.max(util.get_font_width(font_value), util.get_font_width(font_key)))
 	local width = font_width * eopts.entry_width
 
 	local tb_key
 	if key ~= nil then
-		tb_key = create_element(key, opts, font_key, fg_key, width)
+		tb_key = create_element(key, opts, fg_key, hl_key, width)
 	end
 
 	local tb_value
 	if value ~= nil then
 		if type(value) ~= "string" or string.len(value) > 0 then
-			tb_value = create_element(value, opts, font, fg, width)
+			tb_value = create_element(value, opts, fg_value, hl_value, width)
 		end
 	end
 
@@ -103,9 +111,21 @@ local function create_key_value_widget(opts, key, value)
 		layout = wibox.layout.fixed.horizontal({})
 	end
 
+	local default_bg = opts.theme.bg
+	local bg_key = hl_key.bg or default_bg
+	local bg_value = hl_value.bg or default_bg
+
 	local base = wibox.widget.base.make_widget_declarative({
-		tb_key,
-		tb_value,
+		{
+			tb_key,
+			bg = bg_key,
+			widget = wibox.container.background,
+		},
+		{
+			tb_value,
+			bg = bg_value,
+			widget = wibox.container.background,
+		},
 		spacing = tb_key and tb_value and eopts.spacing,
 		layout = layout,
 	})
@@ -121,22 +141,11 @@ local function create_widget(opts, kvs)
 		local k = kv.key
 		local v = kv.value
 
-		local bg = eopts.color_bg or opts.theme.bg
-		local is_odd = (i % 2) == 0
-		if is_odd then
-			local odd = eopts.odd
-			bg = util.color_or_luminosity(odd, bg)
-		end
-
 		local tb = create_key_value_widget(opts, k, v)
 		local base = wibox.widget.base.make_widget_declarative({
-			{
-				tb,
-				margins = eopts.padding,
-				widget = wibox.container.margin,
-			},
-			bg = bg,
-			widget = wibox.container.background,
+			tb,
+			margins = eopts.padding,
+			widget = wibox.container.margin,
 		})
 		table.insert(widgets, base)
 		i = i + 1
