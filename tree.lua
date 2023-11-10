@@ -50,6 +50,9 @@ local function parse_key(key, table_index)
 					global = v
 				elseif k == "group" then
 					group = v
+				elseif k == "seq" then
+					assert(not seq, "unable to parse key", dump(key))
+					seq = v
 				else
 					assert(not seq, "unable to parse key", dump(key))
 					seq = v
