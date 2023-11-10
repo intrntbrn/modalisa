@@ -55,11 +55,21 @@ local function make_prompt(opts, header_text)
 	end
 
 	local base = wibox.widget.base.make_widget_declarative({
-		tb_header,
-		prompt,
-		spacing = tb_header and popts.spacing,
-		forced_width = not tb_header and width,
-		layout = layout,
+		{
+			{
+				tb_header,
+				prompt,
+				spacing = tb_header and popts.spacing,
+				layout = layout,
+			},
+			strategy = "max",
+			width = awful.screen.focused().geometry.width - popts.padding.left - popts.padding.right,
+			height = awful.screen.focused().geometry.height - popts.padding.top - popts.padding.bottom,
+			widget = wibox.container.constraint,
+		},
+		strategy = popts.width_strategy,
+		width = width,
+		widget = wibox.container.constraint,
 	})
 
 	return base

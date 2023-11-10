@@ -190,6 +190,7 @@ local defaults = {
 		placement = "centered", -- or any awful.placement func
 		vertical_layout = true, -- from top to bottom
 		width = 20, -- chars
+		width_strategy = "min", -- min | max | exact
 		padding = {
 			top = dpi(5),
 			bottom = dpi(5),
@@ -202,9 +203,9 @@ local defaults = {
 		opacity = 1,
 		color_border = nil,
 		header_highlight = {
+			font = "Monospace 20",
 			fg = nil,
 			bg = nil,
-			font = "Monospace 20",
 			bold = true,
 			italic = true,
 		},
@@ -242,6 +243,10 @@ local parameter_options = {
 	hints = {
 		sort = { "group", "id", "key", "nil" },
 		odd_style = { "row", "column", "checkered", "none" },
+	},
+
+	prompt = {
+		width_strategy = { "min", "max", "exact" },
 	},
 
 	echo = {
