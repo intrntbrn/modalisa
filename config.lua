@@ -10,7 +10,7 @@ local unpack = unpack or table.unpack
 
 local defaults = {
 	-- keys
-	root_keys = { "<M-y>" },
+	root_keys = { "<M-a>" },
 	back_keys = { "<BackSpace>" },
 	stop_keys = { "<Escape>" },
 	include_default_keys = true,
