@@ -358,7 +358,9 @@ function popup:update(t)
 				if odd_source then
 					local odd = (odd_source % 2) == 0
 					if odd then
-						bg = util.color_or_luminosity(hopts.color_odd_bg, default_bg)
+						if not entry.is_dummy or hopts.odd_empty then
+							bg = util.color_or_luminosity(hopts.color_odd_bg, default_bg)
+						end
 					end
 				end
 			end

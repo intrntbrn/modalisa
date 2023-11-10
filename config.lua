@@ -9,14 +9,13 @@ local gears = require("gears")
 local unpack = unpack or table.unpack
 
 local defaults = {
-	-- keys
 	root_keys = { "<M-a>" },
 	back_keys = { "<BackSpace>" },
 	stop_keys = { "<Escape>" },
 	include_default_keys = true,
 
 	mode = "hybrid", -- "modal" | "hold" | "hybrid" | "forever"
-	smart_modifiers = true,
+	smart_modifiers = true, -- like smartcase but for all root key modifiers
 	stop_on_unknown_key = false,
 	timeout = 0, -- ms
 	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~",
@@ -107,6 +106,7 @@ local defaults = {
 		opacity = 1,
 		shape = nil,
 		odd_style = "row", -- row  | column | checkered | none
+		odd_empty = true, -- continue odd pattern for empty entries
 		key_aliases = {
 			[" "] = "space",
 			Left = "←",
@@ -129,7 +129,7 @@ local defaults = {
 
 	echo = {
 		enabled = true,
-		show_percentage_as_progressbar = false,
+		show_percentage_as_progressbar = false, -- display 0-1.0 as progressbar
 		placement = "centered",
 		timeout = 1000, -- ms
 		vertical_layout = true,
@@ -222,7 +222,6 @@ local defaults = {
 		opacity = 1,
 	},
 
-	-- awesome
 	awesome = {
 		auto_select_the_only_choice = false,
 		resize_delta = dpi(32),
