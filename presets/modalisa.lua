@@ -68,13 +68,25 @@ local function make_config(cfg)
 	label.color_fg = "nil"
 	label.color_bg = "nil"
 	label.color_border = "nil"
-	prompt.font_header = "nil"
 	prompt.color_border = "nil"
 	prompt.color_bg = "nil"
 	prompt.color_fg = "nil"
-	prompt.color_header_fg = "nil"
 	prompt.color_cursor_fg = "nil"
 	prompt.color_cursor_bg = "nil"
+	prompt.header_highlight.fg = "nil"
+	prompt.header_highlight.bg = "nil"
+
+	if prompt.header_highlight.italic == nil then
+		prompt.header_highlight.italic = false
+	end
+
+	if prompt.header_highlight.bold == nil then
+		prompt.header_highlight.bold = false
+	end
+
+	prompt.header_highlight.bold = true
+	prompt.header_highlight.strikethrough = false
+	prompt.header_highlight.underline = false
 
 	local param_opts = config.get_options()
 	cfg = vim.tbl_deep_extend("force", cfg, param_opts)

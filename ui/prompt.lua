@@ -13,17 +13,20 @@ local popup = {}
 local prompt
 
 ---@diagnostic disable-next-line: unused-local
-local function make_textbox(popts, text, font, fg, width)
+local function make_textbox(opts, text, font)
+	local popts = opts.prompt
+	local hl_header = popts.header_highlight
+	local fg = hl_header.fg or opts.theme.accent
+	local markup = util.apply_highlight(text, hl_header)
 	local tb = wibox.widget.base.make_widget_declarative({
 		{
-			markup = util.markup.fg(text, fg),
+			markup = util.markup.fg(markup, fg),
 			font = font,
 			valign = "center",
 			halign = "center",
 			widget = wibox.widget.textbox,
 		},
 		forced_height = beautiful.get_font_height(font),
-		forced_width = width,
 		strategy = "exact",
 		widget = wibox.container.constraint,
 	})
@@ -32,16 +35,16 @@ end
 
 local function make_prompt(opts, header_text)
 	local popts = opts.prompt
-	local font = popts.font
-	local font_header = popts.font_header or font
-	local fg_header = popts.color_header_fg or opts.theme.accent
+	local hl_header = popts.header_highlight
 
-	local font_width = dpi(math.max(util.get_font_width(font), util.get_font_width(font_header)))
+	local default_font = popts.font
+	local font = hl_header.font or default_font
+	local font_width = dpi(math.max(util.get_font_width(default_font), util.get_font_width(font)))
 	local width = font_width * popts.width
 
 	local tb_header
 	if header_text and string.len(header_text) > 0 then
-		tb_header = make_textbox(popts, header_text, font_header, fg_header, width)
+		tb_header = make_textbox(opts, header_text, font)
 	end
 
 	local layout

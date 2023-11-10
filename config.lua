@@ -130,9 +130,9 @@ local defaults = {
 	echo = {
 		enabled = true,
 		show_percentage_as_progressbar = false, -- display 0-1.0 as progressbar
-		placement = "centered",
+		placement = "centered", -- or any awful.placement func
 		timeout = 1000, -- ms
-		vertical_layout = true,
+		vertical_layout = true, -- from top to bottom
 		entry_width = 20, -- chars
 		entry_width_strategy = "exact", -- min | max | exact
 		padding = {
@@ -187,8 +187,8 @@ local defaults = {
 	},
 
 	prompt = {
-		placement = "centered",
-		vertical_layout = true,
+		placement = "centered", -- or any awful.placement func
+		vertical_layout = true, -- from top to bottom
 		width = 20, -- chars
 		padding = {
 			top = dpi(5),
@@ -197,15 +197,20 @@ local defaults = {
 			right = dpi(5),
 		},
 		spacing = 0,
-		font = "Monospace 20",
-		font_header = nil,
 		border_width = beautiful.border_width or dpi(1),
 		shape = nil,
 		opacity = 1,
 		color_border = nil,
+		header_highlight = {
+			fg = nil,
+			bg = nil,
+			font = "Monospace 20",
+			bold = true,
+			italic = true,
+		},
+		font = "Monospace 20",
 		color_bg = nil,
 		color_fg = nil,
-		color_header_fg = nil,
 		color_cursor_fg = nil,
 		color_cursor_bg = nil,
 	},
