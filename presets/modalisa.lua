@@ -65,9 +65,13 @@ local function make_config(cfg)
 	hints.highlight.separator.underline = false
 	hints.highlight.separator.strikethrough = false
 
-	label.color_fg = "nil"
-	label.color_bg = "nil"
+	label.highlight.fg = "nil"
+	label.highlight.bg = "nil"
+	label.highlight.underline = false
+	label.highlight.strikethrough = false
+	label.highlight.italic = false
 	label.color_border = "nil"
+
 	prompt.color_border = "nil"
 	prompt.color_bg = "nil"
 	prompt.color_fg = "nil"

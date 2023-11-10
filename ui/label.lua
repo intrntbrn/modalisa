@@ -1,6 +1,7 @@
 local awful = require("awful")
 local wibox = require("wibox")
 local config = require("modalisa.config")
+local util = require("modalisa.util")
 
 local M = {}
 local popup = {}
@@ -43,14 +44,16 @@ end
 function popup:set(text, placement, opts)
 	local lopts = opts.label
 	local widget = self.popup.widget
+	local highlight = lopts.highlight
+
 	local bg = widget:get_children_by_id("background")[1]
 	local tb = widget:get_children_by_id("textbox")[1]
 
-	tb.markup = text
-	tb.font = lopts.font
+	tb.markup = util.apply_highlight(text, highlight)
+	tb.font = highlight.font
 
-	bg.fg = lopts.color_fg or opts.theme.bg
-	bg.bg = lopts.color_bg or opts.theme.accent
+	bg.fg = highlight.fg or opts.theme.bg
+	bg.bg = highlight.bg or opts.theme.accent
 	bg.forced_width = lopts.width
 	bg.forced_height = lopts.height
 	bg.border_color = lopts.color_border or opts.theme.border

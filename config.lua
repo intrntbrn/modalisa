@@ -217,15 +217,18 @@ local defaults = {
 	},
 
 	label = {
-		font = "Monospace 40",
 		shape = gears.shape.rounded_rect,
 		border_width = beautiful.border_width or dpi(1),
-		color_bg = nil,
-		color_fg = nil,
 		color_border = nil,
 		width = dpi(100),
 		height = dpi(100),
 		opacity = 1,
+		highlight = {
+			font = "Monospace 40",
+			bg = nil,
+			fg = nil,
+			bold = true,
+		},
 	},
 
 	awesome = {
