@@ -302,10 +302,7 @@ function M.client_swap_picker()
 		group = "client.swap",
 		is_menu = true,
 		opts = {
-			hints = {
-				enabled = false,
-			},
-			labels = "asdfertgcvjkluionmb",
+			labels = util.labels_qwerty,
 		},
 		cond = function()
 			return client.focus
