@@ -1,12 +1,9 @@
 # ⌨️ modalisa 🎨
 
 `modalisa` is a hybrid modal keymap framework for awesomewm.
-It comes with a preconfigured keymap that includes all default awesomewm
-controls (and a lot more), but can also be used for all kinds of applications.
-It is designed to combine best of both traditional and modal input modes while
-also looking pretty.
+It combines the best of both traditional and modal input modes while also providing a visually appealing interface.
 
-Traditional input modes, such as default awesomewm, often require
+Traditional input modes in tiling window managers often require
 complex keymaps that involve pressing multiple modifiers simultaneously
 due to limited keyspace. Additionally, users have to rely on their memory or
 unpractical cheatsheets as there are no key suggestions while typing.
@@ -15,14 +12,13 @@ but can become cumbersome when repeating actions. Users either have to
 repeat the entire sequence or specify a count beforehand, making the process
 inefficient.
 
-`modalisa` addresses these shortcomings by keeping track of modifier states to
-provide a set of distinct input modes that can be tailored exactly to the user's
-needs for each key and at every stage of the sequence individually.
-It allows for traditional keybinds for common operations that can be repeated by holding
-down the modifier, while also enabling users to tap the modifier (like a
-leader key) to enter modal mode followed by a key sequence for less common
-commands. This flexibility makes it possible to transition into a more modal-esque
-keymap gradually without having to relearn most of the awesomewm controls.
+`modalisa` addresses these shortcomings by providing a flexible hybrid approach.
+It keeps track of modifier states to provide distinct input modes that can be tailored to the user's needs for each key and at every stage of the sequence individually.
+It allows for traditional keybinds for common operations that can be repeated by holding down the modifier,
+while also enabling users to tap the modifier (like a leader key) to enter modal mode followed by a key sequence for less common commands.
+This flexibility makes it possible to transition into a more modal-esque keymap gradually without having to relearn most of the awesomewm controls.
+
+In addition, `modalisa` comes with a preconfigured default keymap that includes improved default awesomewm controls (and a lot more) to provide a starting point and to give an overview about the possibilities using this framework.
 
 ## ✨ Features
 
@@ -54,7 +50,7 @@ keymap gradually without having to relearn most of the awesomewm controls.
 		cond = function()
 			return awful.screen.focused().selected_tag.index > 1
 		end,
-		fn = function(opts)
+		function(opts)
 			local dynamic_menu = {
 				y = {
 					desc = function()
@@ -98,7 +94,7 @@ require("modalisa").setup({
 	stop_keys = { "<Escape>" },
 	mode = "hybrid",
 	include_default_keys = true,
-	-- use these colors or define your own if auto generated theme is bad
+	-- try the auto-generated theme first
 	theme = {
 		-- fg = "#eceffc",
 		-- bg = "#24283B",
@@ -115,14 +111,15 @@ require("modalisa").setup({
 
 `cp ~/.config/awesome/modalisa/keys.lua ~/.config/awesome/modalisa_keys.lua`
 
-2. Disable the default keymap by setting `include_default_keys = false`.
+2. Disable the default keymap by setting `include_default_keys = false` on
+   setup.
 
 3. Edit the copy. The keymap will be imported automatically when awesomewm
    starts.
 
 ## ⚙️ Configuration
 
-Most configuration options (`opts`) can be explored interactively by pressing `i` on the
+Most configuration options can be explored interactively by pressing `i` on the
 default keymap.
 
 <details><summary>Default Settings</summary>
@@ -140,10 +137,10 @@ default keymap.
 Keymaps are organized and represented using hierarchical tree structures.
 Each key is stored as a node in the tree.
 When a character is input, the tree is traversed to find the corresponding key.
-If there no possible successors, the key's function is executed.
+If a node has been found and there are no possible successors (leaf), the key's function is executed.
 Users can also use a specific key (by default, `BackSpace`) to go back a level in the tree.
 
-The tree structure implements property inheritance, which means that options (`opts`) defined at a higher level in the tree will be inherited by child keys, unless overridden.
+The tree structure implements property inheritance, which means that options (`opts`) defined at a higher level in the tree will be inherited by the successor keys, unless overridden.
 This provides a convenient way to define common options for groups of keys without repeating them for each individual key.
 
 By default, the keymap is stored in the root tree, which is accessed by pressing the keybind defined in `root_keys` during setup.
@@ -169,23 +166,23 @@ The keys itself can also override the behaviour by explicitly setting a `continu
 
 Keys can be configured by using the following properties:
 
-| Property    | Type                 | Description                                                                                                                                                  |
-| ----------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (`seq`)     | string               | The sequence of keys to be pressed.                                                                                                                          |
-| (`fn`)      | function(opts, tree) | The function to be executed when the key sequence has been entered. If the key has successors it will only be executed if a timeout occurs (similar to vim). |
-| `desc`      | string, function     | Provides a brief description of the key.                                                                                                                     |
-| `opts`      | table                | Specifies custom options for the key that will be merged with options from predecessors.                                                                     |
-| `cond`      | function(opts)       | A condition that determines whether the key is active (nil means it is always active)                                                                        |
-| `group`     | string               | Assigns the key to a group, used for sorting purposes.                                                                                                       |
-| `global`    | string, boolean      | Creates a global keybinding in awesomewm to run the key's function (e.g. "\<M-a\>"). If set to true, the key sequence will be used as the global keybinding. |
-| `continue`  | boolean              | Forces continuation after executing the key's function regardless of the current input mode.                                                                 |
-| `hidden`    | boolean              | Hides the key in hints.                                                                                                                                      |
-| `is_menu`   | boolean              | Marks the key explicitly as a menu, even if it has no successsors (purely cosmetic, used for dynamic menus).                                                 |
-| `temp`      | boolean              | Marks the key as temporary, indicating that it is dynamically created and only available for a single use.                                                   |
-| `highlight` | table                | Custom attributes to display the key in hints (font, fg, bg, bold, italic, underline, strikethrough, etc.)                                                   |
-| `on_enter`  | function(opts, tree) | The function to be executed before the main function (init).                                                                                                 |
-| `on_leave`  | function(opts, tree) | The function to be executed after the main function (cleanup).                                                                                               |
-| `result`    | table                | Specifies the results or notifications to be shown after executing the key's function (e.g. { volume = 0.5 }).                                               |
+| Property    | Type                 | Description                                                                                                                                                                                                                                                  |
+| ----------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (`seq`)     | string               | The sequence of keys to be pressed.                                                                                                                                                                                                                          |
+| (`fn`)      | function(opts, tree) | The function to be executed when the key sequence has been entered. If the key has successors it will only be executed if a timeout occurs (similar to vim). Successor keys can get dynamically created by returning a table containing the key definitions. |
+| `desc`      | string, function     | Provides a brief description of the key.                                                                                                                                                                                                                     |
+| `opts`      | table                | Specifies custom options for the key that will be merged with options from predecessors.                                                                                                                                                                     |
+| `cond`      | function(opts)       | A condition that determines whether the key is active (nil means it is always active)                                                                                                                                                                        |
+| `group`     | string               | Assigns the key to a group, used for sorting purposes.                                                                                                                                                                                                       |
+| `global`    | string, boolean      | Creates a global keybinding in awesomewm to run the key's function (e.g. "\<M-a\>"). If set to true, the key sequence will be used as the global keybinding.                                                                                                 |
+| `continue`  | boolean              | Forces continuation after executing the key's function regardless of the current input mode.                                                                                                                                                                 |
+| `hidden`    | boolean              | Hides the key in hints.                                                                                                                                                                                                                                      |
+| `highlight` | table                | Custom attributes to display the key in hints (font, fg, bg, bold, italic, underline, strikethrough, etc.)                                                                                                                                                   |
+| `is_menu`   | boolean              | Marks the key explicitly as a menu, even if it has no successsors (purely cosmetic, used for dynamic menus).                                                                                                                                                 |
+| `temp`      | boolean              | Marks the key as temporary, indicating that it is dynamically created and only available for a single use.                                                                                                                                                   |
+| `on_enter`  | function(opts, tree) | The function to be executed before the main function (init).                                                                                                                                                                                                 |
+| `on_leave`  | function(opts, tree) | The function to be executed after the main function (cleanup).                                                                                                                                                                                               |
+| `result`    | table                | Specifies the results or notifications to be shown after executing the key's function (e.g. { volume = 0.5 }).                                                                                                                                               |
 
 ### 📢 Signals
 

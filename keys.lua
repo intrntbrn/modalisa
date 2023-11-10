@@ -5,6 +5,9 @@ local util = require("modalisa.util")
 
 local M = {}
 
+-- NOTE:
+-- presets can be overwritten by using the + operator
+
 local keys = {
 	["."] = nil,
 	[","] = nil,
