@@ -1014,8 +1014,11 @@ end
 
 function M.tag_toggle_policy()
 	return mt({
-		group = "tag.policy",
-		desc = "toggle tag fill policy",
+		group = "tag.property.policy",
+		desc = "fill policy toggle",
+		cond = function()
+			return awful.screen.focused().selected_tag
+		end,
 		result = { fill_policty = helper.get_current_tag_master_fill_policy },
 		fn = function()
 			local s = awful.screen.focused()
@@ -1024,6 +1027,58 @@ function M.tag_toggle_policy()
 				return
 			end
 			awm.tag_toggle_fill_policy(t)
+		end,
+	})
+end
+
+function M.tag_toggle_volatile()
+	return mt({
+		group = "tag.property.volatile",
+		desc = function(opts)
+			local t = awful.screen.focused().selected_tag
+			if not t then
+				return "volatile toggle"
+			end
+			if t.volatile then
+				return "volatile" .. " " .. opts.toggle_true
+			end
+			return "volatile" .. " " .. opts.toggle_false
+		end,
+		result = { volatile = helper.get_current_tag_volatile },
+		fn = function()
+			local s = awful.screen.focused()
+			local t = s.selected_tag
+			if not t then
+				return
+			end
+
+			t.volatile = not t.volatile
+		end,
+	})
+end
+
+function M.tag_toggle_gap_single_client()
+	return mt({
+		group = "tag.property.gap.single",
+		desc = function(opts)
+			local t = awful.screen.focused().selected_tag
+			if not t then
+				return "gap single client toggle"
+			end
+			if t.gap_single_client then
+				return "gap single client" .. " " .. opts.toggle_true
+			end
+			return "gap single client" .. " " .. opts.toggle_false
+		end,
+		result = { gap_single_client = helper.get_current_tag_gap_single_client },
+		fn = function()
+			local s = awful.screen.focused()
+			local t = s.selected_tag
+			if not t then
+				return
+			end
+
+			t.gap_single_client = not t.gap_single_client
 		end,
 	})
 end
@@ -1137,13 +1192,43 @@ end
 
 function M.tag_rename()
 	return mt({
+		group = "tag.rename",
 		desc = "rename tag",
+		cond = function()
+			return awful.screen.focused().selected_tag
+		end,
 		function(opts)
 			local fn = function(s)
 				awful.tag.selected().name = s
 			end
 			local initial = awful.tag.selected().name
 			local header = "rename tag:"
+			require("modalisa.ui.prompt").run(fn, initial, header, opts)
+		end,
+	})
+end
+
+function M.tag_gap()
+	return mt({
+		group = "tag.gap",
+		desc = "set tag gap",
+		cond = function()
+			return awful.screen.focused().selected_tag
+		end,
+		function(opts)
+			local t = awful.screen.focused().selected_tag
+			if not t then
+				return
+			end
+			local fn = function(s)
+				local gap = tonumber(s)
+				if not gap then
+					return
+				end
+				t.gap = gap
+			end
+			local initial = t.gap
+			local header = "tag gap"
 			require("modalisa.ui.prompt").run(fn, initial, header, opts)
 		end,
 	})
@@ -1199,6 +1284,14 @@ end
 
 function helper.get_current_tag_master_fill_policy()
 	return awful.screen.focused().selected_tag.master_fill_policy
+end
+
+function helper.get_current_tag_volatile()
+	return awful.screen.focused().selected_tag.volatile
+end
+
+function helper.get_current_tag_gap_single_client()
+	return awful.screen.focused().selected_tag.gap_single_client
 end
 
 function helper.get_current_tag_gap()
