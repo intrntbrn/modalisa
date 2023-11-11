@@ -12,6 +12,7 @@ local keys = {
 	["."] = nil,
 	[","] = nil,
 	[";"] = nil,
+	["r"] = nil,
 	["y"] = nil,
 	["q"] = nil,
 	["g"] = nil,
@@ -110,6 +111,9 @@ local keys = {
 	["tr"] = ps.tag_rename(),
 	["tn"] = { desc = "new tag" }, -- TODO
 	["tp"] = ps.tag_toggle_policy(),
+	["tv"] = ps.tag_toggle_volatile(),
+	["tg"] = ps.tag_gap(),
+	["ts"] = ps.tag_toggle_gap_single_client(),
 	["tt"] = ps.tag_toggle_menu() + { opts = { hints = { enabled = true, delay = 0 } } },
 	["ta"] = ps.tag_move_all_clients_to_tag_menu() + { opts = { hints = { enabled = true, delay = 0 } } },
 	["t<Left>"] = ps.tag_previous() + { continue = true },
@@ -125,18 +129,13 @@ local keys = {
 	["t8"] = ps.tag_move_focused_client_to_tag(8),
 	["t9"] = ps.tag_move_focused_client_to_tag(9),
 	["t0"] = ps.tag_move_focused_client_to_tag(10),
-
-	-- layout
-	["r"] = { desc = "layout", group = "menu.layout" },
-	["r "] = ps.layout_select_menu() + { opts = { labels = util.labels_qwerty } },
-	["r<Left>"] = ps.layout_prev() + { continue = true },
-	["r<Right>"] = ps.layout_next() + { continue = true },
-	["rk"] = ps.layout_master_width_increase() + { continue = true },
-	["rj"] = ps.layout_master_width_decrease() + { continue = true },
-	["rl"] = ps.layout_master_count_increase() + { continue = true },
-	["rh"] = ps.layout_master_count_decrease() + { continue = true },
-	["rL"] = ps.layout_column_count_increase() + { continue = true },
-	["rH"] = ps.layout_column_count_decrease() + { continue = true },
+	["t "] = ps.layout_select_menu() + { opts = { labels = util.labels_qwerty } },
+	["tk"] = ps.layout_master_width_increase() + { continue = true },
+	["tj"] = ps.layout_master_width_decrease() + { continue = true },
+	["tl"] = ps.layout_master_count_increase() + { continue = true },
+	["th"] = ps.layout_master_count_decrease() + { continue = true },
+	["tc"] = ps.layout_column_count_increase() + { continue = true },
+	["tC"] = ps.layout_column_count_decrease() + { continue = true },
 
 	-- client
 	["c"] = { desc = "client", group = "menu.client" },
