@@ -155,7 +155,13 @@ end
 
 local function generate_boolean_toggle(param, root_config, sub_config)
 	return {
-		desc = string.format("toggle %s", param),
+		desc = function(opts)
+			if sub_config[param] then
+				return param .. " " .. opts.toggle_true
+			end
+			return param .. " " .. opts.toggle_false
+		end,
+
 		fn = function(_, tree)
 			local current_value = sub_config[param]
 			if current_value then

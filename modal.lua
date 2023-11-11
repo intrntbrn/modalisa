@@ -5,7 +5,6 @@ local M = {}
 -- beautiful menu
 -- fix default clienting floating resize (resize modes)
 -- event names
--- toggle desc symbols
 
 local awful = require("awful")
 local lib = require("modalisa.lib")

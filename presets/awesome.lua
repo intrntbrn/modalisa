@@ -10,14 +10,11 @@ local M = {}
 local helper = {}
 
 -- TODO: placement
--- new tag, rename, gap
+-- new tag, gap
 -- screen (awful.screen.focus_relative(-1), c:move_to_screen())
--- wallpaper example
 -- client: border_width, skip taskbar, hidden, hide bar
 -- urgent
--- resume menu
 -- resize modes
--- run(true is hotkey)
 
 function M.awesome_help()
 	return mt({
@@ -325,15 +322,15 @@ end
 function M.client_focus_toggle_fullscreen()
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			local c = client.focus
 			if not c then
-				return "toggle fullscreen"
+				return "fullscreen toggle"
 			end
 			if c.fullscreen then
-				return "unfullscreen"
+				return "fullscreen" .. " " .. opts.toggle_true
 			end
-			return "fullscreen"
+			return "fullscreen" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return client.focus
@@ -348,14 +345,14 @@ function M.client_toggle_fullscreen(c)
 	assert(c)
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			if not c then
-				return "toggle fullscreen"
+				return "fullscreen toggle"
 			end
 			if c.fullscreen then
-				return "unfullscreen"
+				return "fullscreen" .. " " .. opts.toggle_true
 			end
-			return "fullscreen"
+			return "fullscreen" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return c and c.valid
@@ -369,15 +366,15 @@ end
 function M.client_focus_toggle_maximize()
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			local c = client.focus
 			if not c then
-				return "toggle maximize"
+				return "maximize toggle"
 			end
 			if c.maximized then
-				return "unmaximize"
+				return "maximize" .. " " .. opts.toggle_true
 			end
-			return "maximize"
+			return "maximize" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return client.focus
@@ -392,14 +389,14 @@ function M.client_toggle_maximize(c)
 	assert(c)
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			if not c then
-				return "toggle maximize"
+				return "maximize toggle"
 			end
 			if c.maximized then
-				return "unmaximize"
+				return "maximize" .. " " .. opts.toggle_true
 			end
-			return "maximize"
+			return "maximize" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return c and c.valid
@@ -413,15 +410,15 @@ end
 function M.client_focus_toggle_sticky()
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			local c = client.focus
 			if not c then
-				return "toggle sticky"
+				return "sticky toggle"
 			end
 			if c.sticky then
-				return "unsticky"
+				return "sticky" .. " " .. opts.toggle_true
 			end
-			return "sticky"
+			return "sticky" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return client.focus
@@ -436,14 +433,14 @@ function M.client_toggle_sticky(c)
 	assert(c)
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			if not c then
-				return "toggle sticky"
+				return "sticky toggle"
 			end
 			if c.sticky then
-				return "unsticky"
+				return "sticky" .. " " .. opts.toggle_true
 			end
-			return "sticky"
+			return "sticky" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return c and c.valid
@@ -457,15 +454,15 @@ end
 function M.client_focus_toggle_maximize_horizontally()
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			local c = client.focus
 			if not c then
-				return "toggle maximize horizontally"
+				return "maximize horizontal toggle"
 			end
 			if c.maximized_horizontal then
-				return "unmaximize horizontally"
+				return "maximize horizontal" .. " " .. opts.toggle_true
 			end
-			return "maximize horizontally"
+			return "maximize horizontal" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return client.focus
@@ -480,14 +477,14 @@ function M.client_toggle_maximize_horizontally(c)
 	assert(c)
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			if not c then
-				return "toggle maximize horizontally"
+				return "maximize horizontal toggle"
 			end
 			if c.maximized_horizontal then
-				return "unmaximize horizontally"
+				return "maximize horizontal" .. " " .. opts.toggle_true
 			end
-			return "maximize horizontally"
+			return "maximize horizontal" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return c and c.valid
@@ -501,15 +498,15 @@ end
 function M.client_focus_toggle_maximize_vertically()
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			local c = client.focus
 			if not c then
-				return "toggle maximize vertically"
+				return "maximize vertical toggle"
 			end
 			if c.maximized_vertical then
-				return "unmaximize vertically"
+				return "maximize vertical" .. " " .. opts.toggle_true
 			end
-			return "maximize vertically"
+			return "maximize vertical" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return client.focus
@@ -524,14 +521,14 @@ function M.client_toggle_maximize_vertically(c)
 	assert(_)
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			if not c then
-				return "toggle maximize vertically"
+				return "maximize vertical toggle"
 			end
 			if c.maximized_vertical then
-				return "unmaximize vertically"
+				return "maximize vertical" .. " " .. opts.toggle_true
 			end
-			return "maximize vertically"
+			return "maximize vertical" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return c and c.valid
@@ -545,15 +542,15 @@ end
 function M.client_focus_toggle_floating()
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			local c = client.focus
 			if not c then
-				return "toggle floating"
+				return "floating toggle"
 			end
 			if c.floating then
-				return "unfloating"
+				return "floating" .. " " .. opts.toggle_true
 			end
-			return "floating"
+			return "floating" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return client.focus
@@ -568,14 +565,14 @@ function M.client_toggle_floating(c)
 	assert(c)
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			if not c then
-				return "toggle floating"
+				return "floating toggle"
 			end
 			if c.floating then
-				return "unfloating"
+				return "floating" .. " " .. opts.toggle_true
 			end
-			return "floating"
+			return "floating" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return c and c.valid
@@ -589,15 +586,15 @@ end
 function M.client_focus_toggle_ontop()
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			local c = client.focus
 			if not c then
-				return "toggle ontop"
+				return "ontop toggle"
 			end
 			if c.ontop then
-				return "ontop disable"
+				return "ontop" .. " " .. opts.toggle_true
 			end
-			return "ontop"
+			return "ontop" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return client.focus
@@ -612,14 +609,14 @@ function M.client_toggle_ontop(c)
 	assert(c)
 	return mt({
 		group = "client.property",
-		desc = function()
+		desc = function(opts)
 			if not c then
-				return "toggle ontop"
+				return "ontop top"
 			end
 			if c.ontop then
-				return "ontop disable"
+				return "ontop" .. " " .. opts.toggle_true
 			end
-			return "ontop"
+			return "ontop" .. " " .. opts.toggle_false
 		end,
 		cond = function()
 			return c and c.valid

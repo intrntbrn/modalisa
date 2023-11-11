@@ -21,6 +21,9 @@ local defaults = {
 	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~",
 	ignore_shift_state_for_special_characters = true,
 
+	toggle_false = "on", -- "", "", "toggle", "on"
+	toggle_true = "off", -- "", -"", "toggle", "off"
+
 	theme = {
 		fg = beautiful.fg_focus or "#eceffc",
 		bg = beautiful.bg_focus or "#24283B",
