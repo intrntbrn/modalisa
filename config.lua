@@ -137,6 +137,7 @@ local defaults = {
 		timeout = 1000, -- ms
 		align_vertical = true, -- key above value
 		vertical_layout = false, -- kvs from top to bottom
+		sort = true,
 
 		entry_width = 20, -- chars
 		entry_width_strategy = "exact", -- min | max | exact

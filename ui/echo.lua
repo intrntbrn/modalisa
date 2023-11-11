@@ -145,7 +145,13 @@ local function create_widget(opts, kvs)
 	local eopts = opts.echo
 	local widgets = {}
 	local i = 1
-	for _, kv in ipairs(kvs) do
+
+	local iter = pairs
+	if eopts.sort then
+		iter = vim.spairs
+	end
+
+	for _, kv in iter(kvs) do
 		local k = kv.key
 		local v = kv.value
 
