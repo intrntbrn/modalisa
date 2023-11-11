@@ -135,14 +135,16 @@ local defaults = {
 		show_percentage_as_progressbar = false, -- display 0-1.0 as progressbar
 		placement = "centered", -- or any awful.placement func
 		timeout = 1000, -- ms
-		vertical_layout = true, -- from top to bottom
+		align_vertical = true, -- key above value
+		vertical_layout = false, -- kvs from top to bottom
+
 		entry_width = 20, -- chars
 		entry_width_strategy = "exact", -- min | max | exact
 		padding = {
-			top = dpi(5),
-			bottom = dpi(5),
-			left = dpi(5),
-			right = dpi(5),
+			top = dpi(3),
+			bottom = dpi(3),
+			left = dpi(3),
+			right = dpi(3),
 		},
 		spacing = 0,
 		border_width = beautiful.border_width or dpi(1),
@@ -179,7 +181,7 @@ local defaults = {
 				top = dpi(5),
 				bottom = dpi(5),
 			},
-			paddings = {
+			padding = {
 				left = 0,
 				right = 0,
 				top = 0,

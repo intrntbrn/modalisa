@@ -50,7 +50,7 @@ local function create_progressbar(value, opts, _, highlight, width)
 			border_width = popts.border_width,
 			bar_border_width = popts.bar_border_width,
 			margins = popts.margin,
-			paddings = popts.paddings,
+			paddings = popts.padding,
 			opacity = popts.opacity,
 			widget = wibox.widget.progressbar,
 		},
@@ -105,7 +105,7 @@ local function create_key_value_widget(opts, key, value)
 	end
 
 	local layout
-	if eopts.vertical_layout then
+	if eopts.align_vertical then
 		layout = wibox.layout.fixed.vertical({})
 	else
 		layout = wibox.layout.fixed.horizontal({})
@@ -117,12 +117,20 @@ local function create_key_value_widget(opts, key, value)
 
 	local base = wibox.widget.base.make_widget_declarative({
 		{
-			tb_key,
+			{
+				tb_key,
+				margin = eopts.padding,
+				widget = wibox.container.margin,
+			},
 			bg = bg_key,
 			widget = wibox.container.background,
 		},
 		{
-			tb_value,
+			{
+				tb_value,
+				margin = eopts.padding,
+				widget = wibox.container.margin,
+			},
 			bg = bg_value,
 			widget = wibox.container.background,
 		},
@@ -142,20 +150,15 @@ local function create_widget(opts, kvs)
 		local v = kv.value
 
 		local tb = create_key_value_widget(opts, k, v)
-		local base = wibox.widget.base.make_widget_declarative({
-			tb,
-			margins = eopts.padding,
-			widget = wibox.container.margin,
-		})
-		table.insert(widgets, base)
+		table.insert(widgets, tb)
 		i = i + 1
 	end
 
 	local layout
 	if eopts.vertical_layout then
-		layout = wibox.layout.fixed.horizontal({})
-	else
 		layout = wibox.layout.fixed.vertical({})
+	else
+		layout = wibox.layout.fixed.horizontal({})
 	end
 
 	for _, kv in ipairs(widgets) do
@@ -247,6 +250,7 @@ end
 
 local function run(kvs, opts)
 	opts = config.get_config(opts)
+	---@diagnostic disable-next-line: need-check-nil
 	local eopts = opts.echo
 
 	local list = transform(kvs)
