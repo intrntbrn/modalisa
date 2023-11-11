@@ -11,6 +11,22 @@ local glib = require("lgi").GLib
 M.labels_qwerty = "asdfghjklwertyuiozxcvbnmpqASDFGHJKLQWERTYUIOPZXCVBNM1234567890!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~"
 M.labels_numericalpha = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~"
 
+function M.find_index(name, tbl, labels)
+	local first_char = string.sub(name, 1, 1)
+	if not tbl[first_char] then
+		return first_char
+	end
+
+	for i = 1, string.len(labels) do
+		local c = string.sub(labels, i, i)
+		if not tbl[c] then
+			return c
+		end
+	end
+
+	error("unable to find index")
+end
+
 function M.merge_opts(a, b)
 	if not b then
 		return vim.deepcopy(a)
