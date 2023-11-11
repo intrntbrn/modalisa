@@ -1,5 +1,6 @@
 local awful = require("awful")
 local util = require("modalisa.util")
+local vim = require("modalisa.lib.vim")
 local awm = require("modalisa.awesome")
 local mt = require("modalisa.presets.metatable")
 local label = require("modalisa.ui.label")
@@ -10,7 +11,7 @@ local M = {}
 local helper = {}
 
 -- TODO: placement
--- new tag, gap
+-- new tag
 -- screen (awful.screen.focus_relative(-1), c:move_to_screen())
 -- client: border_width, skip taskbar, hidden, hide bar
 -- urgent
@@ -1186,6 +1187,58 @@ function M.tag_last()
 		end,
 		fn = function()
 			awful.tag.history.restore()
+		end,
+	})
+end
+
+function M.tag_new()
+	return mt({
+		group = "tag.new",
+		desc = "new tag",
+		function(opts)
+			local fn = function(name)
+				awful.tag
+					.add(name, {
+						screen = awful.screen.focused(),
+					})
+					:view_only()
+			end
+			local initial = ""
+			local header = "tag name:"
+			require("modalisa.ui.prompt").run(fn, initial, header, opts)
+		end,
+	})
+end
+
+function M.tag_new_copy()
+	return mt({
+		group = "tag.new.copy",
+		desc = "new tag copy",
+		cond = function()
+			return awful.screen.focused().selected_tag
+		end,
+		function(opts)
+			local t = awful.screen.focused().selected_tag
+			local fn = function(name)
+				awful.tag
+					.add(name, {
+						screen = awful.screen.focused(),
+						layout = t.layout,
+						layouts = vim.deepcopy(t.layouts),
+						gap = t.gap,
+						icon = t.icon,
+						volatile = t.volatile,
+						gap_single_client = t.gap_single_client,
+						master_width_factor = t.master_width_factor,
+						master_count = t.master_count,
+						column_count = t.column_count,
+						master_fill_policy = t.master_fill_policy,
+					})
+					:view_only()
+			end
+			local initial = ""
+			local header = "tag name:"
+			require("modalisa.ui.prompt").run(fn, initial, header, opts)
 		end,
 	})
 end

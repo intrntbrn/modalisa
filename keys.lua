@@ -109,7 +109,8 @@ local keys = {
 	["t"] = { desc = "tag", group = "menu.tag" },
 	["tD"] = ps.tag_delete(),
 	["tr"] = ps.tag_rename(),
-	["tn"] = { desc = "new tag" }, -- TODO
+	["tn"] = ps.tag_new(),
+	["tN"] = ps.tag_new_copy(),
 	["tp"] = ps.tag_toggle_policy(),
 	["tv"] = ps.tag_toggle_volatile(),
 	["tg"] = ps.tag_gap(),
