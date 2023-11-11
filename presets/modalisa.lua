@@ -104,8 +104,11 @@ local function generate_option_list(param, value, root_config, sub_config, label
 		fn = function(_)
 			local param_options = {}
 			for _, v in vim.spairs(value) do
-				local idx = util.find_index(v, param_options, labels)
-				param_options[idx] = {
+				local index = util.find_index(v, param_options, labels)
+				if not index then
+					break
+				end
+				param_options[index] = {
 					desc = string.format("%s", v),
 					fn = function(_, t)
 						sub_config[param] = v
@@ -124,6 +127,9 @@ local function generate_sub_menu(param, value, root_config, sub_config, labels)
 	local subconfig = sub_config[param]
 	for k, v in vim.spairs(value) do
 		local index = util.find_index(k, entries, labels)
+		if not index then
+			break
+		end
 		local entry = M.generate_entry(k, v, root_config, subconfig, labels)
 		entries[index] = entry
 	end
@@ -240,6 +246,9 @@ function M.generate()
 
 			for param, template in vim.spairs(cfg) do
 				local index = util.find_index(param, entries, labels)
+				if not index then
+					break
+				end
 				local entry = M.generate_entry(param, template, root_config, root_config, labels)
 				entries[index] = entry
 			end
