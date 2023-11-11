@@ -190,7 +190,8 @@ function M.power_shutdown_timer()
 				awful.spawn(cmd)
 				require("modalisa.ui.echo").show_simple("shutdown", string.format("in %d minutes", min))
 			end
-			awesome.emit_signal("modalisa::prompt", fn, initial, header, opts)
+
+			require("modalisa.ui.prompt").run(fn, initial, header, opts)
 		end,
 	})
 end

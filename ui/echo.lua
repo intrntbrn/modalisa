@@ -310,11 +310,6 @@ function M.setup(opts)
 
 	popup:init(opts)
 
-	---@diagnostic disable-next-line: redefined-local
-	awesome.connect_signal("modalisa::echo", function(kvs, opts)
-		run(kvs, opts)
-	end)
-
 	awesome.connect_signal("modalisa::executed", function(tree, result)
 		handle_signal(tree, result)
 	end)

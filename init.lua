@@ -64,17 +64,6 @@ local mt = {
 	end,
 }
 
-local function gen_signals()
-	for k, v in pairs(M) do
-		if type(v) == "function" then
-			local name = string.format("modalisa::%s", k)
-			awesome.connect_signal(name, function(...)
-				v(...)
-			end)
-		end
-	end
-end
-
 local once
 function M.setup(opts)
 	assert(once == nil, "modalisa is already setup")
@@ -101,8 +90,6 @@ function M.setup(opts)
 	if pcall(require, "modalisa_keys") then
 		require("modalisa_keys").setup(opts)
 	end
-
-	gen_signals()
 
 	return setmetatable(M, mt)
 end

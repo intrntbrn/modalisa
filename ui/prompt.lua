@@ -178,11 +178,6 @@ function M.setup(opts)
 	-- create widgets
 	prompt = awful.widget.prompt()
 	popup:init(opts)
-
-	---@diagnostic disable-next-line: redefined-local
-	awesome.connect_signal("modalisa::prompt", function(fn, initial, header, opts)
-		run(fn, initial, header, opts)
-	end)
 end
 
 function M.run(fn, initial, header, opts)
