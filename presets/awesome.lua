@@ -1214,27 +1214,32 @@ function M.tag_new_copy()
 	return mt({
 		group = "tag.new.copy",
 		desc = "new tag copy",
+		opts = { echo = { vertical_layout = true, align_vertical = false } },
 		cond = function()
 			return awful.screen.focused().selected_tag
 		end,
 		function(opts)
 			local t = awful.screen.focused().selected_tag
 			local fn = function(name)
-				awful.tag
-					.add(name, {
-						screen = awful.screen.focused(),
-						layout = t.layout,
-						layouts = vim.deepcopy(t.layouts),
-						gap = t.gap,
-						icon = t.icon,
-						volatile = t.volatile,
-						gap_single_client = t.gap_single_client,
-						master_width_factor = t.master_width_factor,
-						master_count = t.master_count,
-						column_count = t.column_count,
-						master_fill_policy = t.master_fill_policy,
-					})
-					:view_only()
+				local props = {
+					screen = awful.screen.focused(),
+					layout = t.layout,
+					layouts = vim.deepcopy(t.layouts),
+					gap = t.gap,
+					icon = t.icon,
+					volatile = t.volatile,
+					gap_single_client = t.gap_single_client,
+					master_width_factor = t.master_width_factor,
+					master_count = t.master_count,
+					column_count = t.column_count,
+					master_fill_policy = t.master_fill_policy,
+				}
+				awful.tag.add(name, props):view_only()
+				-- don't show these values:
+				props.screen = nil
+				props.layouts = nil
+				props.layout = props.layout.name
+				require("modalisa.ui.echo").show(props, opts)
 			end
 			local initial = ""
 			local header = "tag name:"
