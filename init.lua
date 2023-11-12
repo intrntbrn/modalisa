@@ -71,8 +71,6 @@ function M.setup(opts)
 	config.setup(opts)
 	opts = config.get_config() or {}
 
-	print(dump(opts))
-
 	require("modalisa.root").setup(opts)
 	require("modalisa.modal").setup(opts)
 

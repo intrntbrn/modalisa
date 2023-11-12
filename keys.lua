@@ -158,7 +158,7 @@ local keys = {
 	["cp"] = ps.client_set_property("opacity") + { desc = "opacity" },
 	["cw"] = ps.client_set_property("border_width") + { desc = "border_width" },
 	["cC"] = ps.client_set_property("border_color") + { desc = "border_color" },
-	["ck"] = ps.client_kill() + { desc = "kill", highlight = { desc = { bold = true, fg = "#F7768E" } } },
+	["ck"] = ps.client_kill() + { desc = "kill" },
 	["cu"] = ps.client_unminimize_menu(false) + { desc = "unminize" },
 	["c<Tab>"] = ps.client_focus_prev(),
 	["cs"] = ps.client_swap_master_smart(),

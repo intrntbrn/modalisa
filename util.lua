@@ -212,4 +212,18 @@ function M.run_on_idle(f)
 	glib.idle_add(glib.PRIORITY_DEFAULT_IDLE, f)
 end
 
+function M.scandir(directory)
+	local i, t, popen = 0, {}, io.popen
+	local pfile = popen('ls -a "' .. directory .. '"')
+	if not pfile then
+		return
+	end
+	for filename in pfile:lines() do
+		i = i + 1
+		t[i] = filename
+	end
+	pfile:close()
+	return t
+end
+
 return M
