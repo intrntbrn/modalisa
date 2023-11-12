@@ -10,7 +10,9 @@ local dump = require("modalisa.lib.vim").inspect
 local M = {}
 local helper = {}
 
+-- wallpaper
 -- screen (awful.screen.focus_relative(-1), c:move_to_screen())
+-- screen padding
 -- client: border_width, skip taskbar, hidden, hide bar
 
 local function cond_is_floating()
@@ -758,6 +760,43 @@ function M.client_move_smart(dir)
 		desc = string.format("move client %s", dir),
 		fn = function(opts)
 			awm.client_move_smart(client.focus, dir, opts.awesome.resize_delta)
+		end,
+	})
+end
+
+function M.client_set_property(x)
+	return mt({
+		group = string.format("client.property.%s", x),
+		desc = string.format("client set %s", x),
+		fn = function(opts)
+			local c = client.focus
+			if not c then
+				return
+			end
+			local current_value = c[x]
+			if not current_value then
+				return
+			end
+
+			local is_number = false
+			if type(current_value) == "number" then
+				is_number = true
+			end
+
+			local header = string.format("%s:", x)
+			local initial = current_value
+			local fn = function(str)
+				local value = str
+				if is_number then
+					local number = tonumber(str)
+					if not number then
+						return
+					end
+					value = number
+				end
+				c[x] = value
+			end
+			require("modalisa.ui.prompt").run(fn, initial, header, opts)
 		end,
 	})
 end

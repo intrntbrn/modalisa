@@ -156,6 +156,11 @@ local keys = {
 
 	-- resize floating
 	["r"] = ps.client_resize_floating(),
+	["rf"] = { desc = "fix manual position" },
+	["rfx"] = ps.client_set_property("x") + { desc = "x coordinate" },
+	["rfy"] = ps.client_set_property("y") + { desc = "y coordinate" },
+	["rfw"] = ps.client_set_property("width") + { desc = "width" },
+	["rfh"] = ps.client_set_property("height") + { desc = "height" },
 	["r "] = ps.client_placement("no_offscreen"),
 	["ro"] = ps.client_placement("no_overlap"),
 	["rt"] = { desc = "top placement", group = "placement.top", opts = {} },

@@ -245,20 +245,16 @@ function M.client_unminmize(c)
 end
 
 function M.client_placement(placement)
-	print("client_placement !!!!!")
 	local c = client.focus
 	if not c then
-		print("client_placement !!!!! NO CLIENT")
 		return
 	end
 	local fn = awful.placement[placement]
 	if not fn then
-		print("PLACEMENT DOES NOT EXIST - FIXME: ")
 		return
 	end
 
 	fn(c, { honor_workarea = true })
-	print("PLACEMENT EXECUTED")
 end
 
 function M.client_kill(c)
