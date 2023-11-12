@@ -177,10 +177,10 @@ local defaults = {
 			border_color = nil,
 			bar_border_color = nil,
 			margin = {
-				left = dpi(5),
-				right = dpi(5),
-				top = dpi(5),
-				bottom = dpi(5),
+				left = dpi(8),
+				right = dpi(8),
+				top = dpi(8),
+				bottom = dpi(8),
 			},
 			padding = {
 				left = 0,

@@ -10,12 +10,17 @@ local dump = require("modalisa.lib.vim").inspect
 local M = {}
 local helper = {}
 
--- TODO: placement
--- new tag
 -- screen (awful.screen.focus_relative(-1), c:move_to_screen())
 -- client: border_width, skip taskbar, hidden, hide bar
--- urgent
--- resize modes
+
+local function cond_is_floating()
+	local c = client.focus
+	if not c then
+		return
+	end
+	local layout = awful.layout.get(awful.screen.focused()).name
+	return layout == "floating" or c.floating
+end
 
 function M.awesome_help()
 	return mt({
@@ -757,6 +762,39 @@ function M.client_move_smart(dir)
 	})
 end
 
+function M.client_placement(placement)
+	return mt({
+		group = "client.placement",
+		cond = function()
+			return cond_is_floating()
+		end,
+		desc = string.format("place %s", placement),
+		fn = function()
+			awm.client_placement(placement)
+		end,
+	})
+end
+
+function M.client_resize_mode_floating()
+	return mt({
+		group = "resize.mode",
+		cond = function()
+			return cond_is_floating()
+		end,
+		desc = "resize mode",
+	})
+end
+
+function M.client_resize_floating()
+	return mt({
+		group = "client.resize",
+		cond = function()
+			return cond_is_floating()
+		end,
+		desc = "resize client",
+	})
+end
+
 function M.client_resize_smart(dir)
 	return mt({
 		group = "client.layout.resize",
@@ -781,9 +819,7 @@ function M.client_floating_size_increase(dir)
 	return mt({
 		group = "client.layout.resize",
 		cond = function()
-			local layout = awful.layout.get(awful.screen.focused()).name
-			local c = client.focus
-			return layout == "floating" or c and c.floating and not c.fullscreen
+			return cond_is_floating()
 		end,
 		desc = function()
 			return string.format("increase client size %s", dir)
@@ -801,9 +837,7 @@ function M.client_floating_size_decrease(dir)
 	return mt({
 		group = "client.layout.resize",
 		cond = function()
-			local layout = awful.layout.get(awful.screen.focused()).name
-			local c = client.focus
-			return layout == "floating" or c and c.floating and not c.fullscreen
+			return cond_is_floating()
 		end,
 		desc = function()
 			return string.format("decrease client size %s", dir)

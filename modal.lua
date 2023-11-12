@@ -1,9 +1,6 @@
 local M = {}
 
 -- TODO: MAJOR:
--- exposed api
--- beautiful menu
--- fix default clienting floating resize (resize modes)
 -- event names
 
 local awful = require("awful")
