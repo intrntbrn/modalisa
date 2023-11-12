@@ -45,7 +45,7 @@ local keys = {
 	["xs"] = ps.spawn("steam"),
 
 	-- root
-	["Q"] = ps.client_focus_kill(),
+	["Q"] = ps.client_kill(),
 	["h"] = ps.client_focus("left"),
 	["j"] = ps.client_focus("down"),
 	["k"] = ps.client_focus("up"),
@@ -87,7 +87,7 @@ local keys = {
 	["s"] = ps.client_swap_master_smart() + { opts = { labels = util.labels_qwerty } },
 	["f"] = ps.client_toggle_property("fullscreen"),
 	["m"] = ps.client_toggle_property("maximize"),
-	["n"] = ps.client_focus_minimize(),
+	["n"] = ps.client_minimize(),
 	["u"] = ps.client_unminimize_menu(false)
 		+ { opts = { hints = { enabled = true, delay = 0 }, labels = util.labels_qwerty } },
 	["<Tab>"] = ps.client_focus_prev(),
@@ -142,7 +142,7 @@ local keys = {
 	-- client
 	["c"] = { desc = "client", group = "menu.client" },
 	["ct"] = ps.client_toggle_tag_menu(),
-	["cn"] = ps.client_focus_minimize(),
+	["cn"] = ps.client_minimize(),
 	["cf"] = ps.client_toggle_property("fullscreen") + { desc = "fullscreen" },
 	["cm"] = ps.client_toggle_property("maximize") + { desc = "maximize" },
 	["ch"] = ps.client_toggle_property("maximize_horizontally") + { desc = "maximize horizontally" },
@@ -158,7 +158,7 @@ local keys = {
 	["cp"] = ps.client_set_property("opacity") + { desc = "opacity" },
 	["cw"] = ps.client_set_property("border_width") + { desc = "border_width" },
 	["cC"] = ps.client_set_property("border_color") + { desc = "border_color" },
-	["ck"] = ps.client_focus_kill() + { desc = "kill", highlight = { desc = { bold = true, fg = "#F7768E" } } },
+	["ck"] = ps.client_kill() + { desc = "kill", highlight = { desc = { bold = true, fg = "#F7768E" } } },
 	["cu"] = ps.client_unminimize_menu(false) + { desc = "unminize" },
 	["c<Tab>"] = ps.client_focus_prev(),
 	["cs"] = ps.client_swap_master_smart(),

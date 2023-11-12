@@ -244,8 +244,8 @@ function M.client_unminmize(c)
 	c:activate({ raise = true, context = "key.unminimize" })
 end
 
-function M.client_placement(placement)
-	local c = client.focus
+function M.client_placement(placement, cl)
+	local c = cl or client.focus
 	if not c then
 		return
 	end

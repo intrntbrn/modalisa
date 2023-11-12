@@ -15,8 +15,8 @@ local helper = {}
 -- screen padding
 -- client: border_width, skip taskbar, hidden, hide bar
 
-local function cond_is_floating()
-	local c = client.focus
+local function cond_is_floating(cl)
+	local c = cl or client.focus
 	if not c then
 		return
 	end
@@ -327,396 +327,65 @@ function M.client_swap_picker()
 	})
 end
 
-function M.client_focus_toggle_fullscreen()
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			local c = client.focus
-			if not c then
-				return "fullscreen toggle"
-			end
-			if c.fullscreen then
-				return "fullscreen" .. " " .. opts.toggle_true
-			end
-			return "fullscreen" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return client.focus
-		end,
-		fn = function()
-			awm.client_toggle_fullscreen()
-		end,
-	})
-end
-
-function M.client_toggle_fullscreen(c)
-	assert(c)
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			if not c then
-				return "fullscreen toggle"
-			end
-			if c.fullscreen then
-				return "fullscreen" .. " " .. opts.toggle_true
-			end
-			return "fullscreen" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return c and c.valid
-		end,
-		fn = function()
-			awm.client_toggle_fullscreen()
-		end,
-	})
-end
-
-function M.client_focus_toggle_maximize()
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			local c = client.focus
-			if not c then
-				return "maximize toggle"
-			end
-			if c.maximized then
-				return "maximize" .. " " .. opts.toggle_true
-			end
-			return "maximize" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return client.focus
-		end,
-		fn = function()
-			awm.client_toggle_maximize()
-		end,
-	})
-end
-
-function M.client_toggle_maximize(c)
-	assert(c)
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			if not c then
-				return "maximize toggle"
-			end
-			if c.maximized then
-				return "maximize" .. " " .. opts.toggle_true
-			end
-			return "maximize" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return c and c.valid
-		end,
-		fn = function()
-			awm.client_toggle_maximize(c)
-		end,
-	})
-end
-
-function M.client_focus_toggle_sticky()
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			local c = client.focus
-			if not c then
-				return "sticky toggle"
-			end
-			if c.sticky then
-				return "sticky" .. " " .. opts.toggle_true
-			end
-			return "sticky" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return client.focus
-		end,
-		fn = function()
-			awm.client_toggle_sticky()
-		end,
-	})
-end
-
-function M.client_toggle_sticky(c)
-	assert(c)
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			if not c then
-				return "sticky toggle"
-			end
-			if c.sticky then
-				return "sticky" .. " " .. opts.toggle_true
-			end
-			return "sticky" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return c and c.valid
-		end,
-		fn = function()
-			awm.client_toggle_sticky(c)
-		end,
-	})
-end
-
-function M.client_focus_toggle_maximize_horizontally()
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			local c = client.focus
-			if not c then
-				return "maximize horizontal toggle"
-			end
-			if c.maximized_horizontal then
-				return "maximize horizontal" .. " " .. opts.toggle_true
-			end
-			return "maximize horizontal" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return client.focus
-		end,
-		fn = function()
-			awm.client_toggle_maximize_horizontally()
-		end,
-	})
-end
-
-function M.client_toggle_maximize_horizontally(c)
-	assert(c)
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			if not c then
-				return "maximize horizontal toggle"
-			end
-			if c.maximized_horizontal then
-				return "maximize horizontal" .. " " .. opts.toggle_true
-			end
-			return "maximize horizontal" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return c and c.valid
-		end,
-		fn = function()
-			awm.client_toggle_maximize_horizontally(c)
-		end,
-	})
-end
-
-function M.client_focus_toggle_maximize_vertically()
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			local c = client.focus
-			if not c then
-				return "maximize vertical toggle"
-			end
-			if c.maximized_vertical then
-				return "maximize vertical" .. " " .. opts.toggle_true
-			end
-			return "maximize vertical" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return client.focus
-		end,
-		fn = function()
-			awm.client_toggle_maximize_vertically()
-		end,
-	})
-end
-
-function M.client_toggle_maximize_vertically(c)
-	assert(_)
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			if not c then
-				return "maximize vertical toggle"
-			end
-			if c.maximized_vertical then
-				return "maximize vertical" .. " " .. opts.toggle_true
-			end
-			return "maximize vertical" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return c and c.valid
-		end,
-		fn = function()
-			awm.client_toggle_maximize_vertically(c)
-		end,
-	})
-end
-
-function M.client_focus_toggle_floating()
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			local c = client.focus
-			if not c then
-				return "floating toggle"
-			end
-			if c.floating then
-				return "floating" .. " " .. opts.toggle_true
-			end
-			return "floating" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return client.focus
-		end,
-		fn = function()
-			awm.client_toggle_floating()
-		end,
-	})
-end
-
-function M.client_toggle_floating(c)
-	assert(c)
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			if not c then
-				return "floating toggle"
-			end
-			if c.floating then
-				return "floating" .. " " .. opts.toggle_true
-			end
-			return "floating" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return c and c.valid
-		end,
-		fn = function()
-			awm.client_toggle_floating(c)
-		end,
-	})
-end
-
-function M.client_focus_toggle_ontop()
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			local c = client.focus
-			if not c then
-				return "ontop toggle"
-			end
-			if c.ontop then
-				return "ontop" .. " " .. opts.toggle_true
-			end
-			return "ontop" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return client.focus
-		end,
-		fn = function()
-			awm.client_toggle_ontop()
-		end,
-	})
-end
-
-function M.client_toggle_ontop(c)
-	assert(c)
-	return mt({
-		group = "client.property",
-		desc = function(opts)
-			if not c then
-				return "ontop top"
-			end
-			if c.ontop then
-				return "ontop" .. " " .. opts.toggle_true
-			end
-			return "ontop" .. " " .. opts.toggle_false
-		end,
-		cond = function()
-			return c and c.valid
-		end,
-		fn = function()
-			awm.client_toggle_ontop(1)
-		end,
-	})
-end
-
-function M.client_focus_minimize()
-	return mt({
-		group = "client.property",
-		desc = "client minimize",
-		cond = function()
-			return client.focus
-		end,
-		fn = function()
-			awm.client_minmize()
-		end,
-	})
-end
-
-function M.client_minimize(c)
-	assert(c)
+function M.client_minimize(cl)
 	return mt({
 		group = "client.property",
 		desc = "minimize",
 		cond = function()
+			local c = cl or client.focus
 			return c and c.valid
 		end,
 		fn = function()
+			local c = cl or client.focus
 			awm.client_minmize(c)
 		end,
 	})
 end
 
-function M.client_focus_kill()
+function M.client_kill(cl)
 	return mt({
 		group = "client.kill",
 		desc = function()
 			return "client kill"
 		end,
 		cond = function()
-			return client.focus
-		end,
-		fn = function()
-			awm.client_kill()
-		end,
-	})
-end
-
-function M.client_kill(c)
-	assert(c)
-	return mt({
-		group = "client.kill",
-		desc = function()
-			return "client kill"
-		end,
-		cond = function()
+			local c = cl or client.focus
 			return c and c.valid
 		end,
 		fn = function()
+			local c = cl or client.focus
 			awm.client_kill(c)
 		end,
 	})
 end
 
-function M.client_swap_master_smart()
+function M.client_swap_master_smart(cl)
 	return mt({
 		group = "client.swap.smart",
 		desc = "master swap smart",
 		cond = function()
-			return client.focus
+			local c = cl or client.focus
+			return c and c.valid
 		end,
 		fn = function()
-			awm.client_master_swap()
+			local c = cl or client.focus
+			awm.client_master_swap(c)
 		end,
 	})
 end
 
-function M.client_move_to_master()
+function M.client_move_to_master(cl)
 	return mt({
 		group = "client.layout.move.master",
 		desc = "move to master",
 		cond = function()
+			local c = cl or client.focus
 			local master = awful.client.getmaster()
-			local focus = client.focus
-			return master and focus and master ~= focus
+			return master and c and master ~= c
 		end,
 		fn = function()
-			awm.client_move_to_master()
+			local c = cl or client.focus
+			awm.client_move_to_master(c)
 		end,
 	})
 end
@@ -751,28 +420,31 @@ function M.client_focus_prev()
 	})
 end
 
-function M.client_move_smart(dir)
+function M.client_move_smart(dir, cl)
 	return mt({
 		group = "client.move",
 		cond = function()
-			return client.focus
+			local c = cl or client.focus
+			return c and c.valid
 		end,
 		desc = string.format("move client %s", dir),
 		fn = function(opts)
-			awm.client_move_smart(client.focus, dir, opts.awesome.resize_delta)
+			local c = cl or client.focus
+			awm.client_move_smart(c, dir, opts.awesome.resize_delta)
 		end,
 	})
 end
 
-function M.client_toggle_titlebar()
+function M.client_toggle_titlebar(cl)
 	return mt({
 		group = "client.tilebar",
 		cond = function()
-			return client.focus
+			local c = cl or client.focus
+			return c and c.valid
 		end,
 		desc = "client titlebar toggle",
 		fn = function()
-			local c = client.focus
+			local c = cl or client.focus
 			if not c then
 				return
 			end
@@ -785,12 +457,12 @@ function M.client_toggle_titlebar()
 	})
 end
 
-function M.client_toggle_property(x)
+function M.client_toggle_property(x, cl)
 	return mt({
 		group = string.format("client.property.%s", x),
 		cond = function()
-			local c = client.focus
-			if not c then
+			local c = cl or client.focus
+			if not c or not c.valid then
 				return
 			end
 			if c[x] ~= nil then
@@ -798,8 +470,8 @@ function M.client_toggle_property(x)
 			end
 		end,
 		desc = function(opts)
-			local c = client.focus
-			if not c then
+			local c = cl or client.focus
+			if not c or not c.valid then
 				return string.format("client %s toggle")
 			end
 			if c[x] then
@@ -808,7 +480,7 @@ function M.client_toggle_property(x)
 			return string.format("client %s %s", x, opts.toggle_false)
 		end,
 		fn = function()
-			local c = client.focus
+			local c = cl or client.focus
 			if not c then
 				return
 			end
@@ -817,12 +489,16 @@ function M.client_toggle_property(x)
 	})
 end
 
-function M.client_set_property(x)
+function M.client_set_property(x, cl)
 	return mt({
 		group = string.format("client.property.%s", x),
 		desc = string.format("client set %s", x),
+		cond = function()
+			local c = cl or client.focus
+			return c and c.valid
+		end,
 		fn = function(opts)
-			local c = client.focus
+			local c = cl or client.focus
 			if not c then
 				return
 			end
@@ -854,47 +530,48 @@ function M.client_set_property(x)
 	})
 end
 
-function M.client_placement(placement)
+function M.client_placement(placement, cl)
 	return mt({
 		group = "client.placement",
 		cond = function()
-			return cond_is_floating()
+			return cond_is_floating(cl)
 		end,
 		desc = string.format("place %s", placement),
 		fn = function()
-			awm.client_placement(placement)
+			awm.client_placement(placement, cl)
 		end,
 	})
 end
 
-function M.client_resize_mode_floating()
+function M.client_resize_mode_floating(cl)
 	return mt({
 		group = "resize.mode",
 		cond = function()
-			return cond_is_floating()
+			return cond_is_floating(cl)
 		end,
 		desc = "resize mode",
 	})
 end
 
-function M.client_resize_floating()
+function M.client_resize_floating(cl)
 	return mt({
 		group = "client.resize",
 		cond = function()
-			return cond_is_floating()
+			return cond_is_floating(cl)
 		end,
 		desc = "resize client",
 	})
 end
 
-function M.client_resize_smart(dir)
+function M.client_resize_smart(dir, cl)
 	return mt({
 		group = "client.layout.resize",
 		cond = function()
-			return client.focus
+			local c = cl or client.focus
+			return c and c.valid
 		end,
 		desc = function()
-			local c = client.focus
+			local c = cl or client.focus
 			local layout = awful.layout.get(awful.screen.focused()).name
 			if layout == "floating" or c and (c.floating and not c.fullscreen) then
 				return string.format("increase client size %s", dir)
@@ -902,22 +579,23 @@ function M.client_resize_smart(dir)
 			return string.format("resize client smart %s", dir)
 		end,
 		fn = function(opts)
-			awm.client_resize_smart(client.focus, dir, opts.awesome.resize_delta, opts.awesome.resize_factor)
+			local c = cl or client.focus
+			awm.client_resize_smart(c, dir, opts.awesome.resize_delta, opts.awesome.resize_factor)
 		end,
 	})
 end
 
-function M.client_floating_size_increase(dir)
+function M.client_floating_size_increase(dir, cl)
 	return mt({
 		group = "client.layout.resize",
 		cond = function()
-			return cond_is_floating()
+			return cond_is_floating(cl)
 		end,
 		desc = function()
 			return string.format("increase client size %s", dir)
 		end,
 		fn = function(opts)
-			local c = client.focus
+			local c = cl or client.focus
 			local resize_delta = opts.awesome.resize_delta
 			resize_delta = math.abs(resize_delta)
 			awm.client_floating_resize(c, dir, resize_delta)
@@ -925,17 +603,17 @@ function M.client_floating_size_increase(dir)
 	})
 end
 
-function M.client_floating_size_decrease(dir)
+function M.client_floating_size_decrease(dir, cl)
 	return mt({
 		group = "client.layout.resize",
 		cond = function()
-			return cond_is_floating()
+			return cond_is_floating(cl)
 		end,
 		desc = function()
 			return string.format("decrease client size %s", dir)
 		end,
 		fn = function(opts)
-			local c = client.focus
+			local c = cl or client.focus
 			local resize_delta = opts.awesome.resize_delta
 			resize_delta = math.abs(resize_delta) * -1
 			awm.client_floating_resize(c, dir, resize_delta)
