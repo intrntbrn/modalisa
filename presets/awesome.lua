@@ -472,7 +472,7 @@ function M.client_toggle_property(x, cl)
 		desc = function(opts)
 			local c = cl or client.focus
 			if not c or not c.valid then
-				return string.format("client %s toggle")
+				return string.format("client %s toggle", x)
 			end
 			if c[x] then
 				return string.format("client %s %s", x, opts.toggle_true)
