@@ -638,7 +638,7 @@ end
 function M.client_focus_minimize()
 	return mt({
 		group = "client.property",
-		desc = "minimize",
+		desc = "client minimize",
 		cond = function()
 			return client.focus
 		end,
@@ -760,6 +760,59 @@ function M.client_move_smart(dir)
 		desc = string.format("move client %s", dir),
 		fn = function(opts)
 			awm.client_move_smart(client.focus, dir, opts.awesome.resize_delta)
+		end,
+	})
+end
+
+function M.client_toggle_titlebar()
+	return mt({
+		group = "client.tilebar",
+		cond = function()
+			return client.focus
+		end,
+		desc = "client titlebar toggle",
+		fn = function()
+			local c = client.focus
+			if not c then
+				return
+			end
+
+			awful.titlebar.toggle(c, "top")
+			awful.titlebar.toggle(c, "bottom")
+			awful.titlebar.toggle(c, "left")
+			awful.titlebar.toggle(c, "right")
+		end,
+	})
+end
+
+function M.client_toggle_property(x)
+	return mt({
+		group = string.format("client.property.%s", x),
+		cond = function()
+			local c = client.focus
+			if not c then
+				return
+			end
+			if c[x] ~= nil then
+				return type(c[x]) == "boolean"
+			end
+		end,
+		desc = function(opts)
+			local c = client.focus
+			if not c then
+				return string.format("client %s toggle")
+			end
+			if c[x] then
+				return string.format("client %s %s", x, opts.toggle_true)
+			end
+			return string.format("client %s %s", x, opts.toggle_false)
+		end,
+		fn = function()
+			local c = client.focus
+			if not c then
+				return
+			end
+			c[x] = not c[x]
 		end,
 	})
 end
