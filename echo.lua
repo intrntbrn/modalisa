@@ -288,19 +288,8 @@ local function handle_exec_signal(t, results)
 	run(results, opts)
 end
 
-function M.show(kvs, opts)
+local function show(kvs, opts)
 	run(kvs, opts)
-end
-
-function M.show_simple(key, value, opts)
-	if not value then
-		value = ""
-	end
-
-	local result = {}
-	result[key] = value
-
-	run(result, opts)
 end
 
 local once
@@ -315,7 +304,7 @@ function M.setup(opts)
 		if not kvs then
 			return
 		end
-		M.show(kvs, opts)
+		show(kvs, opts)
 	end)
 
 	awesome.connect_signal("modalisa::on_exec", function(tree, result)
