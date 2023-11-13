@@ -12,6 +12,7 @@ local defaults = {
 	root_keys = { "<M-a>" },
 	back_keys = { "<BackSpace>" },
 	stop_keys = { "<Escape>" },
+	toggle_keys = { "." },
 	include_default_keys = true,
 
 	mode = "hybrid", -- "modal" | "hold" | "hybrid" | "forever"

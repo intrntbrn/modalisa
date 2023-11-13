@@ -242,6 +242,26 @@ local function keygrabber_keys(t)
 		end
 	end
 
+	-- toggle keys
+	local toggle_keys
+	if type(opts.toggle_keys) == "table" then
+		toggle_keys = opts.toggle_keys
+	elseif type(opts.toggle_keys) == "string" then
+		toggle_keys = { opts.toggle_keys }
+	end
+
+	for _, tk in pairs(toggle_keys) do
+		local parsed_keys = parse_vim_key(tk, opts)
+		for _, parsed_key in pairs(parsed_keys) do
+			local key = {
+				mods = parsed_key.mods,
+				key = parsed_key.key,
+				toggle = true,
+			}
+			add_key_to_map(all_keys, key)
+		end
+	end
+
 	-- stop keys
 	assert(opts.stop_keys, "no stop keys found")
 	local stop_keys
@@ -395,6 +415,10 @@ function trunner:on_stop()
 	self:on_leave(t) -- also emit leave event
 	print("on::stop", t:desc())
 	awesome.emit_signal("modalisa::on_stop", t)
+end
+
+function trunner:toggle_hints(t)
+	awesome.emit_signal("modalisa::hints::toggle", t)
 end
 
 function trunner:start_timer()
@@ -565,6 +589,11 @@ function trunner:input(key)
 		return
 	end
 
+	if key == "toggle" then
+		self:toggle_hints(self.tree)
+		return
+	end
+
 	-- traverse
 	local node = tree:get(key)
 	if not node then
@@ -599,7 +628,7 @@ function trunner:keypressed_callback()
 		local keys = self.keybinds[key]
 		if keys then
 			local function input_key(k)
-				self:input(k.stop and "stop" or k.back and "back" or k.name)
+				self:input(k.stop and "stop" or k.back and "back" or k.toggle and "toggle" or k.name)
 			end
 
 			for _, k in pairs(keys) do
