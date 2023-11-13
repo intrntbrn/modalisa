@@ -1,9 +1,10 @@
 local awful = require("awful")
 local util = require("modalisa.util")
-local mt = require("modalisa.presets.metatable")
 local dpi = require("beautiful").xresources.apply_dpi
-local helper = require("modalisa.presets.helper")
 local grect = require("gears.geometry").rectangle
+local mt = require("modalisa.presets.metatable")
+local helper = require("modalisa.presets.helper")
+local pscreen = require("modalisa.presets.screen")
 local label = require("modalisa.ui.label")
 ---@diagnostic disable-next-line: unused-local
 local dump = require("modalisa.lib.vim").inspect
@@ -889,6 +890,27 @@ function M.client_toggle_tag_menu()
 			return ret
 		end,
 	})
+end
+
+function M.move_to_screen_menu(cl)
+	local fn = function(s)
+		local c = cl or client.focus
+		if not c then
+			return
+		end
+		c:move_to_screen(s)
+	end
+
+	local menu = pscreen.generate_menu(fn, false)
+
+	return menu
+		+ {
+			desc = "move client to screen",
+			cond = function()
+				local c = cl or client.focus
+				return c
+			end,
+		}
 end
 
 return M

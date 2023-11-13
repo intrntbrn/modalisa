@@ -174,8 +174,9 @@ local keys = {
 	["ck"] = pclient.client_kill() + { desc = "kill" },
 	["cu"] = pclient.client_unminimize_menu(false) + { desc = "unminize" },
 	["c<Tab>"] = pclient.client_focus_prev(),
-	["cs"] = pclient.client_swap_master_smart(),
+	["cc"] = pclient.client_swap_master_smart(),
 	["c<Return>"] = pclient.client_move_to_master(),
+	["cs"] = pclient.move_to_screen_menu(),
 
 	-- resize floating
 	["r"] = pclient.client_resize_floating(),
