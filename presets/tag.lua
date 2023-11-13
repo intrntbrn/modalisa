@@ -21,13 +21,6 @@ local function tag_toggle_index(i)
 	awful.tag.viewtoggle(t)
 end
 
-local function tag_toggle_fill_policy(t)
-	if not t then
-		return
-	end
-	awful.tag.togglemfpol(t)
-end
-
 local function tag_view_only_index(i)
 	local s = awful.screen.focused()
 	if not s then
@@ -44,33 +37,6 @@ local function tag_view_only_index(i)
 	else
 		t:view_only()
 	end
-end
-
-local function tag_view_only(t)
-	if not t then
-		return
-	end
-	t:view_only()
-end
-
-local function tag_delete(t)
-	t = t
-	if not t then
-		return
-	end
-	t:delete()
-end
-
-local function tag_next()
-	awful.tag.viewnext()
-end
-
-local function tag_prev()
-	awful.tag.viewprev()
-end
-
-local function tag_last()
-	awful.tag.history.restore()
 end
 
 local function tag_get_properties(t)
@@ -294,7 +260,7 @@ function M.tag_toggle_policy()
 			if not t then
 				return
 			end
-			tag_toggle_fill_policy(t)
+			awful.tag.togglemfpol(t)
 		end,
 	})
 end
@@ -381,7 +347,7 @@ function M.tag_view_only_menu()
 						return helper.tagname(t)
 					end,
 					fn = function()
-						tag_view_only(t)
+						t:view_only()
 					end,
 				})
 			end
@@ -393,7 +359,7 @@ end
 function M.tag_delete()
 	return mt({
 		group = "tag.action",
-		desc = "delete selected tag",
+		desc = "delete tag",
 		cond = function()
 			return awful.screen.focused().selected_tag
 		end,
@@ -402,7 +368,7 @@ function M.tag_delete()
 			if not t then
 				return
 			end
-			tag_delete(t)
+			t:delete()
 		end,
 	})
 end
@@ -429,7 +395,7 @@ function M.tag_next()
 			return "view next tag"
 		end,
 		fn = function()
-			tag_next()
+			awful.tag.viewnext()
 		end,
 	})
 end
@@ -441,7 +407,7 @@ function M.tag_previous()
 			return "view previous tag"
 		end,
 		fn = function()
-			tag_prev()
+			awful.tag.viewprev()
 		end,
 	})
 end
