@@ -2,6 +2,7 @@ local awful = require("awful")
 local util = require("modalisa.util")
 local vim = require("modalisa.lib.vim")
 local awm = require("modalisa.awesome")
+local ascreen = require("modalisa.awesome.screen")
 local mt = require("modalisa.presets.metatable")
 local label = require("modalisa.ui.label")
 ---@diagnostic disable-next-line: unused-local
@@ -1082,19 +1083,7 @@ function M.tag_new_copy()
 		function(opts)
 			local t = awful.screen.focused().selected_tag
 			local fn = function(name)
-				local props = {
-					screen = awful.screen.focused(),
-					layout = t.layout,
-					layouts = vim.deepcopy(t.layouts),
-					gap = t.gap,
-					icon = t.icon,
-					volatile = t.volatile,
-					gap_single_client = t.gap_single_client,
-					master_width_factor = t.master_width_factor,
-					master_count = t.master_count,
-					column_count = t.column_count,
-					master_fill_policy = t.master_fill_policy,
-				}
+				local props = awm.tag_get_properties(t)
 				awful.tag.add(name, props):view_only()
 				-- don't show these values:
 				props.screen = nil
@@ -1152,6 +1141,23 @@ function M.tag_gap()
 		end,
 	})
 end
+
+-- function M.screen_menu()
+-- 	return mt({
+-- 		desc = "screens",
+-- 		cond = function()
+-- 			return ascreen.screen_count() > 1
+-- 		end,
+--         group = "screen",
+--         is_menu = true,
+--         function (opts)
+--             local entries = {}
+--             for s in screen do
+--                 local i = s.index
+--             end
+--         end
+-- 	})
+-- end
 
 function helper.tagname_by_index(i)
 	local s = awful.screen.focused()
