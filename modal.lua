@@ -1,8 +1,5 @@
 local M = {}
 
--- TODO: MAJOR:
--- event names
-
 local awful = require("awful")
 local lib = require("modalisa.lib")
 local vim = require("modalisa.lib.vim")
@@ -644,7 +641,8 @@ function trunner:keypressed_callback()
 		-- no match!
 
 		if modifier_key then
-			-- user is pressing a mod key, we have to ignore it
+			-- user is pressing a mod key, we have to ignore it as it might be used
+			-- to transition to a valid key combo.
 			return
 		end
 

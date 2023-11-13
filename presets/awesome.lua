@@ -10,7 +10,6 @@ local dump = require("modalisa.lib.vim").inspect
 local M = {}
 local helper = {}
 
--- wallpaper
 -- screen (awful.screen.focus_relative(-1), c:move_to_screen())
 -- screen padding
 
@@ -512,7 +511,7 @@ function M.client_toggle_titlebar(cl)
 	})
 end
 
-function M.client_toggle_property(x, cl)
+function M.client_toggle_property(x, cl, raise)
 	return mt({
 		group = string.format("client.property.%s", x),
 		cond = function()
@@ -540,6 +539,9 @@ function M.client_toggle_property(x, cl)
 				return
 			end
 			c[x] = not c[x]
+			if raise then
+				c:raise()
+			end
 		end,
 	})
 end
