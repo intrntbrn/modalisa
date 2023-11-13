@@ -1,8 +1,6 @@
 local awful = require("awful")
 local util = require("modalisa.util")
-local vim = require("modalisa.lib.vim")
 local mt = require("modalisa.presets.metatable")
-local label = require("modalisa.ui.label")
 ---@diagnostic disable-next-line: unused-local
 local dump = require("modalisa.lib.vim").inspect
 local helper = require("modalisa.presets.helper")

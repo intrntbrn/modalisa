@@ -1,6 +1,5 @@
 local awful = require("awful")
 local util = require("modalisa.util")
-local vim = require("modalisa.lib.vim")
 local mt = require("modalisa.presets.metatable")
 local dpi = require("beautiful").xresources.apply_dpi
 local helper = require("modalisa.presets.helper")
@@ -386,7 +385,7 @@ local function client_floating_resize(c, dir, px)
 	awful.placement.no_offscreen(c)
 end
 
-local function client_resize_tiled(c, dir, resize_factor)
+function M.client_resize_tiled(c, dir, resize_factor)
 	c = c or client.focus
 	if not c then
 		return
