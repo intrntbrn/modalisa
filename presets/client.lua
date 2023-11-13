@@ -5,7 +5,7 @@ local grect = require("gears.geometry").rectangle
 local mt = require("modalisa.presets.metatable")
 local helper = require("modalisa.presets.helper")
 local pscreen = require("modalisa.presets.screen")
-local label = require("modalisa.ui.label")
+local label = require("modalisa.label")
 ---@diagnostic disable-next-line: unused-local
 local dump = require("modalisa.lib.vim").inspect
 
@@ -730,7 +730,7 @@ function M.client_set_property(x, cl)
 				end
 				c[x] = value
 			end
-			require("modalisa.ui.prompt").run(fn, initial, header, opts)
+			require("modalisa.prompt").run(fn, initial, header, opts)
 		end,
 	})
 end

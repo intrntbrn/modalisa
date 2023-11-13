@@ -145,7 +145,7 @@ function M.awesome_padding_menu()
 							s.padding = cpy
 						end
 
-						require("modalisa.ui.prompt").run(run, initial, header, opts)
+						require("modalisa.prompt").run(run, initial, header, opts)
 					end,
 				}
 			end

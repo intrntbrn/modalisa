@@ -58,7 +58,7 @@ local function brightness_show(opts)
 	awful.spawn.easy_async(cmd, function(stdout)
 		stdout = string.gsub(stdout, "\n", "")
 		local value = tonumber(stdout)
-		require("modalisa.ui.echo").show_simple("brightness", value, opts)
+		require("modalisa.echo").show_simple("brightness", value, opts)
 	end)
 end
 
@@ -95,10 +95,10 @@ local function volume_show(opts)
 	awful.spawn.easy_async(amixer_get_master, function(stdout)
 		local vol, status = string.match(stdout, "([%d]+)%%.*%[([%l]*)")
 		if status == "off" then
-			require("modalisa.ui.echo").show_simple("volume", "muted", opts)
+			require("modalisa.echo").show_simple("volume", "muted", opts)
 		else
 			local value = tonumber(vol) / 100
-			require("modalisa.ui.echo").show_simple("volume", value, opts)
+			require("modalisa.echo").show_simple("volume", value, opts)
 		end
 	end)
 end
@@ -188,10 +188,10 @@ function M.power_shutdown_timer()
 				end
 				local cmd = string.format("shutdown -P +%d", min)
 				awful.spawn(cmd)
-				require("modalisa.ui.echo").show_simple("shutdown", string.format("in %d minutes", min))
+				require("modalisa.echo").show_simple("shutdown", string.format("in %d minutes", min))
 			end
 
-			require("modalisa.ui.prompt").run(fn, initial, header, opts)
+			require("modalisa.prompt").run(fn, initial, header, opts)
 		end,
 	})
 end

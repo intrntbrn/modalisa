@@ -2,10 +2,6 @@ local awful = require("awful")
 
 local M = {}
 
-function M.screen_count()
-	return screen.count()
-end
-
 function M.tagname_by_index(i)
 	local s = awful.screen.focused()
 	local t = s.tags[i]

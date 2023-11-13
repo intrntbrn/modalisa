@@ -74,10 +74,10 @@ function M.setup(opts)
 	require("modalisa.root").setup(opts)
 	require("modalisa.modal").setup(opts)
 
-	require("modalisa.ui.hints").setup(opts)
-	require("modalisa.ui.label").setup(opts)
-	require("modalisa.ui.echo").setup(opts)
-	require("modalisa.ui.prompt").setup(opts)
+	require("modalisa.hints").setup(opts)
+	require("modalisa.label").setup(opts)
+	require("modalisa.echo").setup(opts)
+	require("modalisa.prompt").setup(opts)
 
 	-- default keys
 	if opts.include_default_keys then

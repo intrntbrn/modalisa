@@ -176,7 +176,7 @@ function M.move_tag_to_screen_menu(tag, keep_old_tag)
 			desc = "move tag to screen",
 			cond = function()
 				local t = tag or awful.screen.focused().selected_tag
-				return t and helper.screen_count() > 1
+				return t and screen.count() > 1
 			end,
 		}
 end
@@ -438,7 +438,7 @@ function M.tag_new()
 			end
 			local initial = ""
 			local header = "tag name:"
-			require("modalisa.ui.prompt").run(fn, initial, header, opts)
+			require("modalisa.prompt").run(fn, initial, header, opts)
 		end,
 	})
 end
@@ -463,11 +463,11 @@ function M.tag_new_copy()
 				props.screen = nil
 				props.layouts = nil
 				props.layout = props.layout.name
-				require("modalisa.ui.echo").show(props, opts)
+				require("modalisa.echo").show(props, opts)
 			end
 			local initial = ""
 			local header = "tag name:"
-			require("modalisa.ui.prompt").run(fn, initial, header, opts)
+			require("modalisa.prompt").run(fn, initial, header, opts)
 		end,
 	})
 end
@@ -485,7 +485,7 @@ function M.tag_rename()
 			end
 			local initial = awful.tag.selected().name
 			local header = "rename tag:"
-			require("modalisa.ui.prompt").run(fn, initial, header, opts)
+			require("modalisa.prompt").run(fn, initial, header, opts)
 		end,
 	})
 end
@@ -511,7 +511,7 @@ function M.tag_gap()
 			end
 			local initial = t.gap
 			local header = "tag gap"
-			require("modalisa.ui.prompt").run(fn, initial, header, opts)
+			require("modalisa.prompt").run(fn, initial, header, opts)
 		end,
 	})
 end

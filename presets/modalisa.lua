@@ -183,7 +183,7 @@ local function generate_number(param, root_config, sub_config)
 				sub_config[param] = number
 				config.set_config(root_config)
 			end
-			require("modalisa.ui.prompt").run(fn, initial, header, opts)
+			require("modalisa.prompt").run(fn, initial, header, opts)
 		end,
 	}
 end
@@ -203,7 +203,7 @@ local function generate_string(param, root_config, sub_config)
 				sub_config[param] = x
 				config.set_config(root_config)
 			end
-			require("modalisa.ui.prompt").run(fn, initial, header, opts)
+			require("modalisa.prompt").run(fn, initial, header, opts)
 		end,
 	}
 end
