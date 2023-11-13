@@ -181,16 +181,12 @@ function M.setup(opts)
 		local header = args.header
 		local initial = args.initial
 
-		M.run(fn, initial, header, opts)
+		run(fn, initial, header, opts)
 	end)
 
 	-- create widgets
 	prompt = awful.widget.prompt()
 	popup:init(opts)
-end
-
-function M.run(fn, initial, header, opts)
-	run(fn, initial, header, opts)
 end
 
 return M
