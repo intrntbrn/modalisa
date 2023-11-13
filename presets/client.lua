@@ -108,7 +108,7 @@ local function client_picker(opts, fn, filter)
 		table.insert(menu, {
 			lbl,
 			desc = function()
-				return require("modalisa.presets.awesome").util.clientname(c, i)
+				helper.clientname(c, i)
 			end,
 			fn = function()
 				fn(c)
