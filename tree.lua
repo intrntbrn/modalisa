@@ -141,6 +141,14 @@ function M:opts_raw()
 	return self._data.opts_raw
 end
 
+function M:add_opts(opts)
+	local merged_raw = util.merge_opts(self._data.opts_raw or {}, opts)
+	self._data.opts_raw = merged_raw
+	local merged_merged = util.merge_opts(self._data.opts_merged, merged_raw)
+	self._data.opts_merged = merged_merged
+	self:update_succ_opts()
+end
+
 function M:exec_on_enter(opts)
 	local fn = self._data.on_enter
 	if fn then
@@ -244,14 +252,6 @@ end
 
 function M:highlight()
 	return self._data.highlight
-end
-
-function M:add_opts(opts)
-	local merged_raw = util.merge_opts(self._data.opts_raw or {}, opts)
-	self._data.opts_raw = merged_raw
-	local merged_merged = util.merge_opts(self._data.opts_merged, merged_raw)
-	self._data.opts_merged = merged_merged
-	self:update_succ_opts()
 end
 
 function M:set_continue(v)

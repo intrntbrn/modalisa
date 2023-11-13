@@ -371,24 +371,24 @@ function trunner:on_start()
 	local t = self.tree
 	self.is_running = true
 	print("on::start", t:desc())
-	awesome.emit_signal("modalisa::event::start", t)
+	awesome.emit_signal("modalisa::on_start", t)
 end
 
 function trunner:on_enter(t)
 	print("on::enter", t:desc())
 	t:exec_on_enter()
-	awesome.emit_signal("modalisa::updated", t)
+	awesome.emit_signal("modalisa::on_enter", t)
 end
 
 function trunner:on_leave(t)
 	print("on::leave", t:desc())
 	t:exec_on_leave()
-	awesome.emit_signal("modalisa::event::leave", t)
+	awesome.emit_signal("modalisa::on_leave", t)
 end
 
 function trunner:on_exec(t, result)
 	print("on::executed", t:desc())
-	awesome.emit_signal("modalisa::executed", t, result)
+	awesome.emit_signal("modalisa::on_exec", t, result)
 end
 
 function trunner:on_stop()
@@ -397,7 +397,7 @@ function trunner:on_stop()
 	self.is_running = false
 	self:on_leave(t) -- also emit leave event
 	print("on::stop", t:desc())
-	awesome.emit_signal("modalisa::stopped", t)
+	awesome.emit_signal("modalisa::on_stop", t)
 end
 
 function trunner:start_timer()

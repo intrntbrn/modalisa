@@ -310,7 +310,7 @@ function M.setup(opts)
 
 	popup:init(opts)
 
-	awesome.connect_signal("modalisa::executed", function(tree, result)
+	awesome.connect_signal("modalisa::on_exec", function(tree, result)
 		handle_signal(tree, result)
 	end)
 end

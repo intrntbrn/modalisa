@@ -267,8 +267,8 @@ local options
 
 local function on_update(key)
 	local value = rawget(options, key)
-	print("modalisa::config: ", key, " = ", vim.inspect(value))
-	awesome.emit_signal("modalisa::config", key, value)
+	print("modalisa::config::update: ", key, " = ", vim.inspect(value))
+	awesome.emit_signal("modalisa::config::update", key, value)
 end
 
 function M.get_default_config(...)
@@ -306,7 +306,7 @@ function M.set_config(...)
 	-- TODO: determine changed params and emit property signals
 	local new = M.get_config(...)
 	options = vim.deepcopy(new)
-	awesome.emit_signal("modalisa::config")
+	awesome.emit_signal("modalisa::config::update")
 end
 
 function M.get(k)

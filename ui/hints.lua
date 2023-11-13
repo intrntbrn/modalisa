@@ -657,20 +657,20 @@ function M.setup(opts)
 	assert(once == nil, "hints are already setup")
 	once = popup:new(opts.hints)
 
-	awesome.connect_signal("modalisa::executed", function(_)
+	awesome.connect_signal("modalisa::on_exec", function(_)
 		util.run_on_idle(function()
 			popup:refresh_entries()
 		end)
 	end)
 
-	awesome.connect_signal("modalisa::updated", function(t)
+	awesome.connect_signal("modalisa::on_enter", function(t)
 		util.run_on_idle(function()
 			show(t)
 		end)
 	end)
 
 	-- live update on config change
-	awesome.connect_signal("modalisa::config", function(_, _)
+	awesome.connect_signal("modalisa::config::update", function(_, _)
 		util.run_on_idle(function()
 			if not current_tree then
 				return
@@ -683,7 +683,7 @@ function M.setup(opts)
 		end)
 	end)
 
-	awesome.connect_signal("modalisa::stopped", function(_)
+	awesome.connect_signal("modalisa::on_stop", function(_)
 		util.run_on_idle(function()
 			if timer then
 				timer:stop()

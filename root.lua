@@ -33,7 +33,7 @@ function M.setup(opts)
 	assert(root_tree == nil, "root is already setup")
 	root_tree = tree:new(opts, "modalisa")
 
-	awesome.connect_signal("modalisa::config", function(_, _)
+	awesome.connect_signal("modalisa::config::update", function(_, _)
 		-- when config has been updated, we have to merge all opts again
 		local new_opts = config.get_config()
 		root_tree:add_opts(new_opts)

@@ -93,7 +93,7 @@ function M.setup(_)
 	assert(once == nil, "label is already setup")
 	once = true
 
-	awesome.connect_signal("modalisa::stopped", function(_)
+	awesome.connect_signal("modalisa::on_stop", function(_)
 		M.hide_labels()
 	end)
 end
