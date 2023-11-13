@@ -266,7 +266,7 @@ local function run(kvs, opts)
 	set_timer(eopts)
 end
 
-local function handle_signal(t, results)
+local function handle_exec_signal(t, results)
 	if not results then
 		return
 	end
@@ -310,8 +310,16 @@ function M.setup(opts)
 
 	popup:init(opts)
 
+	---@diagnostic disable-next-line: redefined-local
+	awesome.connect_signal("modalisa::echo", function(kvs, opts)
+		if not kvs then
+			return
+		end
+		M.show(kvs, opts)
+	end)
+
 	awesome.connect_signal("modalisa::on_exec", function(tree, result)
-		handle_signal(tree, result)
+		handle_exec_signal(tree, result)
 	end)
 end
 
