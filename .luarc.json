@@ -20,7 +20,5 @@
         "unpack",
         "window"
     ],
-    "diagnostics.library": [
-		"/usr/share/awesome/lib"
-    ]
+    "diagnostics.library": [ "/usr/share/awesome/lib" ]
 }
