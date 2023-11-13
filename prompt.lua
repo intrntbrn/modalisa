@@ -175,6 +175,15 @@ function M.setup(opts)
 	assert(once == nil, "prompt is already setup")
 	once = true
 
+	---@diagnostic disable-next-line: redefined-local
+	awesome.connect_signal("modalisa::prompt", function(args, opts)
+		local fn = args.fn
+		local header = args.header
+		local initial = args.initial
+
+		M.run(fn, initial, header, opts)
+	end)
+
 	-- create widgets
 	prompt = awful.widget.prompt()
 	popup:init(opts)

@@ -145,7 +145,7 @@ function M.awesome_padding_menu()
 							s.padding = cpy
 						end
 
-						require("modalisa.prompt").run(run, initial, header, opts)
+						awesome.emit_signal("modalisa::prompt", { fn = run, initial = initial, header = header }, opts)
 					end,
 				}
 			end

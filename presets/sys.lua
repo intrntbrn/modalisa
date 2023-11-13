@@ -192,7 +192,7 @@ function M.power_shutdown_timer()
 				awesome.emit_signal("modalisa::echo", { shutdown = string.format("in %d minutes", min) }, opts)
 			end
 
-			require("modalisa.prompt").run(fn, initial, header, opts)
+			awesome.emit_signal("modalisa::prompt", { fn = fn, initial = initial, header = header }, opts)
 		end,
 	})
 end

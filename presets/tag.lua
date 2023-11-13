@@ -438,7 +438,8 @@ function M.tag_new()
 			end
 			local initial = ""
 			local header = "tag name:"
-			require("modalisa.prompt").run(fn, initial, header, opts)
+
+			awesome.emit_signal("modalisa::prompt", { fn = fn, initial = initial, header = header }, opts)
 		end,
 	})
 end
@@ -463,11 +464,11 @@ function M.tag_new_copy()
 				props.screen = nil
 				props.layouts = nil
 				props.layout = props.layout.name
-				require("modalisa.echo").show(props, opts)
+				awesome.emit_signal("modalisa::echo", props, opts)
 			end
 			local initial = ""
 			local header = "tag name:"
-			require("modalisa.prompt").run(fn, initial, header, opts)
+			awesome.emit_signal("modalisa::prompt", { fn = fn, initial = initial, header = header }, opts)
 		end,
 	})
 end
@@ -485,7 +486,7 @@ function M.tag_rename()
 			end
 			local initial = awful.tag.selected().name
 			local header = "rename tag:"
-			require("modalisa.prompt").run(fn, initial, header, opts)
+			awesome.emit_signal("modalisa::prompt", { fn = fn, initial = initial, header = header }, opts)
 		end,
 	})
 end
@@ -510,8 +511,9 @@ function M.tag_gap()
 				t.gap = gap
 			end
 			local initial = t.gap
-			local header = "tag gap"
-			require("modalisa.prompt").run(fn, initial, header, opts)
+			local header = "tag gap:"
+
+			awesome.emit_signal("modalisa::prompt", { fn = fn, initial = initial, header = header }, opts)
 		end,
 	})
 end

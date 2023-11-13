@@ -730,7 +730,8 @@ function M.client_set_property(x, cl)
 				end
 				c[x] = value
 			end
-			require("modalisa.prompt").run(fn, initial, header, opts)
+
+			awesome.emit_signal("modalisa::prompt", { fn = fn, initial = initial, header = header }, opts)
 		end,
 	})
 end
