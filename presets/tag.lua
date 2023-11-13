@@ -491,52 +491,13 @@ function M.tag_gap()
 	})
 end
 
-local function layout_master_width_decrease(factor)
-	local f = factor or default_resize_factor
-	f = math.abs(f) * -1
-	awful.tag.incmwfact(f)
-end
-
-local function layout_master_width_increase(factor)
-	local f = factor or default_resize_factor
-	f = math.abs(f)
-	awful.tag.incmwfact(f)
-end
-
-local function layout_master_count_increase()
-	awful.tag.incnmaster(1, nil, true)
-end
-
-local function layout_master_count_decrease()
-	awful.tag.incnmaster(-1, nil, true)
-end
-
-local function layout_column_count_decrease()
-	awful.tag.incncol(-1, nil, true)
-end
-
-local function layout_column_count_increase()
-	awful.tag.incncol(1, nil, true)
-end
-
-local function layout_next()
-	awful.layout.inc(1)
-end
-
-local function layout_prev()
-	awful.layout.inc(-1)
-end
-
-local function layout_set(t, l)
-	awful.layout.set(l, t)
-end
-
 function M.layout_master_width_increase(factor)
 	return mt({
 		group = "layout.master.width",
 		desc = "master width increase",
 		fn = function()
-			layout_master_width_increase(factor)
+			local f = factor or default_resize_factor
+			awful.tag.incmwfact(f)
 		end,
 		result = { master_width = helper.get_current_tag_master_width_factor },
 	})
@@ -547,7 +508,8 @@ function M.layout_master_width_decrease(factor)
 		group = "layout.master.width",
 		desc = "master width decrease",
 		fn = function()
-			layout_master_width_decrease(factor)
+			local f = factor or default_resize_factor
+			awful.tag.incmwfact(f * -1)
 		end,
 		result = { master_width = helper.get_current_tag_master_width_factor },
 	})
@@ -561,7 +523,7 @@ function M.layout_master_count_decrease()
 			return awful.screen.focused().selected_tag.master_count > 0
 		end,
 		fn = function()
-			layout_master_count_decrease()
+			awful.tag.incnmaster(-1, nil, true)
 		end,
 		result = { master_count = helper.get_current_tag_master_count },
 	})
@@ -572,7 +534,7 @@ function M.layout_master_count_increase()
 		group = "layout.master.count",
 		desc = "master count increase",
 		fn = function()
-			layout_master_count_increase()
+			awful.tag.incnmaster(1, nil, true)
 		end,
 		result = { master_count = helper.get_current_tag_master_count },
 	})
@@ -586,7 +548,7 @@ function M.layout_column_count_decrease()
 			return awful.screen.focused().selected_tag.column_count > 0
 		end,
 		fn = function()
-			layout_column_count_decrease()
+			awful.tag.incncol(-1, nil, true)
 		end,
 		result = { column_count = helper.get_current_tag_column_count },
 	})
@@ -597,8 +559,7 @@ function M.layout_column_count_increase()
 		group = "layout.column.count",
 		desc = "column count increase",
 		fn = function()
-			layout_column_count_increase()
-			return "column_count", helper.get_current_tag_column_count()
+			awful.tag.incncol(1, nil, true)
 		end,
 		result = { column_count = helper.get_current_tag_column_count },
 	})
@@ -609,7 +570,7 @@ function M.layout_next()
 		group = "layout.inc",
 		desc = "next layout",
 		fn = function()
-			layout_next()
+			awful.layout.inc(1)
 		end,
 		result = { layout = helper.get_current_layout_name },
 	})
@@ -620,7 +581,7 @@ function M.layout_prev()
 		group = "layout.inc",
 		desc = "prev layout",
 		fn = function()
-			layout_prev()
+			awful.layout.inc(-1)
 		end,
 		result = { layout = helper.get_current_layout_name },
 	})
@@ -647,7 +608,7 @@ function M.layout_select_menu()
 					util.index_to_label(i, opts.labels),
 					desc = l.name,
 					fn = function()
-						layout_set(t, l)
+						awful.layout.set(l, t)
 					end,
 					result = { layout = l.name },
 				})
