@@ -112,6 +112,7 @@ local function volume_cmd(inc)
 	if inc < 0 then
 		sign = "-"
 	end
+	inc = math.abs(inc)
 	local cmd = string.format("amixer set Master %s%%%s > /dev/null 2>&1", inc, sign)
 	return cmd
 end
