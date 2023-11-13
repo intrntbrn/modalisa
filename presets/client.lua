@@ -913,4 +913,33 @@ function M.move_to_screen_menu(cl)
 		}
 end
 
+function M.move_to_tag_menu(c)
+	assert(c)
+	return mt({
+		is_menu = true,
+		group = "tag.client.move",
+		cond = function()
+			return c and c.valid
+		end,
+		desc = "move client to tag",
+		fn = function(opts)
+			local s = c.screen
+
+			local ret = {}
+			for i, t in ipairs(s.tags) do
+				local desc = helper.tagname(t)
+				table.insert(ret, {
+					util.index_to_label(i, opts.labels),
+					desc = desc,
+					fn = function()
+						c:move_to_tag(t)
+					end,
+				})
+			end
+
+			return ret
+		end,
+	})
+end
+
 return M

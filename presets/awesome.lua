@@ -132,17 +132,16 @@ function M.awesome_padding_menu()
 					group = "screen.padding",
 					fn = function(opts)
 						s.padding = s.padding or {}
-						local padding = s.padding[x]
-						local initial = string.format("%d", padding or 0)
+						local initial = string.format("%d", s.padding[x] or 0)
 						local header = string.format("padding %s", x)
 						local run = function(str)
 							local number = tonumber(str)
 							if not number then
 								return
 							end
-							local cpy = vim.deepcopy(s.padding) or {}
-							cpy[x] = number
-							s.padding = cpy
+							local padding = vim.deepcopy(s.padding) or {}
+							padding[x] = number
+							s.padding = padding
 						end
 
 						awesome.emit_signal("modalisa::prompt", { fn = run, initial = initial, header = header }, opts)
