@@ -74,10 +74,21 @@ function M.setup(opts)
 	require("modalisa.root").setup(opts)
 	require("modalisa.modal").setup(opts)
 
-	require("modalisa.hints").setup(opts)
-	require("modalisa.label").setup(opts)
-	require("modalisa.echo").setup(opts)
-	require("modalisa.prompt").setup(opts)
+	if not opts.disable_hints then
+		require("modalisa.hints").setup(opts)
+	end
+
+	if not opts.disable_label then
+		require("modalisa.label").setup(opts)
+	end
+
+	if not opts.disable_echo then
+		require("modalisa.echo").setup(opts)
+	end
+
+	if not opts.disable_prompt then
+		require("modalisa.prompt").setup(opts)
+	end
 
 	-- default keys
 	if opts.include_default_keys then

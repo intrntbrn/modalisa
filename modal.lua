@@ -235,33 +235,6 @@ local function keygrabber_keys(t)
 
 	local all_keys = {}
 
-	-- regular keys (successors)
-	for k in pairs(succs) do
-		for _, key in pairs(parse_vim_key(k, opts)) do
-			add_key_to_map(all_keys, key)
-		end
-	end
-
-	-- toggle keys
-	local toggle_keys
-	if type(opts.toggle_keys) == "table" then
-		toggle_keys = opts.toggle_keys
-	elseif type(opts.toggle_keys) == "string" then
-		toggle_keys = { opts.toggle_keys }
-	end
-
-	for _, tk in pairs(toggle_keys) do
-		local parsed_keys = parse_vim_key(tk, opts)
-		for _, parsed_key in pairs(parsed_keys) do
-			local key = {
-				mods = parsed_key.mods,
-				key = parsed_key.key,
-				toggle = true,
-			}
-			add_key_to_map(all_keys, key)
-		end
-	end
-
 	-- stop keys
 	assert(opts.stop_keys, "no stop keys found")
 	local stop_keys
@@ -281,6 +254,26 @@ local function keygrabber_keys(t)
 				mods = parsed_key.mods,
 				key = parsed_key.key,
 				stop = true,
+			}
+			add_key_to_map(all_keys, key)
+		end
+	end
+
+	-- toggle keys
+	local toggle_keys
+	if type(opts.toggle_keys) == "table" then
+		toggle_keys = opts.toggle_keys
+	elseif type(opts.toggle_keys) == "string" then
+		toggle_keys = { opts.toggle_keys }
+	end
+
+	for _, tk in pairs(toggle_keys) do
+		local parsed_keys = parse_vim_key(tk, opts)
+		for _, parsed_key in pairs(parsed_keys) do
+			local key = {
+				mods = parsed_key.mods,
+				key = parsed_key.key,
+				toggle = true,
 			}
 			add_key_to_map(all_keys, key)
 		end
@@ -308,6 +301,13 @@ local function keygrabber_keys(t)
 					add_key_to_map(all_keys, key)
 				end
 			end
+		end
+	end
+
+	-- regular keys (successors)
+	for k in pairs(succs) do
+		for _, key in pairs(parse_vim_key(k, opts)) do
+			add_key_to_map(all_keys, key)
 		end
 	end
 
