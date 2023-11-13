@@ -13,7 +13,11 @@ local M = {}
 local default_resize_delta = dpi(32)
 local default_resize_factor = 0.05
 
-function M.client_create_filter(multi_screen, multi_tag, include_focused_client)
+function M.make_filter(args)
+	local multi_screen = args.multi_screen
+	local multi_tag = args.multi_tag
+	local include_focused_client = args.include_focused_client
+
 	return function(c)
 		if not c then
 			return false
@@ -477,7 +481,7 @@ local function cond_is_floating(cl)
 	return layout == "floating" or c.floating
 end
 
-function M.client_select_picker(multi_window, include_focused_client)
+function M.client_select_picker(multi_screen, include_focused_client)
 	return mt({
 		group = "client.menu.focus",
 		is_menu = true,
@@ -489,7 +493,8 @@ function M.client_select_picker(multi_window, include_focused_client)
 		end,
 		desc = "select client picker",
 		fn = function(opts)
-			local filter = M.client_create_filter(multi_window, false, include_focused_client)
+			local filter =
+				M.make_filter({ multi_screen = multi_screen, include_focused_client = include_focused_client })
 			local fn = function(c)
 				c:activate({ raise = true, context = "client.focus.bydirection" })
 			end
@@ -503,7 +508,7 @@ function M.client_select_picker(multi_window, include_focused_client)
 	})
 end
 
-function M.client_swap_picker()
+function M.client_swap_picker(cl)
 	return mt({
 		group = "client.swap",
 		is_menu = true,
@@ -511,14 +516,19 @@ function M.client_swap_picker()
 			labels = util.labels_qwerty,
 		},
 		cond = function()
-			return client.focus
+			local c = cl or client.focus
+			return c and c.valid
 		end,
 		desc = "swap client picker",
 		fn = function(opts)
+			local c = cl or client.focus
+			if not c then
+				return
+			end
 			local include_focused_client = false
-			local filter = M.client_create_filter(false, false, include_focused_client)
-			local fn = function(c)
-				client.focus:swap(c)
+			local filter = M.make_filter({ include_focused_client = include_focused_client })
+			local fn = function(other)
+				c:swap(other)
 			end
 			return client_picker(opts, fn, filter)
 		end,
@@ -735,6 +745,7 @@ function M.client_set_property(x, cl)
 	})
 end
 
+-- FIXME:
 function M.client_placement(placement, cl)
 	return mt({
 		group = "client.placement",
@@ -748,6 +759,7 @@ function M.client_placement(placement, cl)
 	})
 end
 
+-- FIXME:
 function M.client_resize_mode_floating(cl)
 	return mt({
 		group = "resize.mode",
@@ -758,6 +770,7 @@ function M.client_resize_mode_floating(cl)
 	})
 end
 
+-- FIXME:
 function M.client_resize_floating(cl)
 	return mt({
 		group = "client.resize",
@@ -834,7 +847,7 @@ function M.client_unminimize_menu(multi_tag)
 		fn = function(opts)
 			local ret = {}
 			local i = 1
-			local filter = M.client_create_filter(false, multi_tag, false)
+			local filter = M.make_filter({ multi_tag = multi_tag })
 			for _, c in ipairs(client.get()) do
 				if filter(c) and c.minimized then
 					table.insert(ret, {
@@ -863,17 +876,21 @@ function M.client_unminimize_menu(multi_tag)
 	})
 end
 
-function M.client_toggle_tag_menu()
+function M.client_toggle_tag_menu(cl)
 	return mt({
 		is_menu = true,
 		group = "client.tags.toggle",
 		cond = function()
-			return client.focus
+			local c = cl or client.focus
+			return c and c.valid
 		end,
 		desc = "toggle client tags",
 		fn = function(opts)
+			local c = cl or client.focus
+			if not c then
+				return
+			end
 			local s = awful.screen.focused()
-			local c = client.focus
 			local ret = {}
 			for i, t in pairs(s.tags) do
 				table.insert(ret, {
@@ -908,21 +925,22 @@ function M.move_to_screen_menu(cl)
 			desc = "move client to screen",
 			cond = function()
 				local c = cl or client.focus
-				return c
+				return c and c.valid
 			end,
 		}
 end
 
-function M.move_to_tag_menu(c)
-	assert(c)
+function M.move_to_tag_menu(cl)
 	return mt({
 		is_menu = true,
 		group = "tag.client.move",
 		cond = function()
+			local c = cl or client.focus
 			return c and c.valid
 		end,
 		desc = "move client to tag",
 		fn = function(opts)
+			local c = cl or client.focus
 			local s = c.screen
 
 			local ret = {}

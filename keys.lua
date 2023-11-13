@@ -11,7 +11,7 @@ local scr = require("modalisa.presets.screen")
 local M = {}
 
 -- NOTE:
--- presets can be overwritten by using the + operator
+-- presets can be overwritten (deep extended) by using the + operator
 
 local keys = {
 	["."] = nil,
