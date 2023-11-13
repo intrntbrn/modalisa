@@ -99,6 +99,33 @@ function M.awesome_run_prompt()
 	})
 end
 
+function M.awesome_toggle_wibox()
+	return mt({
+		group = "awesome.wibox",
+		desc = function()
+			local s = awful.screen.focused()
+			if not s.mywibox then
+				return "wibox toggle"
+			end
+			if s.mywibox.visible then
+				return "wibox hide"
+			end
+			return "wibox show"
+		end,
+		cond = function()
+			return awful.screen.focused().mywibox
+		end,
+		fn = function()
+			local s = awful.screen.focused()
+			if not s.mywibox then
+				return
+			end
+
+			s.mywibox.visible = not s.mywibox.visible
+		end,
+	})
+end
+
 function M.spawn_terminal()
 	return mt({
 		group = "spawn",
