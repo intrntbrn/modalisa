@@ -202,7 +202,7 @@ function M.power_suspend()
 		group = "power.suspend",
 		desc = "suspend",
 		function()
-			awful.spawn("suspend")
+			awful.spawn("systemctl suspend")
 		end,
 		result = { suspend = "" },
 	})
