@@ -64,28 +64,28 @@ function popup:set(text, placement, opts)
 	self.popup.placement = placement
 end
 
-function M.hide_labels()
+local function hide_labels()
 	for _, p in pairs(popups) do
 		p:set_visible(false)
 	end
 	popups = {}
 end
 
-function M.show_label_parent(parent, label, opts)
+local function show_label(placement, text, opts)
+	opts = opts or config.get_config()
+	text = text or ""
+
+	local p = popup:new()
+	p:set(text, placement, opts)
+	p:set_visible(true)
+	table.insert(popups, p)
+end
+
+local function show_label_parent(parent, text, opts)
 	local placement = function(x)
 		awful.placement.centered(x, { parent = parent })
 	end
-	return M.show_label(placement, label, opts)
-end
-
-function M.show_label(placement, label, opts)
-	opts = opts or config.get_config()
-	label = label or ""
-
-	local p = popup:new()
-	p:set(label, placement, opts)
-	p:set_visible(true)
-	table.insert(popups, p)
+	return show_label(placement, text, opts)
 end
 
 local once
@@ -93,8 +93,16 @@ function M.setup(_)
 	assert(once == nil, "label is already setup")
 	once = true
 
+	awesome.connect_signal("modalisa::label::show", function(parent, text, opts)
+		show_label_parent(parent, text, opts)
+	end)
+
+	awesome.connect_signal("modalisa::label::hide", function()
+		hide_labels()
+	end)
+
 	awesome.connect_signal("modalisa::on_stop", function(_)
-		M.hide_labels()
+		hide_labels()
 	end)
 end
 

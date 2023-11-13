@@ -5,7 +5,6 @@ local grect = require("gears.geometry").rectangle
 local mt = require("modalisa.presets.metatable")
 local helper = require("modalisa.presets.helper")
 local pscreen = require("modalisa.presets.screen")
-local label = require("modalisa.label")
 ---@diagnostic disable-next-line: unused-local
 local dump = require("modalisa.lib.vim").inspect
 
@@ -104,7 +103,7 @@ local function client_picker(opts, fn, filter)
 
 	for i, c in ipairs(clients) do
 		local lbl = util.index_to_label(i, opts.labels)
-		label.show_label_parent(c, lbl, opts)
+		awesome.emit_signal("modalisa::label::show", c, lbl, opts)
 		-- create menu
 		table.insert(menu, {
 			lbl,
@@ -120,7 +119,7 @@ local function client_picker(opts, fn, filter)
 	-- only 1 client
 	if opts.awesome.auto_select_the_only_choice then
 		if #menu == 1 then
-			label.hide_labels()
+			awesome.emit_signal("modalisa::label::hide")
 			menu[1].fn()
 			return
 		end
@@ -499,7 +498,7 @@ function M.client_select_picker(multi_window, include_focused_client)
 			return list
 		end,
 		on_leave = function()
-			label.hide_labels()
+			awesome.emit_signal("modalisa::label::hide")
 		end,
 	})
 end
@@ -524,7 +523,7 @@ function M.client_swap_picker()
 			return client_picker(opts, fn, filter)
 		end,
 		on_leave = function()
-			label.hide_labels()
+			awesome.emit_signal("modalisa::label::hide")
 		end,
 	})
 end

@@ -1,5 +1,6 @@
 local M = {}
 
+---@diagnostic disable-next-line: unused-local
 local dump = require("modalisa.lib.vim").inspect
 local root_tree = require("modalisa.root")
 local modal = require("modalisa.modal")
@@ -54,8 +55,13 @@ function M.get(k)
 end
 
 -- get complete config
-function M.get_config(opts)
-	return config.get_config(opts)
+function M.get_config(...)
+	return config.get_config(...)
+end
+
+-- get complete config
+function M.get_default_config(...)
+	return config.get_default_config(...)
 end
 
 local mt = {
