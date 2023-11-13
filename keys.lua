@@ -5,7 +5,6 @@ local sys = require("modalisa.presets.sys")
 local awm = require("modalisa.presets.awesome")
 local c = require("modalisa.presets.client")
 local t = require("modalisa.presets.tag")
-local l = require("modalisa.presets.layout")
 local sp = require("modalisa.presets.spawn")
 local scr = require("modalisa.presets.screen")
 
@@ -75,12 +74,12 @@ local keys = {
 	["<S-Up>"] = c.client_floating_size_decrease("up"),
 	["<S-Right>"] = c.client_floating_size_decrease("right"),
 
-	["<"] = l.layout_column_count_decrease() + { continue = true },
-	[">"] = l.layout_column_count_increase() + { continue = true },
-	["+"] = l.layout_master_count_increase() + { continue = true },
-	["-"] = l.layout_master_count_decrease() + { continue = true },
-	["]"] = l.layout_master_width_increase() + { continue = true },
-	["["] = l.layout_master_width_decrease() + { continue = true },
+	["<"] = t.layout_column_count_decrease() + { continue = true },
+	[">"] = t.layout_column_count_increase() + { continue = true },
+	["+"] = t.layout_master_count_increase() + { continue = true },
+	["-"] = t.layout_master_count_decrease() + { continue = true },
+	["]"] = t.layout_master_width_increase() + { continue = true },
+	["["] = t.layout_master_width_decrease() + { continue = true },
 
 	["1"] = t.tag_view_only(1) + { hidden = false },
 	["2"] = t.tag_view_only(2) + { hidden = false },
@@ -146,13 +145,13 @@ local keys = {
 	["t8"] = t.tag_move_focused_client_to_tag(8),
 	["t9"] = t.tag_move_focused_client_to_tag(9),
 	["t0"] = t.tag_move_focused_client_to_tag(10),
-	["t "] = l.layout_select_menu() + { opts = { labels = util.labels_qwerty } },
-	["tk"] = l.layout_master_width_increase() + { continue = true },
-	["tj"] = l.layout_master_width_decrease() + { continue = true },
-	["tl"] = l.layout_master_count_increase() + { continue = true },
-	["th"] = l.layout_master_count_decrease() + { continue = true },
-	["tc"] = l.layout_column_count_increase() + { continue = true },
-	["tC"] = l.layout_column_count_decrease() + { continue = true },
+	["t "] = t.layout_select_menu() + { opts = { labels = util.labels_qwerty } },
+	["tk"] = t.layout_master_width_increase() + { continue = true },
+	["tj"] = t.layout_master_width_decrease() + { continue = true },
+	["tl"] = t.layout_master_count_increase() + { continue = true },
+	["th"] = t.layout_master_count_decrease() + { continue = true },
+	["tc"] = t.layout_column_count_increase() + { continue = true },
+	["tC"] = t.layout_column_count_decrease() + { continue = true },
 
 	-- client
 	["c"] = { desc = "client", group = "menu.client" },
