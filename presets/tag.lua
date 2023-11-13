@@ -3,6 +3,7 @@ local util = require("modalisa.util")
 local vim = require("modalisa.lib.vim")
 local mt = require("modalisa.presets.metatable")
 local helper = require("modalisa.presets.helper")
+local pscreen = require("modalisa.presets.screen")
 ---@diagnostic disable-next-line: unused-local
 local dump = require("modalisa.lib.vim").inspect
 
@@ -97,19 +98,35 @@ local function tag_get_properties(t)
 	return props
 end
 
-local function tag_move_to_screen(s, t)
-	assert(s)
+local function tag_move_to_screen(s, t, keep_old_tag)
+	assert(s, "screen is nil")
 	t = t or awful.screen.focused().selected_tag
 	if not t then
 		return
 	end
 
-	local props = M.tag_get_properties(t)
+	local props = tag_get_properties(t)
 	assert(props)
 
 	props.screen = s
 
-	awful.tag(props.name, props)
+	local clients = t:clients()
+
+	local t_new = awful.tag.add(props.name, props)
+	if not t_new then
+		return
+	end
+
+	for _, c in pairs(clients) do
+		c:move_to_screen(s)
+	end
+	t_new:clients(clients)
+	if not keep_old_tag then
+		t:delete()
+	end
+
+	t_new:view_only()
+	awful.screen.focus(s)
 end
 
 function M.tag_move_focused_client_to_tag(i)
@@ -175,6 +192,27 @@ function M.move_client_to_tag_menu(c)
 			return ret
 		end,
 	})
+end
+
+function M.move_tag_to_screen_menu(tag, keep_old_tag)
+	local fn = function(s)
+		local t = tag or awful.screen.focused().selected_tag
+		if not t then
+			return
+		end
+		tag_move_to_screen(s, t, keep_old_tag)
+	end
+
+	local menu = pscreen.screen_menu(fn, false)
+
+	return menu
+		+ {
+			desc = "move tag to screen",
+			cond = function()
+				local t = tag or awful.screen.focused().selected_tag
+				return t and helper.screen_count() > 1
+			end,
+		}
 end
 
 function M.tag_move_all_clients_to_tag_menu()
