@@ -1,6 +1,7 @@
 local awful = require("awful")
 local util = require("modalisa.util")
 local mt = require("modalisa.presets.metatable")
+local vim = require("modalisa.lib.vim")
 
 local M = {}
 
@@ -114,6 +115,47 @@ function M.awesome_toggle_wibox()
 			end
 
 			s.mywibox.visible = not s.mywibox.visible
+		end,
+	})
+end
+
+function M.awesome_padding_menu()
+	return mt({
+		group = "awesome.screen.padding",
+		is_menu = true,
+		desc = "screen padding",
+		fn = function()
+			local s = awful.screen.focused()
+			local fn = function(x)
+				return {
+					desc = string.format("%s", x),
+					group = "screen.padding",
+					fn = function(opts)
+						s.padding = s.padding or {}
+						local padding = s.padding[x]
+						local initial = string.format("%d", padding or 0)
+						local header = string.format("padding %s", x)
+						local run = function(str)
+							local number = tonumber(str)
+							if not number then
+								return
+							end
+							local cpy = vim.deepcopy(s.padding) or {}
+							cpy[x] = number
+							s.padding = cpy
+						end
+
+						require("modalisa.ui.prompt").run(run, initial, header, opts)
+					end,
+				}
+			end
+
+			return {
+				h = fn("left"),
+				j = fn("bottom"),
+				k = fn("top"),
+				l = fn("right"),
+			}
 		end,
 	})
 end

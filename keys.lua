@@ -114,9 +114,10 @@ local keys = {
 	["ax"] = pawm.awesome_execute(),
 	["ar"] = pawm.awesome_run_prompt(),
 	["as"] = pawm.awesome_help(),
-	["ap"] = pawm.awesome_menubar(),
+	["am"] = pawm.awesome_menubar(),
 	["at"] = pawm.awesome_toggle_wibox(),
 	["aw"] = pawm.awesome_wallpaper_menu(2),
+	["ap"] = pawm.awesome_padding_menu(),
 
 	-- tag
 	["t"] = { desc = "tag", group = "menu.tag" },
