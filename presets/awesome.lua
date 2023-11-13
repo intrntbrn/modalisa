@@ -1,6 +1,5 @@
 local awful = require("awful")
 local util = require("modalisa.util")
-local vim = require("modalisa.lib.vim")
 local mt = require("modalisa.presets.metatable")
 
 local M = {}

@@ -1,24 +1,24 @@
 {
     "diagnostics.globals": [
-        "jit",
-        "screen",
-        "mouse",
-        "root",
-        "client",
         "awesome",
         "button",
+        "client",
         "dbus",
         "drawable",
         "drawin",
+        "jit",
         "key",
         "keygrabber",
+        "math.atan2",
+        "mouse",
         "mousegrabber",
+        "root",
+        "screen",
         "selection",
-        "tag",
-        "window",
         "table.unpack",
+        "tag",
         "unpack",
-        "math.atan2"
+        "window"
     ],
     "diagnostics.library": [
 		"/usr/share/awesome/lib"

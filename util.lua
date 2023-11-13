@@ -170,12 +170,6 @@ function M.apply_highlight(text, highlight)
 	return text
 end
 
--- https://stackoverflow.com/questions/9790688/escaping-strings-for-gsub/20778724#20778724
-local quotepattern = "([" .. ("%^$().[]*+-?"):gsub("(.)", "%%%1") .. "])"
-M.quote = function(str)
-	return str:gsub(quotepattern, "%%%1")
-end
-
 function M.get_font_width(font)
 	local _, _, width = string.find(font, "[%s]+([0-9]+)")
 	-- TODO: figure out the default font size that awesome uses

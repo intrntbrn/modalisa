@@ -5,7 +5,24 @@ local vim = require("modalisa.lib.vim")
 
 local M = {}
 
-function M.screen_menu(fn, include_focused)
+function M.focus_direction(dir)
+	return mt({
+		group = "screen.focus.dir",
+		desc = string.format("focus %s screen", dir),
+		cond = function()
+			return screen.count() > 1
+		end,
+		fn = function()
+			if screen.count() == 2 then
+				awful.screen.focus_relative(1)
+			else
+				awful.screen.focus_bydirection(dir)
+			end
+		end,
+	})
+end
+
+function M.generate_menu(fn, include_focused)
 	return mt({
 		desc = "screen menu",
 		group = "screen",

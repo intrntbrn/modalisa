@@ -6,6 +6,7 @@ local pclient = require("modalisa.presets.client")
 local ptag = require("modalisa.presets.tag")
 local playout = require("modalisa.presets.layout")
 local pspawn = require("modalisa.presets.spawn")
+local pscreen = require("modalisa.presets.screen")
 
 local M = {}
 
@@ -58,6 +59,11 @@ local keys = {
 	["J"] = pclient.client_move_smart("down"),
 	["K"] = pclient.client_move_smart("up"),
 	["L"] = pclient.client_move_smart("right"),
+
+	["<C-h>"] = pscreen.focus_direction("left"),
+	["<C-j>"] = pscreen.focus_direction("down"),
+	["<C-k>"] = pscreen.focus_direction("up"),
+	["<C-l>"] = pscreen.focus_direction("right"),
 
 	["<Left>"] = pclient.client_resize_smart("left"),
 	["<Down>"] = pclient.client_resize_smart("down"),
