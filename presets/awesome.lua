@@ -13,7 +13,6 @@ local helper = {}
 -- wallpaper
 -- screen (awful.screen.focus_relative(-1), c:move_to_screen())
 -- screen padding
--- client: border_width, skip taskbar, hidden, hide bar
 
 local function cond_is_floating(cl)
 	local c = cl or client.focus
@@ -122,6 +121,35 @@ function M.awesome_toggle_wibox()
 			end
 
 			s.mywibox.visible = not s.mywibox.visible
+		end,
+	})
+end
+
+function M.awesome_wallpaper_menu(max_depth)
+	return mt({
+		group = "awesome.wallpaper",
+		desc = "wallpaper",
+		is_menu = true,
+		fn = function(opts)
+			local wp = require("gears.wallpaper")
+			local dir = opts.awesome.wallpaper_dir
+			local fp = require("modalisa.presets.file").file_picker
+			local filter = require("modalisa.presets.file").filter_image
+			local entries = {
+				m = fp(dir, function(w)
+					wp.maximized(w)
+				end, max_depth, filter) + { desc = "maximized" },
+				t = fp(dir, function(w)
+					wp.tiled(w)
+				end, max_depth, filter) + { desc = "tiled" },
+				f = fp(dir, function(w)
+					wp.fit(w)
+				end, max_depth, filter) + { desc = "fit" },
+				c = fp(dir, function(w)
+					wp.centered(w)
+				end, max_depth, filter) + { desc = "centered" },
+			}
+			return entries
 		end,
 	})
 end

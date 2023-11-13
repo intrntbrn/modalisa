@@ -105,7 +105,8 @@ local keys = {
 	["ar"] = ps.awesome_run_prompt(),
 	["as"] = ps.awesome_help(),
 	["ap"] = ps.awesome_menubar(),
-	["aw"] = ps.awesome_toggle_wibox(),
+	["at"] = ps.awesome_toggle_wibox(),
+	["aw"] = ps.awesome_wallpaper_menu(2),
 
 	-- tag
 	["t"] = { desc = "tag", group = "menu.tag" },

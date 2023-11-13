@@ -241,6 +241,7 @@ local defaults = {
 		auto_select_the_only_choice = false,
 		resize_delta = dpi(32),
 		resize_factor = 0.025,
+		wallpaper_dir = os.getenv("HOME") .. "/.config/awesome/",
 		browser = "firefox || chromium || google-chrome-stable || qutebrowser",
 		terminal = terminal or "alacritty || kitty || wezterm || st || urxvt || xterm",
 		app_menu = "rofi -show drun || dmenu_run",
