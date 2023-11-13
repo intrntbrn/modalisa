@@ -648,11 +648,7 @@ local function show(t)
 	end
 end
 
-function M.show(t)
-	show(t)
-end
-
-function M.toggle(t)
+local function toggle(t)
 	if popup:is_visible() then
 		popup:set_visible(false)
 		return
@@ -681,7 +677,7 @@ function M.setup(opts)
 	end)
 
 	awesome.connect_signal("modalisa::hints::toggle", function(t)
-		M.toggle(t)
+		toggle(t)
 	end)
 
 	-- live update on config change
