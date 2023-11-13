@@ -80,20 +80,24 @@ function M.setup(opts)
 	require("modalisa.root").setup(opts)
 	require("modalisa.modal").setup(opts)
 
+	-- NOTE: all UI modules are only invoked by signals making them completely
+	-- optional, so that users are able to implement their own, if configuration
+	-- options do not suit them.
+
 	if not opts.disable_hints then
-		require("modalisa.hints").setup(opts)
+		require("modalisa.ui.hints").setup(opts)
 	end
 
 	if not opts.disable_label then
-		require("modalisa.label").setup(opts)
+		require("modalisa.ui.label").setup(opts)
 	end
 
 	if not opts.disable_echo then
-		require("modalisa.echo").setup(opts)
+		require("modalisa.ui.echo").setup(opts)
 	end
 
 	if not opts.disable_prompt then
-		require("modalisa.prompt").setup(opts)
+		require("modalisa.ui.prompt").setup(opts)
 	end
 
 	-- default keys
