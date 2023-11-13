@@ -255,8 +255,8 @@ function M.layout_next()
 		desc = "next layout",
 		fn = function()
 			awm.layout_next()
-			return "layout", helper.get_current_layout_name()
 		end,
+		result = { layout = helper.get_current_layout_name },
 	})
 end
 
@@ -266,8 +266,8 @@ function M.layout_prev()
 		desc = "prev layout",
 		fn = function()
 			awm.layout_prev()
-			return "layout", helper.get_current_layout_name()
 		end,
+		result = { layout = helper.get_current_layout_name },
 	})
 end
 
@@ -293,8 +293,8 @@ function M.layout_select_menu()
 					desc = l.name,
 					fn = function()
 						awm.layout_set(t, l)
-						return "layout", l.name
 					end,
+					result = { layout = l.name },
 				})
 			end
 
