@@ -345,23 +345,6 @@ local function client_move_smart(c, dir, resize_delta)
 	end
 end
 
-local function client_resize_smart(c, dir, resize_delta, resize_factor)
-	c = c or client.focus
-	if not c then
-		return
-	end
-
-	resize_delta = resize_delta or default_resize_delta
-	resize_factor = resize_factor or default_resize_factor
-
-	local layout = awful.layout.get(awful.screen.focused()).name
-	if layout == "floating" or c.floating then
-		return M.client_floating_resize(c, dir, resize_delta)
-	end
-
-	M.client_resize_tiled(c, dir, resize_factor)
-end
-
 local function client_floating_resize(c, dir, px)
 	local resize = {
 		left = function(cl, d)
@@ -386,7 +369,7 @@ local function client_floating_resize(c, dir, px)
 	awful.placement.no_offscreen(c)
 end
 
-function M.client_resize_tiled(c, dir, resize_factor)
+local function client_resize_tiled(c, dir, resize_factor)
 	c = c or client.focus
 	if not c then
 		return
@@ -459,6 +442,23 @@ function M.client_resize_tiled(c, dir, resize_factor)
 	elseif dir == "right" then
 		awful.tag.incmwfact(resize_factor / 4)
 	end
+end
+
+local function client_resize_smart(c, dir, resize_delta, resize_factor)
+	c = c or client.focus
+	if not c then
+		return
+	end
+
+	resize_delta = resize_delta or default_resize_delta
+	resize_factor = resize_factor or default_resize_factor
+
+	local layout = awful.layout.get(awful.screen.focused()).name
+	if layout == "floating" or c.floating then
+		return client_floating_resize(c, dir, resize_delta)
+	end
+
+	client_resize_tiled(c, dir, resize_factor)
 end
 
 local function client_toggle_tag(c, t)
