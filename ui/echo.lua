@@ -1,6 +1,7 @@
 local config = require("modalisa.config")
 local util = require("modalisa.util")
 local gears = require("gears")
+local gstring = require("gears.string")
 local wibox = require("wibox")
 local awful = require("awful")
 local beautiful = require("beautiful")
@@ -66,6 +67,10 @@ local function create_element(value, opts, fg, highlight, width)
 	local eopts = opts.echo
 	local t = type(value)
 	if t == "string" then
+		local escaped = gstring.xml_escape(value)
+		if escaped then
+			value = escaped
+		end
 		return create_textbox(value, opts, fg, highlight, width)
 	end
 	if t == "number" then
@@ -305,6 +310,10 @@ function M.setup(opts)
 			return
 		end
 		show(kvs, opts)
+	end)
+
+	awesome.connect_signal("modalisa::echo::hide", function()
+		popup:set_visible(false)
 	end)
 
 	awesome.connect_signal("modalisa::on_exec", function(tree, result)
