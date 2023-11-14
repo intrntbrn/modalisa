@@ -13,7 +13,7 @@ function M.audio_next()
 	return mt({
 		group = "audio.inc",
 		desc = "audio next",
-		function()
+		fn = function()
 			local cmd = audio_playerctl_cmd("next")
 			awful.spawn(cmd)
 		end,
@@ -24,7 +24,7 @@ function M.audio_prev()
 	return mt({
 		group = "audio.inc",
 		desc = "audio prev",
-		function()
+		fn = function()
 			local cmd = audio_playerctl_cmd("previous")
 			awful.spawn(cmd)
 		end,
@@ -35,7 +35,7 @@ function M.audio_play_pause()
 	return mt({
 		group = "audio",
 		desc = "audio play-pause",
-		function()
+		fn = function()
 			local cmd = audio_playerctl_cmd("play-pause")
 			awful.spawn(cmd)
 		end,
@@ -46,7 +46,7 @@ function M.audio_stop()
 	return mt({
 		group = "audio",
 		desc = "audio stop",
-		function()
+		fn = function()
 			local cmd = audio_playerctl_cmd("stop")
 			awful.spawn(cmd)
 		end,
@@ -81,7 +81,7 @@ function M.brightness_inc(inc)
 				show_percentage_as_progressbar = true,
 			},
 		},
-		function(opts)
+		fn = function(opts)
 			local cmd = brightness_cmd(inc)
 			awful.spawn.easy_async_with_shell(cmd, function()
 				brightness_show(opts)
@@ -126,7 +126,7 @@ function M.volume_inc(inc)
 				show_percentage_as_progressbar = true,
 			},
 		},
-		function(opts)
+		fn = function(opts)
 			local cmd = volume_cmd(inc)
 			awful.spawn.easy_async_with_shell(cmd, function()
 				volume_show(opts)
@@ -144,7 +144,7 @@ function M.volume_mute_toggle()
 				show_percentage_as_progressbar = true,
 			},
 		},
-		function(opts)
+		fn = function(opts)
 			local cmd = volume_toggle_cmd()
 			awful.spawn.easy_async_with_shell(cmd, function()
 				volume_show(opts)
@@ -157,7 +157,7 @@ function M.power_shutdown()
 	return mt({
 		group = "power.shutdown",
 		desc = "shutdown",
-		function()
+		fn = function()
 			awful.spawn("shutdown -h 0")
 		end,
 		result = { shutdown = "" },
@@ -168,7 +168,7 @@ function M.power_shutdown_cancel()
 	return mt({
 		group = "power.shutdown",
 		desc = "cancel shutdown timer",
-		function()
+		fn = function()
 			awful.spawn("shutdown -c")
 		end,
 		result = { shutdown = "cancled" },
@@ -179,7 +179,7 @@ function M.power_shutdown_timer()
 	return mt({
 		group = "power.shutdown",
 		desc = "shutdown timer",
-		function(opts)
+		fn = function(opts)
 			local header = "shutdown in minutes:"
 			local initial = 60
 			local fn = function(x)
@@ -201,7 +201,7 @@ function M.power_suspend()
 	return mt({
 		group = "power.suspend",
 		desc = "suspend",
-		function()
+		fn = function()
 			awful.spawn("systemctl suspend")
 		end,
 		result = { suspend = "" },
@@ -212,7 +212,7 @@ function M.power_reboot()
 	return mt({
 		group = "power.reboot",
 		desc = "reboot",
-		function()
+		fn = function()
 			awful.spawn("reboot")
 		end,
 		result = { reboot = "" },

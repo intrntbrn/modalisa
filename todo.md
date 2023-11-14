@@ -6,8 +6,6 @@
 - cleanup api
 - screen picker labels
 - tag right click menu
-- hint hover
-- client kill signals
 - keypresser vim style
 - gui editor
 - fix swap client picker

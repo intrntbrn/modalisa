@@ -66,7 +66,7 @@ local function tag_get_properties(t)
 	return props
 end
 
-local function tag_move_to_screen(s, t, keep_old_tag)
+local function tag_move_to_screen(s, t, delete_old_tag)
 	assert(s, "screen is nil")
 	t = t or awful.screen.focused().selected_tag
 	if not t then
@@ -89,7 +89,7 @@ local function tag_move_to_screen(s, t, keep_old_tag)
 		c:move_to_screen(s)
 	end
 	t_new:clients(clients)
-	if not keep_old_tag then
+	if delete_old_tag then
 		t:delete()
 	end
 
@@ -133,13 +133,13 @@ function M.tag_move_focused_client_to_tag(i)
 	})
 end
 
-function M.move_tag_to_screen_menu(tag, keep_old_tag)
+function M.move_tag_to_screen_menu(tag, delete_old_tag)
 	local fn = function(s)
 		local t = tag or awful.screen.focused().selected_tag
 		if not t then
 			return
 		end
-		tag_move_to_screen(s, t, keep_old_tag)
+		tag_move_to_screen(s, t, delete_old_tag)
 	end
 
 	local menu = pscreen.generate_menu(fn, false)
@@ -397,11 +397,11 @@ function M.tag_last()
 	})
 end
 
-function M.tag_new()
+function M.tag_new(is_prompt)
 	return mt({
 		group = "tag.new",
 		desc = "new tag",
-		function(opts)
+		fn = function(opts)
 			local fn = function(name)
 				awful.tag
 					.add(name, {
@@ -409,10 +409,14 @@ function M.tag_new()
 					})
 					:view_only()
 			end
-			local initial = ""
-			local header = "tag name:"
+			if is_prompt then
+				local initial = ""
+				local header = "tag name:"
 
-			awesome.emit_signal("modalisa::prompt", { fn = fn, initial = initial, header = header }, opts)
+				awesome.emit_signal("modalisa::prompt", { fn = fn, initial = initial, header = header }, opts)
+			else
+				fn("")
+			end
 		end,
 	})
 end
@@ -425,7 +429,7 @@ function M.tag_new_copy()
 		cond = function()
 			return awful.screen.focused().selected_tag
 		end,
-		function(opts)
+		fn = function(opts)
 			local t = awful.screen.focused().selected_tag
 			local fn = function(name)
 				local props = tag_get_properties(t)
@@ -453,7 +457,7 @@ function M.tag_rename()
 		cond = function()
 			return awful.screen.focused().selected_tag
 		end,
-		function(opts)
+		fn = function(opts)
 			local fn = function(s)
 				awful.tag.selected().name = s
 			end
@@ -471,7 +475,7 @@ function M.tag_gap()
 		cond = function()
 			return awful.screen.focused().selected_tag
 		end,
-		function(opts)
+		fn = function(opts)
 			local t = awful.screen.focused().selected_tag
 			if not t then
 				return

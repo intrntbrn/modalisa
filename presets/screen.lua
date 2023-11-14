@@ -29,7 +29,7 @@ function M.generate_menu(fn, include_focused)
 		cond = function()
 			return screen.count() > 1
 		end,
-		function(opts)
+		fn = function(opts)
 			local focused = awful.screen.focused()
 			local entries = {}
 			for s in screen do

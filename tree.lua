@@ -79,9 +79,13 @@ local function parse_key(key, table_index)
 					on_enter = v
 				elseif k == "on_leave" then
 					on_leave = v
+				elseif k == "fn" then
+					assert(not fn, "unable to parse key", dump(key))
+					fn = v
 				else
 					assert(not fn, "unable to parse key", dump(key))
 					fn = v
+					print("**** UNNAMED FN :", seq or table_index or "unknown")
 				end
 			elseif t == "boolean" then
 				if k == "temp" then
