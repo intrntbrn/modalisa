@@ -1,6 +1,6 @@
 # ⌨️ modalisa 🎨
 
-`modalisa` is a hybrid modal keymap framework for awesomewm.
+`modalisa` is a hybrid modal keymap framework for AwesomeWM.
 It combines the best of both traditional and modal input modes while also providing a visually appealing interface.
 
 Traditional input modes in tiling window managers often require
@@ -16,9 +16,9 @@ inefficient.
 It keeps track of modifier states to provide distinct input modes that can be tailored to the user's needs for each key and at every stage of the sequence individually.
 It allows for traditional keybinds for common operations that can be repeated by holding down the modifier,
 while also enabling users to tap the modifier (like a leader key) to enter modal mode followed by a key sequence for less common commands.
-This flexibility makes it possible to transition into a more modal-esque keymap gradually without having to relearn most of the awesomewm controls.
+This flexibility makes it possible to transition into a more modal-esque keymap gradually without having to relearn most of the AwesomeWM controls.
 
-In addition, `modalisa` comes with a preconfigured default keymap that includes improved default awesomewm controls (and a lot more) to provide a starting point and to give an overview about the possibilities using this framework.
+In addition, `modalisa` comes with a preconfigured default keymap that includes improved default AwesomeWM controls (and a lot more) to provide a starting point and to give an overview about the possibilities using this framework.
 
 ## ✨ Features
 
@@ -27,7 +27,7 @@ In addition, `modalisa` comes with a preconfigured default keymap that includes 
 - 🌳 Keymap trees with property inheritance
 - 💄 UI building blocks (prompt, echo, labels)
 - 🌐 Define options for every key individually
-- 🪟 Preconfigured awesomewm and system keymap
+- 🪟 Preconfigured AwesomeWM and system keymap
 - 🧙 Use vim syntax to define key sequences
 - ♿ Easy and intuitive configuration
 - 📡 Highly extensible and customizable (200+ parameters)
@@ -105,17 +105,24 @@ require("modalisa").setup({
 })
 ```
 
-### Create your own keymap
+### Create Your Own Keymap
 
-1. Copy the default keymap `keys.lua` as `modalisa_keys.lua` into the home awesomewm directory:
+1. Copy the default keymap `keys.lua` as `modalisa_keys.lua` into the home AwesomeWM directory:
 
 `cp ~/.config/awesome/modalisa/keys.lua ~/.config/awesome/modalisa_keys.lua`
 
-2. Disable the default keymap by setting `include_default_keys = false` on
-   setup.
+2. Disable the default keymap by setting `include_default_keys = false` during setup.
 
-3. Edit the copy. The keymap will be imported automatically when awesomewm
-   starts.
+3. Edit the copy. Restart AwesomeWM for the changes to take effect.
+
+You can retrieve keynames by running the command
+
+```
+awesome-client "awesome.emit_signal('modalisa::showkey')"
+```
+
+from the terminal.
+Press any key combination to show the respective keyname.
 
 ## ⚙️ Configuration
 
@@ -174,7 +181,7 @@ Keys can be configured by using the following properties:
 | `opts`      | table                | Specifies custom options for the key that will be merged with options from predecessors.                                                                                                                                                                     |
 | `cond`      | function(opts)       | A condition that determines whether the key is active (nil means it is always active)                                                                                                                                                                        |
 | `group`     | string               | Assigns the key to a group, used for sorting purposes.                                                                                                                                                                                                       |
-| `global`    | string, boolean      | Creates a global keybinding in awesomewm to run the key's function (e.g. "\<M-a\>"). If set to true, the key sequence will be used as the global keybinding.                                                                                                 |
+| `global`    | string, boolean      | Creates a global keybinding in AwesomeWM to run the key's function (e.g. "\<M-a\>"). If set to true, the key sequence will be used as the global keybinding.                                                                                                 |
 | `continue`  | boolean              | Forces continuation after executing the key's function regardless of the current input mode.                                                                                                                                                                 |
 | `hidden`    | boolean              | Hides the key in hints.                                                                                                                                                                                                                                      |
 | `highlight` | table                | Custom attributes to display the key in hints (font, fg, bg, bold, italic, underline, strikethrough, etc.)                                                                                                                                                   |
