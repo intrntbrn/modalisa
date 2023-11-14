@@ -879,6 +879,14 @@ function M.setup(opts)
 	end
 end
 
+function M.showkey(opts)
+	require("modalisa.showkey").start({
+		mod_map = mod_map,
+		ignore_mods = ignore_mods,
+		opts = opts,
+	})
+end
+
 return setmetatable(M, {
 	__call = function(self, ...)
 		self.run(...)

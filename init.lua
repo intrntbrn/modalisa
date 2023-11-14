@@ -6,6 +6,10 @@ local root_tree = require("modalisa.root")
 local modal = require("modalisa.modal")
 local config = require("modalisa.config")
 
+function M.showkey(...)
+	modal.showkey(...)
+end
+
 -- run key sequence on root
 function M.run(...)
 	return modal.run(...)
