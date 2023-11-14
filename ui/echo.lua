@@ -236,6 +236,9 @@ local function set_timer(eopts)
 	end
 
 	local delay = eopts.timeout
+	if delay <= 0 then
+		return
+	end
 
 	timer = gears.timer({
 		timeout = delay / 1000,
