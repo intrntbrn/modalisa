@@ -861,6 +861,11 @@ function M.setup(opts)
 		global_keybinding_remove(old)
 	end)
 
+	---@diagnostic disable-next-line: redefined-local
+	awesome.connect_signal("modalisa::showkey", function(opts)
+		M.showkey(opts)
+	end)
+
 	awesome.connect_signal("xkb::map_changed", function()
 		generate_mod_conversion_maps()
 	end)
