@@ -14,6 +14,7 @@ local default_resize_delta = dpi(32)
 local default_resize_factor = 0.05
 
 function M.make_filter(args)
+	args = args or {}
 	local multi_screen = args.multi_screen
 	local multi_tag = args.multi_tag
 	local include_focused_client = args.include_focused_client
@@ -937,7 +938,7 @@ function M.move_to_screen_menu(cl)
 		c:move_to_screen(s)
 	end
 
-	local menu = pscreen.generate_menu(fn, false)
+	local menu = pscreen.generate_menu(fn)
 
 	return menu
 		+ {

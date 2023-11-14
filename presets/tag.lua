@@ -142,7 +142,7 @@ function M.move_tag_to_screen_menu(tag, delete_old_tag)
 		tag_move_to_screen(s, t, delete_old_tag)
 	end
 
-	local menu = pscreen.generate_menu(fn, false)
+	local menu = pscreen.generate_menu(fn)
 
 	return menu
 		+ {

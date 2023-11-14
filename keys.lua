@@ -14,7 +14,6 @@ local M = {}
 -- presets can be overwritten (deep extended) by using the + operator
 
 local keys = {
-	["."] = nil,
 	[","] = nil,
 	[";"] = nil,
 	["y"] = nil,
@@ -22,7 +21,6 @@ local keys = {
 	["g"] = nil,
 	["v"] = nil,
 	["d"] = nil,
-	["z"] = nil,
 	["'"] = nil,
 
 	-- interactive configuration of modalisa
@@ -92,6 +90,7 @@ local keys = {
 	["9"] = t.tag_view_only(9) + { hidden = false },
 	["0"] = t.tag_view_only(10) + { hidden = false },
 
+	["z"] = scr.focus_picker(),
 	[" "] = c.client_select_picker(true) + { opts = { labels = util.labels_qwerty } },
 	["w"] = c.client_swap_picker(),
 	["s"] = c.client_swap_master_smart() + { opts = { labels = util.labels_qwerty } },
@@ -183,6 +182,16 @@ local keys = {
 	["cKk"] = c.kill_signal("KILL"),
 	["cKi"] = c.kill_signal("INT"),
 	["cKq"] = c.kill_signal("QUIT"),
+	["c1"] = t.tag_move_focused_client_to_tag(1),
+	["c2"] = t.tag_move_focused_client_to_tag(2),
+	["c3"] = t.tag_move_focused_client_to_tag(3),
+	["c4"] = t.tag_move_focused_client_to_tag(4),
+	["c5"] = t.tag_move_focused_client_to_tag(5),
+	["c6"] = t.tag_move_focused_client_to_tag(6),
+	["c7"] = t.tag_move_focused_client_to_tag(7),
+	["c8"] = t.tag_move_focused_client_to_tag(8),
+	["c9"] = t.tag_move_focused_client_to_tag(9),
+	["c0"] = t.tag_move_focused_client_to_tag(10),
 
 	-- resize floating
 	["r"] = c.client_resize_floating(),

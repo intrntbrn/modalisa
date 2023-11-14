@@ -83,9 +83,8 @@ local function parse_key(key, table_index)
 					assert(not fn, "unable to parse key", dump(key))
 					fn = v
 				else
-					assert(not fn, "unable to parse key", dump(key))
-					fn = v
-					print("**** UNNAMED FN :", seq or table_index or "unknown")
+					-- FIXME:
+					error("unnamed key: ", seq or table_index)
 				end
 			elseif t == "boolean" then
 				if k == "temp" then
