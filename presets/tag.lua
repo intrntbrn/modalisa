@@ -397,31 +397,31 @@ function M.tag_last()
 	})
 end
 
-function M.tag_new(is_prompt)
+function M.tag_new(name)
 	return mt({
 		group = "tag.new",
 		desc = "new tag",
 		fn = function(opts)
-			local fn = function(name)
+			local fn = function(tag_name)
 				awful.tag
-					.add(name, {
+					.add(tag_name, {
 						screen = awful.screen.focused(),
 					})
 					:view_only()
 			end
-			if is_prompt then
+			if not name then
 				local initial = ""
 				local header = "tag name:"
 
 				awesome.emit_signal("modalisa::prompt", { fn = fn, initial = initial, header = header }, opts)
 			else
-				fn("")
+				fn(name)
 			end
 		end,
 	})
 end
 
-function M.tag_new_copy()
+function M.tag_new_copy(name)
 	return mt({
 		group = "tag.new.copy",
 		desc = "new tag copy",
@@ -431,21 +431,28 @@ function M.tag_new_copy()
 		end,
 		fn = function(opts)
 			local t = awful.screen.focused().selected_tag
-			local fn = function(name)
+			if not t then
+				return
+			end
+			local fn = function(tag_name)
 				local props = tag_get_properties(t)
 				if not props then
 					return
 				end
-				awful.tag.add(name, props):view_only()
+				awful.tag.add(tag_name, props):view_only()
 				-- don't show these values:
 				props.screen = nil
 				props.layouts = nil
 				props.layout = props.layout.name
 				awesome.emit_signal("modalisa::echo", props, opts)
 			end
-			local initial = ""
-			local header = "tag name:"
-			awesome.emit_signal("modalisa::prompt", { fn = fn, initial = initial, header = header }, opts)
+			if not name then
+				local initial = ""
+				local header = "tag name:"
+				awesome.emit_signal("modalisa::prompt", { fn = fn, initial = initial, header = header }, opts)
+			else
+				fn(name)
+			end
 		end,
 	})
 end
