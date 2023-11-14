@@ -745,6 +745,25 @@ function M.client_set_property(x, cl)
 	})
 end
 
+function M.kill_signal(sig, cl)
+	return mt({
+		group = string.format("client.kill.signal.%s", sig),
+		desc = string.format("SIG%s", sig),
+		cond = function()
+			local c = cl or client.focus
+			return c and c.valid
+		end,
+		fn = function()
+			local c = cl or client.focus
+			if not c then
+				return
+			end
+			local cmd = string.format("kill -s %s %d", sig, c.pid)
+			awful.spawn(cmd)
+		end,
+	})
+end
+
 -- FIXME:
 function M.client_placement(placement, cl)
 	return mt({

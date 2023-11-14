@@ -717,6 +717,7 @@ function M.fake_input(key, force_continue)
 	trunner:input(key)
 end
 
+-- FIXME: no keybind option
 -- run inline table
 function M.run_tree(tree, opts, name)
 	opts = config.get_config(opts)

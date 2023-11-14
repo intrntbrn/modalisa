@@ -1,12 +1,16 @@
 # general
 
+- alias preset (rel and abs)
 - cleanup all preset functions
-- screen picker labels
+- cleanup modal functions
 - cleanup api
+- screen picker labels
+- tag right click menu
+- hint hover
 - client kill signals
-- alternative key solution
 - keypresser vim style
 - gui editor
+- fix swap client picker
 
 # readme:
 
