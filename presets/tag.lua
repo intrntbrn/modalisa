@@ -66,7 +66,7 @@ local function tag_get_properties(t)
 	return props
 end
 
-local function tag_move_to_screen(s, t, delete_old_tag)
+local function move_tag_to_screen(s, t, delete_old_tag)
 	assert(s, "screen is nil")
 	t = t or awful.screen.focused().selected_tag
 	if not t then
@@ -97,15 +97,16 @@ local function tag_move_to_screen(s, t, delete_old_tag)
 	awful.screen.focus(s)
 end
 
-function M.tag_move_focused_client_to_tag(i)
+function M.move_client_to_tag_index(i, cl)
 	return mt({
 		group = "tag.client.move",
 		cond = function()
-			local c = client.focus
-			if not c then
+			local c = cl or client.focus
+			if not c or not c.valid then
 				return false
 			end
 			local t = awful.screen.focused().tags[i]
+
 			if not t then
 				return false
 			end
@@ -122,12 +123,13 @@ function M.tag_move_focused_client_to_tag(i)
 			return string.format("move client to tag %s", helper.tagname_by_index(i))
 		end,
 		fn = function()
-			local c = client.focus
-			if c then
-				local t = client.focus.screen.tags[i]
-				if t then
-					c:move_to_tag(t)
-				end
+			local c = cl or client.focus
+			if not c or not c.valid then
+				return
+			end
+			local t = client.focus.screen.tags[i]
+			if t then
+				c:move_to_tag(t)
 			end
 		end,
 	})
@@ -139,7 +141,7 @@ function M.move_tag_to_screen_menu(tag, delete_old_tag)
 		if not t then
 			return
 		end
-		tag_move_to_screen(s, t, delete_old_tag)
+		move_tag_to_screen(s, t, delete_old_tag)
 	end
 
 	local menu = pscreen.generate_menu(fn)
@@ -154,7 +156,7 @@ function M.move_tag_to_screen_menu(tag, delete_old_tag)
 		}
 end
 
-function M.tag_move_all_clients_to_tag_menu()
+function M.move_all_clients_to_tag_menu()
 	return mt({
 		is_menu = true,
 		group = "tag.client.move.all",
@@ -219,17 +221,48 @@ function M.tag_toggle_menu()
 	})
 end
 
-function M.tag_toggle_policy()
+function M.toggle_property(prop, tag)
+	return mt({
+		group = string.format("tag.property.%s", prop),
+		cond = function()
+			local t = tag or awful.screen.focused().selected_tag
+			return t
+		end,
+		desc = function(opts)
+			local t = tag or awful.screen.focused().selected_tag
+			if not t then
+				return string.format("tag %s toggle", prop)
+			end
+			if t[prop] then
+				return string.format("tag %s %s", prop, opts.toggle_true)
+			end
+			return string.format("tag %s %s", prop, opts.toggle_false)
+		end,
+		fn = function(opts)
+			local t = tag or awful.screen.focused().selected_tag
+			if not t then
+				return
+			end
+			t[prop] = not t[prop]
+
+			local value = t[prop]
+
+			awesome.emit_signal("modalisa::echo", { [prop] = value }, opts)
+		end,
+	})
+end
+
+function M.tag_toggle_policy(tag)
 	return mt({
 		group = "tag.property.policy",
 		desc = "fill policy toggle",
 		cond = function()
-			return awful.screen.focused().selected_tag
+			local t = tag or awful.screen.focused().selected_tag
+			return t
 		end,
-		result = { fill_policty = helper.get_current_tag_master_fill_policy },
+		result = { fill_policty = helper.tag_get_fn_master_fill_policy(tag) },
 		fn = function()
-			local s = awful.screen.focused()
-			local t = s.selected_tag
+			local t = tag or awful.screen.focused().selected_tag
 			if not t then
 				return
 			end
@@ -238,59 +271,7 @@ function M.tag_toggle_policy()
 	})
 end
 
-function M.tag_toggle_volatile()
-	return mt({
-		group = "tag.property.volatile",
-		desc = function(opts)
-			local t = awful.screen.focused().selected_tag
-			if not t then
-				return "volatile toggle"
-			end
-			if t.volatile then
-				return "volatile" .. " " .. opts.toggle_true
-			end
-			return "volatile" .. " " .. opts.toggle_false
-		end,
-		result = { volatile = helper.get_current_tag_volatile },
-		fn = function()
-			local s = awful.screen.focused()
-			local t = s.selected_tag
-			if not t then
-				return
-			end
-
-			t.volatile = not t.volatile
-		end,
-	})
-end
-
-function M.tag_toggle_gap_single_client()
-	return mt({
-		group = "tag.property.gap.single",
-		desc = function(opts)
-			local t = awful.screen.focused().selected_tag
-			if not t then
-				return "gap single client toggle"
-			end
-			if t.gap_single_client then
-				return "gap single client" .. " " .. opts.toggle_true
-			end
-			return "gap single client" .. " " .. opts.toggle_false
-		end,
-		result = { gap_single_client = helper.get_current_tag_gap_single_client },
-		fn = function()
-			local s = awful.screen.focused()
-			local t = s.selected_tag
-			if not t then
-				return
-			end
-
-			t.gap_single_client = not t.gap_single_client
-		end,
-	})
-end
-
-function M.tag_view_only(i)
+function M.view_only_index(i)
 	return mt({
 		group = "tag.view",
 		desc = function()
@@ -305,7 +286,7 @@ function M.tag_view_only(i)
 	})
 end
 
-function M.tag_view_only_menu()
+function M.view_only_menu()
 	return mt({
 		is_menu = true,
 		group = "tag.view",
@@ -329,15 +310,16 @@ function M.tag_view_only_menu()
 	})
 end
 
-function M.tag_delete()
+function M.delete(tag)
 	return mt({
 		group = "tag.action",
 		desc = "delete tag",
 		cond = function()
-			return awful.screen.focused().selected_tag
+			local t = tag or awful.screen.focused().selected_tag
+			return t
 		end,
 		fn = function()
-			local t = awful.screen.focused().selected_tag
+			local t = tag or awful.screen.focused().selected_tag
 			if not t then
 				return
 			end
@@ -346,7 +328,7 @@ function M.tag_delete()
 	})
 end
 
-function M.tag_toggle_index(i)
+function M.toggle_tag_index(i)
 	return mt({
 		group = "tag.toggle",
 		desc = function()
@@ -361,7 +343,7 @@ function M.tag_toggle_index(i)
 	})
 end
 
-function M.tag_next()
+function M.view_next()
 	return mt({
 		group = "tag.cycle",
 		desc = function()
@@ -373,7 +355,7 @@ function M.tag_next()
 	})
 end
 
-function M.tag_previous()
+function M.view_previous()
 	return mt({
 		group = "tag.cycle",
 		desc = function()
@@ -385,7 +367,7 @@ function M.tag_previous()
 	})
 end
 
-function M.tag_last()
+function M.view_last()
 	return mt({
 		group = "tag.cycle",
 		desc = function()
@@ -397,7 +379,7 @@ function M.tag_last()
 	})
 end
 
-function M.tag_new(name)
+function M.new_tag(name)
 	return mt({
 		group = "tag.new",
 		desc = "new tag",
@@ -421,16 +403,17 @@ function M.tag_new(name)
 	})
 end
 
-function M.tag_new_copy(name)
+function M.new_tag_copy(name, tag)
 	return mt({
 		group = "tag.new.copy",
 		desc = "new tag copy",
 		opts = { echo = { vertical_layout = true, align_vertical = false } },
 		cond = function()
-			return awful.screen.focused().selected_tag
+			local t = tag or awful.screen.focused().selected_tag
+			return t
 		end,
 		fn = function(opts)
-			local t = awful.screen.focused().selected_tag
+			local t = tag or awful.screen.focused().selected_tag
 			if not t then
 				return
 			end
@@ -457,33 +440,39 @@ function M.tag_new_copy(name)
 	})
 end
 
-function M.tag_rename()
+function M.rename(tag)
 	return mt({
 		group = "tag.rename",
 		desc = "rename tag",
 		cond = function()
-			return awful.screen.focused().selected_tag
+			local t = tag or awful.screen.focused().selected_tag
+			return t
 		end,
 		fn = function(opts)
-			local fn = function(s)
-				awful.tag.selected().name = s
+			local t = tag or awful.screen.focused().selected_tag
+			if not t then
+				return
 			end
-			local initial = awful.tag.selected().name
+			local fn = function(s)
+				t.name = s
+			end
+			local initial = t.name
 			local header = "rename tag:"
 			awesome.emit_signal("modalisa::prompt", { fn = fn, initial = initial, header = header }, opts)
 		end,
 	})
 end
 
-function M.tag_gap()
+function M.set_gap(tag)
 	return mt({
 		group = "tag.gap",
 		desc = "set tag gap",
 		cond = function()
-			return awful.screen.focused().selected_tag
+			local t = tag or awful.screen.focused().selected_tag
+			return t
 		end,
 		fn = function(opts)
-			local t = awful.screen.focused().selected_tag
+			local t = tag or awful.screen.focused().selected_tag
 			if not t then
 				return
 			end
@@ -502,77 +491,99 @@ function M.tag_gap()
 	})
 end
 
-function M.layout_master_width_increase(factor)
+function M.master_width_increase(factor, tag)
 	return mt({
 		group = "layout.master.width",
 		desc = "master width increase",
+		cond = function()
+			local t = tag or awful.screen.focused().selected_tag
+			return t
+		end,
 		fn = function()
 			local f = factor or default_resize_factor
-			awful.tag.incmwfact(f)
+			awful.tag.incmwfact(f, tag)
 		end,
-		result = { master_width = helper.get_current_tag_master_width_factor },
+		result = { master_width = helper.tag_get_fn_master_width_factor(tag) },
 	})
 end
 
-function M.layout_master_width_decrease(factor)
+function M.master_width_decrease(factor, tag)
 	return mt({
 		group = "layout.master.width",
 		desc = "master width decrease",
+		cond = function()
+			local t = tag or awful.screen.focused().selected_tag
+			return t
+		end,
 		fn = function()
 			local f = factor or default_resize_factor
-			awful.tag.incmwfact(f * -1)
+			awful.tag.incmwfact(f * -1, tag)
 		end,
-		result = { master_width = helper.get_current_tag_master_width_factor },
+		result = { master_width = helper.tag_get_fn_master_width_factor(tag) },
 	})
 end
 
-function M.layout_master_count_decrease()
+function M.master_count_decrease(tag)
 	return mt({
 		group = "layout.master.count",
 		desc = "master count decrease",
 		cond = function()
-			return awful.screen.focused().selected_tag.master_count > 0
+			local t = tag or awful.screen.focused().selected_tag
+			return t and t.master_count > 0
 		end,
 		fn = function()
-			awful.tag.incnmaster(-1, nil, true)
+			local t = tag or awful.screen.focused().selected_tag
+			awful.tag.incnmaster(-1, t, true)
 		end,
-		result = { master_count = helper.get_current_tag_master_count },
+		result = { master_count = helper.tag_get_fn_master_count(tag) },
 	})
 end
 
-function M.layout_master_count_increase()
+function M.master_count_increase(tag)
 	return mt({
 		group = "layout.master.count",
 		desc = "master count increase",
-		fn = function()
-			awful.tag.incnmaster(1, nil, true)
+		cond = function()
+			local t = tag or awful.screen.focused().selected_tag
+			return t
 		end,
-		result = { master_count = helper.get_current_tag_master_count },
+		fn = function()
+			local t = tag or awful.screen.focused().selected_tag
+			awful.tag.incnmaster(1, t, true)
+		end,
+		result = { master_count = helper.tag_get_fn_master_count(tag) },
 	})
 end
 
-function M.layout_column_count_decrease()
+function M.column_count_decrease(tag)
 	return mt({
 		group = "layout.column.count",
 		desc = "column count decrease",
 		cond = function()
-			return awful.screen.focused().selected_tag.column_count > 0
+			local t = tag or awful.screen.focused().selected_tag
+			return t and t.column_count > 0
 		end,
 		fn = function()
-			awful.tag.incncol(-1, nil, true)
+			local t = tag or awful.screen.focused().selected_tag
+			awful.tag.incncol(-1, t, true)
 		end,
-		result = { column_count = helper.get_current_tag_column_count },
+		result = { column_count = helper.tag_get_fn_column_count(tag) },
 	})
 end
 
-function M.layout_column_count_increase()
+function M.column_count_increase(tag)
 	return mt({
 		group = "layout.column.count",
 		desc = "column count increase",
-		fn = function()
-			awful.tag.incncol(1, nil, true)
+		cond = function()
+			local t = tag or awful.screen.focused().selected_tag
+			return t
 		end,
-		result = { column_count = helper.get_current_tag_column_count },
+		fn = function()
+			local t = tag or awful.screen.focused().selected_tag
+			awful.tag.incncol(1, t, true)
+		end,
+		result = { column_count = helper.tag_get_fn_column_count(tag) },
 	})
 end
 
@@ -583,7 +594,7 @@ function M.layout_next()
 		fn = function()
 			awful.layout.inc(1)
 		end,
-		result = { layout = helper.get_current_layout_name },
+		result = { layout = helper.tag_get_fn_current_layout_name() },
 	})
 end
 
@@ -594,7 +605,7 @@ function M.layout_prev()
 		fn = function()
 			awful.layout.inc(-1)
 		end,
-		result = { layout = helper.get_current_layout_name },
+		result = { layout = helper.tag_get_fn_current_layout_name() },
 	})
 end
 

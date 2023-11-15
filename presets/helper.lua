@@ -34,36 +34,46 @@ function M.clientname(c, i)
 	return txt
 end
 
-function M.get_current_layout_name()
-	return awful.screen.focused().selected_tag.name
+function M.tag_get_fn_current_layout_name(t)
+	return function()
+		t = t or awful.screen.focused().selected_tag
+		return t.layout.name
+	end
 end
 
-function M.get_current_tag_master_width_factor()
-	return awful.screen.focused().selected_tag.master_width_factor
+function M.tag_get_fn_master_width_factor(t)
+	return function()
+		t = t or awful.screen.focused().selected_tag
+		return t.master_width_factor
+	end
 end
 
-function M.get_current_tag_column_count()
-	return awful.screen.focused().selected_tag.column_count
+function M.tag_get_fn_column_count(t)
+	return function()
+		t = t or awful.screen.focused().selected_tag
+		return t.column_count
+	end
 end
 
-function M.get_current_tag_master_count()
-	return awful.screen.focused().selected_tag.master_count
+function M.tag_get_fn_master_count(t)
+	return function()
+		t = t or awful.screen.focused().selected_tag
+		return t.master_count
+	end
 end
 
-function M.get_current_tag_master_fill_policy()
-	return awful.screen.focused().selected_tag.master_fill_policy
+function M.tag_get_fn_master_fill_policy(t)
+	return function()
+		t = t or awful.screen.focused().selected_tag
+		return t.master_fill_policy
+	end
 end
 
-function M.get_current_tag_volatile()
-	return awful.screen.focused().selected_tag.volatile
-end
-
-function M.get_current_tag_gap_single_client()
-	return awful.screen.focused().selected_tag.gap_single_client
-end
-
-function M.get_current_tag_gap()
-	return awful.screen.focused().selected_tag.gap
+function M.tag_get_fn_gap(t)
+	return function()
+		t = t or awful.screen.focused().selected_tag
+		return t.gap
+	end
 end
 
 return M

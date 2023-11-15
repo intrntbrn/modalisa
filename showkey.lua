@@ -22,8 +22,9 @@ function M.start(args)
 	}
 	local opts = args.opts or {}
 
-	-- force disable timeout
+	-- force visibilty and no timeout
 	opts.echo = opts.echo or {}
+	opts.echo.enabled = true
 	opts.echo.timeout = 0
 
 	local ignore_mods = args.ignore_mods or { "Lock2", "Mod2" }

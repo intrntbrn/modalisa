@@ -3,7 +3,7 @@ local mt = require("modalisa.presets.metatable")
 
 local M = {}
 
-function M.spawn_terminal()
+function M.terminal()
 	return mt({
 		group = "spawn",
 		desc = "terminal",
@@ -13,7 +13,7 @@ function M.spawn_terminal()
 	})
 end
 
-function M.spawn_browser()
+function M.browser()
 	return mt({
 		group = "spawn",
 		desc = "browser",
@@ -43,7 +43,7 @@ function M.spawn_with_shell(cmd)
 	})
 end
 
-function M.spawn_appmenu()
+function M.appmenu()
 	return mt({
 		group = "spawn",
 		desc = "open app menu",
