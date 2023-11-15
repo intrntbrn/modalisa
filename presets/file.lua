@@ -42,7 +42,7 @@ local function make_file(dir, file, fn)
 	return {
 		desc = file,
 		group = "file",
-		function()
+		fn = function()
 			local f = concat_dir_file(dir, file)
 			fn(f)
 		end,
@@ -50,57 +50,56 @@ local function make_file(dir, file, fn)
 end
 
 function M.file_picker(dir, fn, max_depth, filter)
-	local fdir = util.scandir(dir)
-	if not fdir then
-		return
-	end
-
-	max_depth = max_depth or 0
-
-	local files = {}
-	local dirs = {}
-
-	for _, fd in pairs(fdir) do
-		local f = concat_dir_file(dir, fd)
-		if fs.is_dir(f) then
-			table.insert(dirs, fd)
-		else
-			if not filter or filter(fd) then
-				table.insert(files, fd)
-			end
-		end
-	end
-
-	local labels = util.labels_qwerty
-	local entries = {}
-
-	if max_depth > 0 then
-		for _, d in pairs(dirs) do
-			if d ~= "." and d ~= ".." then
-				local index = util.find_index(d, entries, labels)
-				if not index then
-					break
-				end
-				local entry = M.file_picker(concat_dir_file(dir, d), fn, max_depth - 1)
-				entries[index] = entry
-			end
-		end
-	end
-
-	for _, f in pairs(files) do
-		local index = util.find_index(f, entries, labels)
-		if not index then
-			break
-		end
-		local entry = make_file(dir, f, fn)
-		entries[index] = entry
-	end
-
 	return mt({
 		desc = dir_name(dir),
 		group = "dir",
 		is_menu = true,
-		function()
+		fn = function(opts)
+			local fdir = util.scandir(dir)
+			if not fdir then
+				return
+			end
+
+			max_depth = max_depth or 0
+
+			local files = {}
+			local dirs = {}
+
+			for _, fd in pairs(fdir) do
+				local f = concat_dir_file(dir, fd)
+				if fs.is_dir(f) then
+					table.insert(dirs, fd)
+				else
+					if not filter or filter(fd) then
+						table.insert(files, fd)
+					end
+				end
+			end
+
+			local labels = opts.labels or util.labels_qwerty
+			local entries = {}
+
+			if max_depth > 0 then
+				for _, d in pairs(dirs) do
+					if d ~= "." and d ~= ".." then
+						local index = util.find_index(d, entries, labels)
+						if not index then
+							break
+						end
+						local entry = M.file_picker(concat_dir_file(dir, d), fn, max_depth - 1)
+						entries[index] = entry
+					end
+				end
+			end
+
+			for _, f in pairs(files) do
+				local index = util.find_index(f, entries, labels)
+				if not index then
+					break
+				end
+				local entry = make_file(dir, f, fn)
+				entries[index] = entry
+			end
 			return entries
 		end,
 	})
