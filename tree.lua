@@ -31,7 +31,7 @@ end
 -- @param key string|table The key object to be parsed
 -- @param table_index string The key string if the key object does not contain the key string
 local function parse_key(key, table_index)
-	local seq, fn, opts, cond, desc, result, temp, global, hidden, group, continue, highlight, on_enter, on_leave, is_menu
+	local seq, fn, opts, cond, desc, result, temp, global, hidden, group, continue, highlight, on_enter, on_leave, is_menu, pre, post
 
 	local t = type(key)
 
@@ -79,6 +79,10 @@ local function parse_key(key, table_index)
 					on_enter = v
 				elseif k == "on_leave" then
 					on_leave = v
+				elseif k == "pre" then
+					pre = v
+				elseif k == "post" then
+					post = v
 				elseif k == "fn" then
 					assert(not fn, "unable to parse key", dump(key))
 					fn = v
@@ -129,6 +133,8 @@ local function parse_key(key, table_index)
 			highlight = highlight,
 			on_enter = on_enter,
 			on_leave = on_leave,
+			post = post,
+			pre = pre,
 		}
 end
 
@@ -170,6 +176,22 @@ end
 
 function M:exec(opts)
 	local fn = self._data.fn
+	if fn then
+		opts = opts or self:opts()
+		return fn(opts, self)
+	end
+end
+
+function M:exec_pre(opts)
+	local fn = self._data.pre
+	if fn then
+		opts = opts or self:opts()
+		return fn(opts, self)
+	end
+end
+
+function M:exec_post(opts)
+	local fn = self._data.post
 	if fn then
 		opts = opts or self:opts()
 		return fn(opts, self)

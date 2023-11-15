@@ -504,7 +504,10 @@ function trunner:execute(t)
 	end
 
 	local opts = t:opts()
+
+	t:exec_pre(opts)
 	local dynamic_list = t:exec(opts)
+	t:exec_post(opts)
 
 	-- make results
 	local result = t:result()
