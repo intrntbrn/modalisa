@@ -5,7 +5,7 @@ local vim = require("modalisa.lib.vim")
 
 local M = {}
 
-function M.awesome_help()
+function M.help_popup()
 	return mt({
 		group = "awesome.menu",
 		desc = "show help",
@@ -21,7 +21,7 @@ function M.awesome_help()
 	})
 end
 
-function M.awesome_menubar()
+function M.menubar()
 	return mt({
 		group = "awesome.menu",
 		desc = "show menubar",
@@ -34,7 +34,7 @@ function M.awesome_menubar()
 	})
 end
 
-function M.awesome_quit()
+function M.quit()
 	return mt({
 		group = "awesome.stop",
 		desc = "quit awesome",
@@ -47,7 +47,7 @@ function M.awesome_quit()
 	})
 end
 
-function M.awesome_restart()
+function M.restart()
 	return mt({
 		group = "awesome.stop",
 		desc = "restart awesome",
@@ -57,7 +57,7 @@ function M.awesome_restart()
 	})
 end
 
-function M.awesome_execute()
+function M.execute_lua()
 	return mt({
 		group = "awesome.execute",
 		desc = "lua code prompt",
@@ -77,7 +77,7 @@ function M.awesome_execute()
 	})
 end
 
-function M.awesome_run_prompt()
+function M.run_prompt()
 	return mt({
 		group = "awesome.execute",
 		desc = "run prompt",
@@ -92,7 +92,7 @@ function M.awesome_run_prompt()
 	})
 end
 
-function M.awesome_toggle_wibox()
+function M.toggle_wibox()
 	return mt({
 		group = "awesome.wibox",
 		desc = function()
@@ -119,7 +119,7 @@ function M.awesome_toggle_wibox()
 	})
 end
 
-function M.awesome_padding_menu()
+function M.screen_padding_menu()
 	return mt({
 		group = "awesome.screen.padding",
 		is_menu = true,
@@ -159,7 +159,7 @@ function M.awesome_padding_menu()
 	})
 end
 
-function M.awesome_wallpaper_menu(max_depth)
+function M.wallpaper_menu(max_depth)
 	return mt({
 		group = "awesome.wallpaper",
 		desc = "wallpaper",

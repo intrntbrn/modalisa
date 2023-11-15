@@ -117,7 +117,7 @@ require("modalisa").setup({
 
 You can retrieve keynames by running the command
 
-```
+```sh
 awesome-client "awesome.emit_signal('modalisa::showkey')"
 ```
 

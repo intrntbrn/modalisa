@@ -1,6 +1,5 @@
 local vim = require("modalisa.lib.vim")
 local dump = vim.inspect
-local gstring = require("gears.string")
 local akeygrabber = require("awful.keygrabber")
 
 local M = {}

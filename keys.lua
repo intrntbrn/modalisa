@@ -6,7 +6,7 @@ local awm = require("modalisa.presets.awesome")
 local c = require("modalisa.presets.client")
 local t = require("modalisa.presets.tag")
 local sp = require("modalisa.presets.spawn")
-local scr = require("modalisa.presets.screen")
+local s = require("modalisa.presets.screen")
 
 local M = {}
 
@@ -58,10 +58,10 @@ local keys = {
 	["K"] = c.client_move_smart("up"),
 	["L"] = c.client_move_smart("right"),
 
-	["<C-h>"] = scr.focus_direction("left"),
-	["<C-j>"] = scr.focus_direction("down"),
-	["<C-k>"] = scr.focus_direction("up"),
-	["<C-l>"] = scr.focus_direction("right"),
+	["<C-h>"] = s.focus_direction("left"),
+	["<C-j>"] = s.focus_direction("down"),
+	["<C-k>"] = s.focus_direction("up"),
+	["<C-l>"] = s.focus_direction("right"),
 
 	["<Left>"] = c.client_resize_smart("left"),
 	["<Down>"] = c.client_resize_smart("down"),
@@ -90,7 +90,7 @@ local keys = {
 	["9"] = t.tag_view_only(9) + { hidden = false },
 	["0"] = t.tag_view_only(10) + { hidden = false },
 
-	["z"] = scr.focus_picker(),
+	["z"] = s.focus_picker(),
 	[" "] = c.client_select_picker(true) + { opts = { labels = util.labels_qwerty } },
 	["w"] = c.client_swap_picker(),
 	["s"] = c.client_swap_master_smart() + { opts = { labels = util.labels_qwerty } },
@@ -108,15 +108,15 @@ local keys = {
 
 	-- awesome
 	["a"] = { desc = "awesome", group = "menu.awesome" },
-	["aQ"] = awm.awesome_quit(),
-	["aR"] = awm.awesome_restart(),
-	["ax"] = awm.awesome_execute(),
-	["ar"] = awm.awesome_run_prompt(),
-	["as"] = awm.awesome_help(),
-	["am"] = awm.awesome_menubar(),
-	["at"] = awm.awesome_toggle_wibox(),
-	["aw"] = awm.awesome_wallpaper_menu(2),
-	["ap"] = awm.awesome_padding_menu(),
+	["aQ"] = awm.quit(),
+	["aR"] = awm.restart(),
+	["ax"] = awm.execute_lua(),
+	["ar"] = awm.run_prompt(),
+	["as"] = awm.help_popup(),
+	["am"] = awm.menubar(),
+	["at"] = awm.toggle_wibox(),
+	["aw"] = awm.wallpaper_menu(2),
+	["ap"] = awm.screen_padding_menu(),
 
 	-- tag
 	["t"] = { desc = "tag", group = "menu.tag" },
