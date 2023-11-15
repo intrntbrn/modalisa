@@ -274,29 +274,20 @@ local function run(kvs, opts)
 	set_timer(eopts)
 end
 
-local function handle_exec_signal(t, results)
-	if not results then
+local function handle_exec_signal(t, results) end
+
+local function show(kvs, opts)
+	if not kvs then
 		return
 	end
 
-	if not t then
-		return
-	end
-
-	local opts = t:opts()
-	if not opts then
-		return
-	end
+	opts = opts or config.get()
 
 	local eopts = opts.echo
 	if not eopts.enabled then
 		return
 	end
 
-	run(results, opts)
-end
-
-local function show(kvs, opts)
 	run(kvs, opts)
 end
 
@@ -320,7 +311,7 @@ function M.setup(opts)
 	end)
 
 	awesome.connect_signal("modalisa::on_exec", function(tree, result)
-		handle_exec_signal(tree, result)
+		show(result, tree:opts())
 	end)
 end
 
