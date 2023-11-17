@@ -73,67 +73,77 @@ function M.make_filter(args)
 	end
 end
 
-local function client_picker(opts, fn, filter)
-	local list = client.get() -- unsorted list from all screens
+function M.client_picker(fn, filter)
+	return mt({
+		desc = "client picker",
+		group = "client.picker",
+		is_menu = true,
+		fn = function(opts)
+			local list = client.get() -- unsorted list from all screens
 
-	local cls = {}
-	for _, c in ipairs(list) do
-		if filter(c) then
-			local si = c.screen.index
-			cls[si] = cls[si] or {}
-			table.insert(cls[si], c)
-		end
-	end
+			local cls = {}
+			for _, c in ipairs(list) do
+				if filter(c) then
+					local si = c.screen.index
+					cls[si] = cls[si] or {}
+					table.insert(cls[si], c)
+				end
+			end
 
-	-- put clients from selected screen first, so labeling is consistent whether
-	-- multiscreen is enabled or not
-	local si = awful.screen.focused().index
+			-- put clients from selected screen first, so labeling is consistent whether
+			-- multiscreen is enabled or not
+			local si = awful.screen.focused().index
 
-	local clients = {}
-	for _, c in ipairs(cls[si] or {}) do
-		-- put filtered clients from focused screen
-		table.insert(clients, c)
-	end
-
-	for s in screen do
-		if s.index ~= si then
-			-- put filtered clients from other screens
-			for _, c in ipairs(cls[s.index] or {}) do
+			local clients = {}
+			for _, c in ipairs(cls[si] or {}) do
+				-- put filtered clients from focused screen
 				table.insert(clients, c)
 			end
-		end
-	end
 
-	local menu = {}
+			for s in screen do
+				if s.index ~= si then
+					-- put filtered clients from other screens
+					for _, c in ipairs(cls[s.index] or {}) do
+						table.insert(clients, c)
+					end
+				end
+			end
 
-	for i, c in ipairs(clients) do
-		local lbl = util.index_to_label(i, opts.labels)
-		awesome.emit_signal("modalisa::label::show", c, lbl, opts)
-		-- create menu
-		table.insert(menu, {
-			lbl,
-			desc = function()
-				helper.clientname(c, i)
-			end,
-			fn = function()
-				fn(c)
-			end,
-		})
-	end
+			local menu = {}
 
-	-- only 1 client
-	if opts.awesome.auto_select_the_only_choice then
-		if #menu == 1 then
+			for i, c in ipairs(clients) do
+				local lbl = util.index_to_label(i, opts.labels)
+				awesome.emit_signal("modalisa::label::show", c, lbl, opts)
+				-- create menu
+				table.insert(menu, {
+					lbl,
+					desc = function()
+						helper.clientname(c, i)
+					end,
+					fn = function()
+						fn(c)
+					end,
+				})
+			end
+
+			-- only 1 client
+			if opts.awesome.auto_select_the_only_choice then
+				if #menu == 1 then
+					awesome.emit_signal("modalisa::label::hide")
+					menu[1].fn()
+					return
+				end
+			end
+
+			return menu
+		end,
+		on_leave = function()
 			awesome.emit_signal("modalisa::label::hide")
-			menu[1].fn()
-			return
-		end
-	end
-
-	return menu
+		end,
+	})
 end
 
-local function client_minmize(c)
+local function minmize(c)
 	c = c or client.focus
 	if not c then
 		return
@@ -141,7 +151,7 @@ local function client_minmize(c)
 	c.minimized = true
 end
 
-local function client_unminmize(c)
+local function unminmize(c)
 	c = c or client.focus
 	if not c then
 		return
@@ -149,7 +159,7 @@ local function client_unminmize(c)
 	c:activate({ raise = true, context = "key.unminimize" })
 end
 
-local function client_placement(placement, cl)
+local function place(placement, cl)
 	local c = cl or client.focus
 	if not c then
 		return
@@ -162,7 +172,7 @@ local function client_placement(placement, cl)
 	fn(c, { honor_workarea = true })
 end
 
-local function client_kill(c)
+local function kill(c)
 	c = c or client.focus
 	if not c then
 		return
@@ -170,7 +180,7 @@ local function client_kill(c)
 	c:kill()
 end
 
-local function client_move_to_master(c)
+local function move_to_master(c)
 	c = c or client.focus
 	if not c then
 		return
@@ -178,22 +188,22 @@ local function client_move_to_master(c)
 	c:swap(awful.client.getmaster())
 end
 
-local function client_focus_bydirection(dir)
+local function focus_bydirection(dir)
 	awful.client.focus.global_bydirection(dir)
 end
 
-local function client_navigate(dir)
+local function navigate(dir)
 	awesome.emit_signal("navigator::navigate", dir)
 end
 
-local function client_focus_prev()
+local function focus_prev()
 	awful.client.focus.history.previous()
 	if client.focus then
 		client.focus:raise()
 	end
 end
 
-local function client_master_swap(c)
+local function swap_with_master(c)
 	c = c or client.focus
 	if not c then
 		return
@@ -465,7 +475,7 @@ local function client_resize_smart(c, dir, resize_delta, resize_factor)
 	client_resize_tiled(c, dir, resize_factor)
 end
 
-local function client_toggle_tag(c, t)
+local function toggle_client_tag(c, t)
 	c = c or client.focus
 	if not c or not t then
 		return
@@ -483,60 +493,39 @@ local function cond_is_floating(cl)
 end
 
 function M.client_select_picker(multi_screen, include_focused_client)
-	return mt({
-		group = "client.menu.focus",
-		is_menu = true,
-		opts = {
-			labels = util.labels_qwerty,
-		},
-		cond = function()
-			return client.focus
-		end,
-		desc = "select client picker",
-		fn = function(opts)
-			local filter =
-				M.make_filter({ multi_screen = multi_screen, include_focused_client = include_focused_client })
-			local fn = function(c)
-				c:activate({ raise = true, context = "client.focus.bydirection" })
-			end
-			local list = client_picker(opts, fn, filter)
+	local filter = M.make_filter({ multi_screen = multi_screen, include_focused_client = include_focused_client })
+	local fn = function(c)
+		c:activate({ raise = true, context = "client.focus.bydirection" })
+	end
 
-			return list
-		end,
-		on_leave = function()
-			awesome.emit_signal("modalisa::label::hide")
-		end,
-	})
+	local ps = M.client_picker(fn, filter)
+
+	return ps + {
+		desc = "select client picker",
+	}
 end
 
 function M.client_swap_picker(cl)
-	return mt({
-		group = "client.swap",
-		is_menu = true,
-		opts = {
-			labels = util.labels_qwerty,
-		},
-		cond = function()
-			local c = cl or client.focus
-			return c and c.valid
-		end,
-		desc = "swap client picker",
-		fn = function(opts)
-			local c = cl or client.focus
-			if not c then
-				return
-			end
-			local include_focused_client = false
-			local filter = M.make_filter({ include_focused_client = include_focused_client })
-			local fn = function(other)
-				c:swap(other)
-			end
-			return client_picker(opts, fn, filter)
-		end,
-		on_leave = function()
-			awesome.emit_signal("modalisa::label::hide")
-		end,
-	})
+	local include_focused_client = false
+	local filter = M.make_filter({ include_focused_client = include_focused_client })
+	local fn = function(other)
+		local c = cl or client.focus
+		if not c then
+			return
+		end
+		c:swap(other)
+	end
+
+	local ps = M.client_picker(fn, filter)
+
+	return ps
+		+ {
+			desc = "swap client picker",
+			cond = function()
+				local c = cl or client.focus
+				return c and c.valid
+			end,
+		}
 end
 
 function M.client_minimize(cl)
@@ -549,7 +538,7 @@ function M.client_minimize(cl)
 		end,
 		fn = function()
 			local c = cl or client.focus
-			client_minmize(c)
+			minmize(c)
 		end,
 	})
 end
@@ -566,7 +555,7 @@ function M.client_kill(cl)
 		end,
 		fn = function()
 			local c = cl or client.focus
-			client_kill(c)
+			kill(c)
 		end,
 	})
 end
@@ -581,7 +570,7 @@ function M.client_swap_master_smart(cl)
 		end,
 		fn = function()
 			local c = cl or client.focus
-			client_master_swap(c)
+			swap_with_master(c)
 		end,
 	})
 end
@@ -597,7 +586,7 @@ function M.client_move_to_master(cl)
 		end,
 		fn = function()
 			local c = cl or client.focus
-			client_move_to_master(c)
+			move_to_master(c)
 		end,
 	})
 end
@@ -607,7 +596,7 @@ function M.client_focus(dir)
 		group = "client.focus",
 		desc = string.format("focus %s client", dir),
 		fn = function()
-			client_focus_bydirection(dir)
+			focus_bydirection(dir)
 		end,
 	})
 end
@@ -617,7 +606,7 @@ function M.client_focus_navigator(dir)
 		group = "client.navigate",
 		desc = string.format("navigate %s", dir),
 		fn = function()
-			client_navigate(dir)
+			navigate(dir)
 		end,
 	})
 end
@@ -627,7 +616,7 @@ function M.client_focus_prev()
 		group = "client.focus",
 		desc = "focus previous client",
 		fn = function()
-			client_focus_prev()
+			focus_prev()
 		end,
 	})
 end
@@ -774,7 +763,7 @@ function M.client_placement(placement, cl)
 		end,
 		desc = string.format("place %s", placement),
 		fn = function()
-			client_placement(placement, cl)
+			place(placement, cl)
 		end,
 	})
 end
@@ -876,7 +865,7 @@ function M.client_unminimize_menu(multi_tag)
 							return helper.clientname(c, i)
 						end,
 						fn = function()
-							client_unminmize(c)
+							unminmize(c)
 						end,
 					})
 					i = i + 1
@@ -919,7 +908,7 @@ function M.client_toggle_tag_menu(cl)
 						return helper.tagname(t)
 					end,
 					fn = function()
-						client_toggle_tag(c, t)
+						toggle_client_tag(c, t)
 					end,
 				})
 			end

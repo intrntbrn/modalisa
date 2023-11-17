@@ -92,7 +92,7 @@ local keys = {
 
 	["z"] = s.focus_picker(),
 	[" "] = c.client_select_picker(true) + { opts = { labels = util.labels_qwerty } },
-	["w"] = c.client_swap_picker(),
+	["w"] = c.client_swap_picker() + { opts = { labels = util.labels_qwerty } },
 	["s"] = c.client_swap_master_smart() + { opts = { labels = util.labels_qwerty } },
 	["f"] = c.client_toggle_property("fullscreen", nil, true),
 	["m"] = c.client_toggle_property("maximized", nil, true),

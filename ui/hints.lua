@@ -154,6 +154,9 @@ function popup:teardown()
 end
 
 function popup:update(t)
+	if not t then
+		return
+	end
 	self:teardown() -- cleanup old entries
 
 	local s = awful.screen.focused()
