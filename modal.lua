@@ -721,14 +721,17 @@ function M.fake_input(key, force_continue)
 	trunner:input(key)
 end
 
--- FIXME: no keybind option
 -- run inline table
-function M.run_tree(tree, opts, name)
+function M.run_tree(tree, opts, name, keybind)
+	if keybind then
+		keybind = parse_key_all(keybind)
+		assert(keybind)
+	end
 	opts = config.get_config(opts)
 	local t = require("modalisa.tree"):new(opts, name)
 	assert(t)
 	t:add_successors(tree)
-	trunner:start(t)
+	trunner:start(t, keybind)
 end
 
 -- run keyroot_tree with a keybind (opt)
