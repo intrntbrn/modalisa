@@ -505,7 +505,7 @@ function M.client_select_picker(multi_screen, include_focused_client)
 	}
 end
 
-function M.client_swap_picker(cl)
+function M.swap_picker(cl)
 	local include_focused_client = false
 	local filter = M.make_filter({ include_focused_client = include_focused_client })
 	local fn = function(other)
@@ -528,7 +528,7 @@ function M.client_swap_picker(cl)
 		}
 end
 
-function M.client_minimize(cl)
+function M.minimize(cl)
 	return mt({
 		group = "client.property",
 		desc = "minimize",
@@ -543,7 +543,7 @@ function M.client_minimize(cl)
 	})
 end
 
-function M.client_kill(cl)
+function M.kill(cl)
 	return mt({
 		group = "client.kill",
 		desc = function()
@@ -560,7 +560,7 @@ function M.client_kill(cl)
 	})
 end
 
-function M.client_swap_master_smart(cl)
+function M.swap_master_smart(cl)
 	return mt({
 		group = "client.swap.smart",
 		desc = "master swap smart",
@@ -575,7 +575,7 @@ function M.client_swap_master_smart(cl)
 	})
 end
 
-function M.client_move_to_master(cl)
+function M.move_to_master(cl)
 	return mt({
 		group = "client.layout.move.master",
 		desc = "move to master",
@@ -591,7 +591,7 @@ function M.client_move_to_master(cl)
 	})
 end
 
-function M.client_focus(dir)
+function M.focus_dir(dir)
 	return mt({
 		group = "client.focus",
 		desc = string.format("focus %s client", dir),
@@ -601,7 +601,7 @@ function M.client_focus(dir)
 	})
 end
 
-function M.client_focus_navigator(dir)
+function M.focus_navigator_dir(dir)
 	return mt({
 		group = "client.navigate",
 		desc = string.format("navigate %s", dir),
@@ -611,7 +611,7 @@ function M.client_focus_navigator(dir)
 	})
 end
 
-function M.client_focus_prev()
+function M.focus_prev()
 	return mt({
 		group = "client.focus",
 		desc = "focus previous client",
@@ -621,7 +621,7 @@ function M.client_focus_prev()
 	})
 end
 
-function M.client_move_smart(dir, cl)
+function M.move_dir_smart(dir, cl)
 	return mt({
 		group = "client.move",
 		cond = function()
@@ -636,7 +636,7 @@ function M.client_move_smart(dir, cl)
 	})
 end
 
-function M.client_toggle_titlebar(cl)
+function M.toggle_titlebar(cl)
 	return mt({
 		group = "client.tilebar",
 		cond = function()
@@ -658,7 +658,7 @@ function M.client_toggle_titlebar(cl)
 	})
 end
 
-function M.client_toggle_property(x, cl, raise)
+function M.toggle_property(x, cl, raise)
 	return mt({
 		group = string.format("client.property.%s", x),
 		cond = function()
@@ -693,7 +693,7 @@ function M.client_toggle_property(x, cl, raise)
 	})
 end
 
-function M.client_set_property(x, cl)
+function M.set_property(x, cl)
 	return mt({
 		group = string.format("client.property.%s", x),
 		desc = string.format("client set %s", x),
@@ -754,8 +754,7 @@ function M.kill_signal(sig, cl)
 	})
 end
 
--- FIXME:
-function M.client_placement(placement, cl)
+function M.placement(placement, cl)
 	return mt({
 		group = "client.placement",
 		cond = function()
@@ -768,8 +767,7 @@ function M.client_placement(placement, cl)
 	})
 end
 
--- FIXME:
-function M.client_resize_mode_floating(cl)
+function M.resize_mode_floating(cl)
 	return mt({
 		group = "resize.mode",
 		cond = function()
@@ -779,8 +777,7 @@ function M.client_resize_mode_floating(cl)
 	})
 end
 
--- FIXME:
-function M.client_resize_floating(cl)
+function M.resize_floating(cl)
 	return mt({
 		group = "client.resize",
 		cond = function()
@@ -790,7 +787,7 @@ function M.client_resize_floating(cl)
 	})
 end
 
-function M.client_resize_smart(dir, cl)
+function M.resize_smart(dir, cl)
 	return mt({
 		group = "client.layout.resize",
 		cond = function()
@@ -812,7 +809,7 @@ function M.client_resize_smart(dir, cl)
 	})
 end
 
-function M.client_floating_size_increase(dir, cl)
+function M.size_increase_floating(dir, cl)
 	return mt({
 		group = "client.layout.resize",
 		cond = function()
@@ -830,7 +827,7 @@ function M.client_floating_size_increase(dir, cl)
 	})
 end
 
-function M.client_floating_size_decrease(dir, cl)
+function M.size_decrease_floating(dir, cl)
 	return mt({
 		group = "client.layout.resize",
 		cond = function()
@@ -848,7 +845,7 @@ function M.client_floating_size_decrease(dir, cl)
 	})
 end
 
-function M.client_unminimize_menu(multi_tag)
+function M.unminimize_menu(multi_tag)
 	return mt({
 		group = "client.property.unminimize",
 		desc = "unminimize clients",
@@ -885,7 +882,7 @@ function M.client_unminimize_menu(multi_tag)
 	})
 end
 
-function M.client_toggle_tag_menu(cl)
+function M.toggle_tag_menu(cl)
 	return mt({
 		is_menu = true,
 		group = "client.tags.toggle",
