@@ -4,6 +4,7 @@ local awful = require("awful")
 local lib = require("modalisa.lib")
 local vim = require("modalisa.lib.vim")
 local dump = require("modalisa.lib").inspect
+local util = require("modalisa.util")
 local root_tree = require("modalisa.root")
 local modmap = require("modalisa.modmap")
 local akeygrabber = require("awful.keygrabber")
@@ -737,6 +738,22 @@ function M.run(seq, keybind)
 		assert(keybind)
 	end
 	run_root_tree(seq, keybind)
+end
+
+function M.exec(seq, opts)
+	local t = root_tree.get(seq)
+	if not t then
+		return
+	end
+
+	local topts = t:opts()
+	if opts then
+		topts = util.merge_opts(topts, opts)
+	end
+
+	t:exec_pre(topts)
+	t:exec(topts)
+	t:exec_post(topts)
 end
 
 local function make_awful_key_run_seq(seq, parsed_key)
