@@ -659,6 +659,13 @@ local function toggle(t)
 	popup:update(t)
 end
 
+local function hide()
+	if timer then
+		timer:stop()
+	end
+	popup:set_visible(false)
+end
+
 local once
 function M.setup(opts)
 	assert(once == nil, "hints are already setup")
@@ -677,7 +684,12 @@ function M.setup(opts)
 	end)
 
 	awesome.connect_signal("modalisa::hints::toggle", function(t)
+		t = t or current_tree
 		toggle(t)
+	end)
+
+	awesome.connect_signal("modalisa::hints::hide", function()
+		hide()
 	end)
 
 	-- live update on config change
@@ -696,10 +708,7 @@ function M.setup(opts)
 
 	awesome.connect_signal("modalisa::on_stop", function(_)
 		util.run_on_idle(function()
-			if timer then
-				timer:stop()
-			end
-			popup:set_visible(false)
+			hide()
 		end)
 	end)
 end
