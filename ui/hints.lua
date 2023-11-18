@@ -674,16 +674,30 @@ function M.setup(opts)
 	assert(once == nil, "hints are already setup")
 	once = popup:new(opts.hints)
 
-	awesome.connect_signal("modalisa::on_exec", function(_)
-		util.run_on_idle(function()
+	awesome.connect_signal("modalisa::on_exec", function(t)
+		---@diagnostic disable-next-line: redefined-local
+		local opts = t:opts()
+		local fn = function()
 			popup:refresh_entries()
-		end)
+		end
+		if opts.hints.low_priority then
+			util.run_on_idle(fn)
+		else
+			fn()
+		end
 	end)
 
 	awesome.connect_signal("modalisa::on_enter", function(t)
-		util.run_on_idle(function()
+		---@diagnostic disable-next-line: redefined-local
+		local opts = t:opts()
+		local fn = function()
 			show(t)
-		end)
+		end
+		if opts.hints.low_priority then
+			util.run_on_idle(fn)
+		else
+			fn()
+		end
 	end)
 
 	awesome.connect_signal("modalisa::hints::toggle", function(t)
@@ -709,10 +723,17 @@ function M.setup(opts)
 		end)
 	end)
 
-	awesome.connect_signal("modalisa::on_stop", function(_)
-		util.run_on_idle(function()
+	awesome.connect_signal("modalisa::on_stop", function(t)
+		---@diagnostic disable-next-line: redefined-local
+		local opts = t:opts()
+		local fn = function()
 			hide()
-		end)
+		end
+		if opts.hints.low_priority then
+			util.run_on_idle(fn)
+		else
+			fn()
+		end
 	end)
 end
 

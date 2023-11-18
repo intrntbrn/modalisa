@@ -38,6 +38,7 @@ local defaults = {
 		delay = 0, -- ms
 		show_header = false,
 		show_disabled_keys = true,
+		low_priority = true, -- generate hints when idling
 		sort = "group", -- group | id | key | none
 		mouse_button_select = 1, -- left click
 		mouse_button_select_continue = 3, -- right click

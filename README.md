@@ -23,7 +23,7 @@ In addition, `modalisa` comes with a preconfigured default keymap that includes 
 ## ✨ Features
 
 - 🪄 Unique input modes
-- 💥 Which Key hints (clickable)
+- 💥 Which key hints with mouse support
 - 🌳 Keymap trees with property inheritance
 - 💄 UI building blocks (prompt, echo, labels)
 - 🌐 Define options for every key individually
@@ -40,7 +40,7 @@ In addition, `modalisa` comes with a preconfigured default keymap that includes 
 	-- opts are inherited from predecessor t
 	["t<Tab>"] = {
 		desc = "view last tag",
-		function(opts)
+		fn = function(opts)
 			awful.tag.history.restore()
 		end,
 	},
@@ -50,7 +50,7 @@ In addition, `modalisa` comes with a preconfigured default keymap that includes 
 		cond = function()
 			return awful.screen.focused().selected_tag.index > 1
 		end,
-		function(opts)
+		fn = function(opts)
 			local dynamic_menu = {
 				y = {
 					desc = function()
