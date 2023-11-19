@@ -270,7 +270,7 @@ local options
 
 local function on_update(key)
 	local value = rawget(options, key)
-	print("modalisa::config::update: ", key, " = ", vim.inspect(value))
+	print("modalisa::config::update", key, " = ", vim.inspect(value))
 	awesome.emit_signal("modalisa::config::update", key, value)
 end
 

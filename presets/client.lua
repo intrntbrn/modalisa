@@ -492,7 +492,7 @@ local function cond_is_floating(cl)
 	return layout == "floating" or c.floating
 end
 
-function M.client_select_picker(multi_screen, include_focused_client)
+function M.select_picker(multi_screen, include_focused_client)
 	local filter = M.make_filter({ multi_screen = multi_screen, include_focused_client = include_focused_client })
 	local fn = function(c)
 		c:activate({ raise = true, context = "client.focus.bydirection" })

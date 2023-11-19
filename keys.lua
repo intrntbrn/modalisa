@@ -91,7 +91,7 @@ local keys = {
 	["0"] = t.view_only_index(10) + { hidden = false },
 
 	["z"] = s.focus_picker(),
-	[" "] = c.client_select_picker(true) + { opts = { labels = util.labels_qwerty } },
+	[" "] = c.select_picker(true) + { opts = { labels = util.labels_qwerty } },
 	["w"] = c.swap_picker() + { opts = { labels = util.labels_qwerty } },
 	["s"] = c.swap_master_smart() + { opts = { labels = util.labels_qwerty } },
 	["f"] = c.toggle_property("fullscreen", nil, true),
