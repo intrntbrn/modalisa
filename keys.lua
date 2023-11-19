@@ -251,7 +251,7 @@ local keys = {
 	["<XF86AudioNext>"] = sys.audio_next() + { global = true },
 	["<XF86AudioPrev>"] = sys.audio_prev() + { global = true },
 	["<XF86AudioStop>"] = sys.audio_stop() + { global = true },
-	["<XF86AudioPause>"] = sys.audio_play_pause() + { global = true },
+	["<XF86AudioPlay>"] = sys.audio_play_pause() + { global = true },
 
 	-- brightness (requires xbacklight)
 	["<XF86MonBrightnessUp>"] = sys.brightness_inc(10) + { desc = "brightness increase", global = true },
