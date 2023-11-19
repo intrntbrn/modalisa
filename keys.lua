@@ -14,15 +14,6 @@ local M = {}
 -- presets can be overwritten (deep extended) by using the + operator
 
 local keys = {
-	[","] = nil,
-	[";"] = nil,
-	["y"] = nil,
-	["q"] = nil,
-	["g"] = nil,
-	["v"] = nil,
-	["d"] = nil,
-	["'"] = nil,
-
 	-- interactive configuration of modalisa
 	["i"] = require("modalisa.presets.modalisa").generate() + {
 		highlight = { desc = { fg = "#7DCFFF", bold = true, italic = true } },
@@ -30,7 +21,7 @@ local keys = {
 	},
 
 	-- spawn menu example
-	["x"] = { desc = "execute", group = "menu.execute" },
+	["x"] = { desc = "execute", group = "execute" },
 	["xw"] = sp.spawn("wezterm"),
 	["xa"] = sp.spawn("alacritty"),
 	["xx"] = sp.spawn("xterm"),
@@ -107,7 +98,7 @@ local keys = {
 	["o"] = sp.appmenu(),
 
 	-- awesome
-	["a"] = { desc = "awesome", group = "menu.awesome" },
+	["a"] = { desc = "awesome", group = "awesome" },
 	["aQ"] = awm.quit(),
 	["aR"] = awm.restart(),
 	["ax"] = awm.execute_lua(),
@@ -119,7 +110,7 @@ local keys = {
 	["ap"] = awm.screen_padding_menu(),
 
 	-- tag
-	["t"] = { desc = "tag", group = "menu.tag" },
+	["t"] = { desc = "tag", group = "tag" },
 	["tD"] = t.delete(),
 	["tr"] = t.rename(),
 	["tn"] = t.new_tag(),
@@ -155,7 +146,7 @@ local keys = {
 	["tC"] = t.column_count_decrease() + { continue = true },
 
 	-- client
-	["c"] = { desc = "client", group = "menu.client" },
+	["c"] = { desc = "client", group = "client" },
 	["ct"] = c.toggle_tag_menu(),
 	["cn"] = c.minimize(),
 	["cf"] = c.toggle_property("fullscreen", nil, true),
