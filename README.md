@@ -172,6 +172,250 @@ default keymap.
 
 <!-- config:start -->
 
+```lua
+{
+	root_keys = { "<M-a>" },
+	back_keys = { "<BackSpace>" },
+	stop_keys = { "<Escape>" },
+	toggle_keys = { "." },
+	include_default_keys = true,
+
+	mode = "hybrid", -- "modal" | "hold" | "hybrid" | "forever"
+	smart_modifiers = true, -- like smartcase but for all root key modifiers
+	stop_on_unknown_key = false,
+	timeout = 0, -- ms
+	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~",
+	ignore_shift_state_for_special_characters = true,
+
+	toggle_false = "on", -- "", "", "toggle", "on"
+	toggle_true = "off", -- "", -"", "toggle", "off"
+
+	theme = {
+		fg = beautiful.fg_focus or "#eceffc",
+		bg = beautiful.bg_focus or "#24283B",
+		grey = beautiful.fg_normal or "#959cbc",
+		border = beautiful.border_color_normal or "#444A73",
+		accent = "#82AAFF",
+	},
+
+	hints = {
+		enabled = true,
+		delay = 0, -- ms
+		show_header = false,
+		show_disabled_keys = true,
+		low_priority = true, -- generate hints when idling
+		sort = "group", -- group | id | key | none
+		mouse_button_select = 1, -- left click
+		mouse_button_select_continue = 3, -- right click
+		mouse_button_stop = 2, -- middle click
+		mouse_button_back = 8, -- back click
+		color_border = nil,
+		color_odd_bg = -8, -- color or luminosity delta
+		color_hover_bg = 15, -- color or luminosity delta
+		color_disabled_fg = nil,
+		font_header = "Monospace 12",
+		color_header_fg = nil,
+		color_header_bg = nil,
+		highlight = {
+			bg = nil,
+			key = {
+				font = "Monospace 12",
+			},
+			desc = {
+				font = "Monospace 12",
+				italic = true,
+			},
+			separator = {
+				font = "Monospace 12",
+			},
+		},
+		menu_highlight = {
+			desc = {
+				bold = true,
+			},
+		},
+		group_highlights = {
+			-- ["^awesome"] = {
+			-- 	desc = {
+			-- 		underline = true,
+			-- 	},
+			-- },
+		},
+		separator = " ➜ ",
+		entry_key_width = 5, -- chars
+		min_entry_width = 25, -- chars
+		max_entry_width = 30, -- chars
+		entry_padding = {
+			top = 0,
+			bottom = 0,
+			left = 0,
+			right = 0,
+		},
+		padding = {
+			top = 0,
+			bottom = 0,
+			left = 0,
+			right = 0,
+		},
+		margin = {
+			top = 0,
+			bottom = 0,
+			left = 0,
+			right = 0,
+		},
+		width = 0.75, -- fraction or abs pixel count
+		height = 0.35, -- fraction or abs pixel count
+		stretch_vertical = false, -- use all available height
+		stretch_horizontal = false, -- use all available width
+		flow_horizontal = false, -- fill from left to right
+		expand_horizontal = true, -- use all available columns first
+		placement = function(h) -- function, placement (e.g. "centered") or false (last position)
+			awful.placement.bottom(h, { honor_workarea = true })
+		end,
+		border_width = beautiful.border_width or dpi(1),
+		opacity = 1,
+		shape = nil,
+		odd_style = "row", -- row  | column | checkered | none
+		odd_empty = true, -- continue odd pattern for empty entries
+		key_aliases = {
+			[" "] = "space",
+			Left = "←",
+			Right = "→",
+			["^Up"] = "↑",
+			["[%-]Up"] = "↑",
+			["^Down"] = "↓",
+			["[%-]Down"] = "↓",
+			XF86MonBrightnessUp = "󰃝 +",
+			XF86MonBrightnessDown = "󰃝 -",
+			XF86AudioRaiseVolume = "󰝝",
+			XF86AudioLowerVolume = "󰝞",
+			XF86AudioMute = "󰝟",
+			XF86AudioPlay = "󰐊",
+			XF86AudioPrev = "󰒮",
+			XF86AudioNext = "󰒭",
+			XF86AudioStop = "󰓛",
+		},
+	},
+
+	echo = {
+		enabled = true,
+		show_percentage_as_progressbar = false, -- display 0-1.0 as progressbar
+		placement = "centered", -- or any awful.placement func
+		timeout = 1000, -- ms
+		align_vertical = true, -- key above value
+		vertical_layout = false, -- kvs from top to bottom
+		sort = true,
+
+		entry_width = 20, -- chars
+		entry_width_strategy = "exact", -- min | max | exact
+		padding = {
+			top = dpi(3),
+			bottom = dpi(3),
+			left = dpi(3),
+			right = dpi(3),
+		},
+		spacing = 0,
+		border_width = beautiful.border_width or dpi(1),
+		shape = nil,
+		opacity = 1,
+		color_border = nil,
+		highlight = {
+			key = {
+				font = "Monospace 20",
+				bg = nil,
+				fg = nil,
+				italic = true,
+				bold = true,
+			},
+			value = {
+				font = "Monospace 20",
+				bg = nil,
+				fg = nil,
+			},
+		},
+
+		progressbar = {
+			shape = gears.shape.rounded_rect,
+			bar_shape = gears.shape.rounded_rect,
+			border_width = dpi(2),
+			bar_border_width = dpi(2),
+			color = nil,
+			background_color = nil,
+			border_color = nil,
+			bar_border_color = nil,
+			margin = {
+				left = dpi(8),
+				right = dpi(8),
+				top = dpi(8),
+				bottom = dpi(8),
+			},
+			padding = {
+				left = 0,
+				right = 0,
+				top = 0,
+				bottom = 0,
+			},
+			opacity = 1,
+		},
+	},
+
+	prompt = {
+		placement = "centered", -- or any awful.placement func
+		vertical_layout = true, -- from top to bottom
+		width = 20, -- chars
+		width_strategy = "min", -- min | max | exact
+		padding = {
+			top = dpi(5),
+			bottom = dpi(5),
+			left = dpi(5),
+			right = dpi(5),
+		},
+		spacing = 0,
+		border_width = beautiful.border_width or dpi(1),
+		shape = nil,
+		opacity = 1,
+		color_border = nil,
+		header_highlight = {
+			font = "Monospace 20",
+			fg = nil,
+			bg = nil,
+			bold = true,
+			italic = true,
+		},
+		font = "Monospace 20",
+		color_bg = nil,
+		color_fg = nil,
+		color_cursor_fg = nil,
+		color_cursor_bg = nil,
+	},
+
+	label = {
+		shape = gears.shape.rounded_rect,
+		border_width = beautiful.border_width or dpi(1),
+		color_border = nil,
+		width = dpi(100),
+		height = dpi(100),
+		opacity = 1,
+		highlight = {
+			font = "Monospace 40",
+			bg = nil,
+			fg = nil,
+			bold = true,
+		},
+	},
+
+	awesome = {
+		auto_select_the_only_choice = false,
+		resize_delta = dpi(32),
+		resize_factor = 0.025,
+		wallpaper_dir = os.getenv("HOME") .. "/.config/awesome/",
+		browser = "firefox || chromium || google-chrome-stable || qutebrowser",
+		terminal = terminal or "alacritty || kitty || wezterm || st || urxvt || xterm",
+		app_menu = "rofi -show drun || dmenu_run",
+	},
+}
+```
+
 <!-- config:end -->
 
 </details>
