@@ -7,8 +7,6 @@ local pscreen = require("modalisa.presets.screen")
 ---@diagnostic disable-next-line: unused-local
 local dump = require("modalisa.lib.vim").inspect
 
-local default_resize_factor = 0.05
-
 local M = {}
 
 local function tag_toggle_index(i)
@@ -156,7 +154,7 @@ function M.move_tag_to_screen_menu(tag, delete_old_tag)
 		}
 end
 
-function M.move_all_clients_to_tag_menu()
+function M.move_all_clients_to_tag_menu(tag)
 	return mt({
 		is_menu = true,
 		group = "tag.client.move.all",
@@ -166,26 +164,30 @@ function M.move_all_clients_to_tag_menu()
 		desc = "move all clients to tag",
 		fn = function(opts)
 			local s = awful.screen.focused()
-			local tags = s.selected_tags
+			local t = tag or s.selected_tag
+			if not t then
+				return
+			end
+
 			local cls = {}
-			for _, t in ipairs(tags) do
-				for _, c in ipairs(t:clients()) do
-					table.insert(cls, c)
-				end
+			for _, c in ipairs(t:clients()) do
+				table.insert(cls, c)
 			end
 
 			local ret = {}
-			for i, t in ipairs(s.tags) do
-				local desc = helper.tagname(t)
-				table.insert(ret, {
-					util.index_to_label(i, opts.labels),
-					desc = desc,
-					fn = function()
-						for _, c in ipairs(cls) do
-							c:move_to_tag(t)
-						end
-					end,
-				})
+			for i, tg in ipairs(s.tags) do
+				if tg ~= t then
+					local desc = helper.tagname(tg)
+					table.insert(ret, {
+						util.index_to_label(i, opts.labels),
+						desc = desc,
+						fn = function()
+							for _, c in ipairs(cls) do
+								c:move_to_tag(tg)
+							end
+						end,
+					})
+				end
 			end
 
 			return ret
@@ -221,7 +223,7 @@ function M.tag_toggle_menu()
 	})
 end
 
-function M.toggle_property(prop, tag)
+function M.toggle_property(prop, tag, prefix)
 	return mt({
 		group = string.format("tag.property.%s", prop),
 		cond = function()
@@ -230,13 +232,17 @@ function M.toggle_property(prop, tag)
 		end,
 		desc = function(opts)
 			local t = tag or awful.screen.focused().selected_tag
+			local pre = prefix or ""
+			if string.len(pre) > 0 then
+				pre = pre .. " "
+			end
 			if not t then
-				return string.format("tag %s toggle", prop)
+				return string.format("%s%s toggle", pre, prop)
 			end
 			if t[prop] then
-				return string.format("tag %s %s", prop, opts.toggle_true)
+				return string.format("%s%s %s", pre, prop, opts.toggle_true)
 			end
-			return string.format("tag %s %s", prop, opts.toggle_false)
+			return string.format("%s%s %s", pre, prop, opts.toggle_false)
 		end,
 		fn = function(opts)
 			local t = tag or awful.screen.focused().selected_tag
@@ -491,7 +497,7 @@ function M.set_gap(tag)
 	})
 end
 
-function M.master_width_increase(factor, tag)
+function M.master_width_increase(tag)
 	return mt({
 		group = "layout.master.width",
 		desc = "master width increase",
@@ -499,15 +505,15 @@ function M.master_width_increase(factor, tag)
 			local t = tag or awful.screen.focused().selected_tag
 			return t
 		end,
-		fn = function()
-			local f = factor or default_resize_factor
+		fn = function(opts)
+			local f = opts.awesome.resize_factor
 			awful.tag.incmwfact(f, tag)
 		end,
 		result = { master_width = helper.tag_get_fn_master_width_factor(tag) },
 	})
 end
 
-function M.master_width_decrease(factor, tag)
+function M.master_width_decrease(tag)
 	return mt({
 		group = "layout.master.width",
 		desc = "master width decrease",
@@ -515,8 +521,8 @@ function M.master_width_decrease(factor, tag)
 			local t = tag or awful.screen.focused().selected_tag
 			return t
 		end,
-		fn = function()
-			local f = factor or default_resize_factor
+		fn = function(opts)
+			local f = opts.awesome.resize_factor
 			awful.tag.incmwfact(f * -1, tag)
 		end,
 		result = { master_width = helper.tag_get_fn_master_width_factor(tag) },
@@ -609,14 +615,14 @@ function M.layout_prev()
 	})
 end
 
-function M.layout_select_menu()
+function M.layout_select_menu(tag)
 	return mt({
 		group = "layout.menu.select",
 		desc = "select a layout",
 		is_menu = true,
 		fn = function(opts)
 			local s = awful.screen.focused()
-			local t = s.selected_tag
+			local t = tag or s.selected_tag
 
 			if not t then
 				return

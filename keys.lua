@@ -94,8 +94,8 @@ local keys = {
 	[" "] = c.select_picker(true) + { opts = { labels = util.labels_qwerty } },
 	["w"] = c.swap_picker() + { opts = { labels = util.labels_qwerty } },
 	["s"] = c.swap_master_smart() + { opts = { labels = util.labels_qwerty } },
-	["f"] = c.toggle_property("fullscreen", nil, true),
-	["m"] = c.toggle_property("maximized", nil, true),
+	["f"] = c.toggle_property("fullscreen", nil, true, "client"),
+	["m"] = c.toggle_property("maximized", nil, true, "client"),
 	["n"] = c.minimize(),
 	["u"] = c.unminimize_menu(false)
 		+ { opts = { hints = { enabled = true, delay = 0 }, labels = util.labels_qwerty } },

@@ -110,9 +110,10 @@ function M.client_picker(fn, filter)
 			end
 
 			local menu = {}
+			local labels = opts.labels or util.labels_qwerty
 
 			for i, c in ipairs(clients) do
-				local lbl = util.index_to_label(i, opts.labels)
+				local lbl = util.index_to_label(i, labels)
 				awesome.emit_signal("modalisa::label::show", c, lbl, opts)
 				-- create menu
 				table.insert(menu, {
@@ -658,7 +659,7 @@ function M.toggle_titlebar(cl)
 	})
 end
 
-function M.toggle_property(x, cl, raise)
+function M.toggle_property(x, cl, raise, prefix)
 	return mt({
 		group = string.format("client.property.%s", x),
 		cond = function()
@@ -671,14 +672,18 @@ function M.toggle_property(x, cl, raise)
 			end
 		end,
 		desc = function(opts)
+			local pre = prefix or ""
 			local c = cl or client.focus
 			if not c or not c.valid then
-				return string.format("client %s toggle", x)
+				return string.format("%s%s toggle", pre, x)
+			end
+			if string.len(pre) > 0 then
+				pre = pre .. " "
 			end
 			if c[x] then
-				return string.format("client %s %s", x, opts.toggle_true)
+				return string.format("%s%s %s", pre, x, opts.toggle_true)
 			end
-			return string.format("client %s %s", x, opts.toggle_false)
+			return string.format("%s%s %s", pre, x, opts.toggle_false)
 		end,
 		fn = function()
 			local c = cl or client.focus
