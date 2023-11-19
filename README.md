@@ -20,6 +20,41 @@ This flexibility makes it possible to transition into a more modal-esque keymap 
 
 In addition, `modalisa` comes with a preconfigured default keymap that includes improved default AwesomeWM controls (and a lot more) to provide a starting point and to give an overview about the possibilities using this framework.
 
+<table>
+  <tr>
+    <th>Which Key Hints</th>
+    <th>AwesomeWM Controls</th>
+    <th>System controls</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="https://user-images.githubusercontent.com/1234183/284088067-73f1d696-c5ed-47fc-a502-776d9ba718f6.gif" />
+    </td>
+    <td>
+      <img src="https://user-images.githubusercontent.com/1234183/284087983-de9dcb2c-9314-4439-bf70-36bfb33c2ddc.gif" />
+    </td>
+    <td>
+      <img src="https://user-images.githubusercontent.com/1234183/284088055-abcc634d-deb9-4315-b22b-1f82706ad089.gif" />
+    </td>
+  </tr>
+  <tr>
+    <th>Client Labels</th>
+    <th>Mouse Menu</th>
+    <th>File Picker (Wallpaper)</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="https://user-images.githubusercontent.com/1234183/284088127-fc91a8b5-40d6-43eb-8d88-3c96a84309ba.gif" />
+    </td>
+    <td>
+      <img src="https://user-images.githubusercontent.com/1234183/284088114-ef598194-7b33-445e-98d8-e5dc14e811aa.gif" />
+    </td>
+    <td>
+      <img src="https://user-images.githubusercontent.com/1234183/284088084-1cd651c7-4a5b-42b3-8c3d-a72bb5930fd0.gif" />
+    </td>
+  </tr>
+</table>
+
 ## ✨ Features
 
 - 🪄 Unique input modes
