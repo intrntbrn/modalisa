@@ -24,7 +24,7 @@ In addition, `modalisa` comes with a preconfigured default keymap that includes 
   <tr>
     <th>Which Key Hints</th>
     <th>AwesomeWM Controls</th>
-    <th>System controls</th>
+    <th>System Controls</th>
   </tr>
   <tr>
     <td>
@@ -40,7 +40,7 @@ In addition, `modalisa` comes with a preconfigured default keymap that includes 
   <tr>
     <th>Client Labels</th>
     <th>Mouse Menu</th>
-    <th>File Picker (Wallpaper)</th>
+    <th>File Picker</th>
   </tr>
   <tr>
     <td>
@@ -103,6 +103,10 @@ In addition, `modalisa` comes with a preconfigured default keymap that includes 
 	},
 }
 ```
+
+## ⚠️ Warning
+
+`modalisa` is in early development and breaking changes might occur.
 
 ## 📋 Requirements
 
