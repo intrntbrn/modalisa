@@ -274,14 +274,12 @@ local function run(kvs, opts)
 	set_timer(eopts)
 end
 
-local function handle_exec_signal(t, results) end
-
 local function show(kvs, opts)
 	if not kvs then
 		return
 	end
 
-	opts = opts or config.get()
+	opts = config.get_config(opts)
 
 	local eopts = opts.echo
 	if not eopts.enabled then
