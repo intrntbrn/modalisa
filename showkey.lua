@@ -6,12 +6,6 @@ local M = {}
 
 local grabber
 
-function M.make_callback()
-	return function(_, mods, key)
-		print("mods: ", dump(mods), "key: ", key)
-	end
-end
-
 function M.start(args)
 	local stop_key = args.stop_key or "Escape"
 	local mod_map = args.mod_map or {
