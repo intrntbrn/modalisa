@@ -479,3 +479,138 @@ Keys can be configured by using the following properties:
 ### 📢 Signals
 
 ## 📡 API
+
+## 💡 More Examples
+
+<details><summary>Client Menu</summary>
+
+```lua
+local function client_menu(c)
+	if not c then
+		return
+	end
+	local pc = require("modalisa.presets.client")
+
+	local opts = {
+		stop_on_unknown_key = true,
+		hints = {
+			enabled = true,
+			sort = "id",
+			show_header = true,
+			delay = 0,
+			fill_remaining_space = false,
+			placement = function(x)
+				awful.placement.under_mouse(x)
+				awful.placement.no_offscreen(x)
+			end,
+			flow_horizontal = false,
+			stretch_vertical = false,
+			stretch_horizontal = false,
+			expand_horizontal = false,
+			width = 0.3,
+			height = 0.3,
+			show_disabled_keys = false,
+			min_entry_width = 11,
+			max_entry_width = 11,
+			entry_key_width = 0,
+			entry_padding = {
+				left = dpi(10),
+			},
+			separator = "",
+		},
+	}
+
+	local function chrome_tabbar(cl)
+		return {
+			"x",
+			desc = "tabbar toggle",
+			cond = function()
+				return string.find(cl.class, ".*chrome.*")
+			end,
+			fn = function()
+				keygrabber.stop()
+				root.fake_input("key_press", "F11")
+				awful.spawn.easy_async_with_shell("sleep 0.15", function()
+					cl.fullscreen = false
+				end)
+				root.fake_input("key_release", "F11")
+			end,
+		}
+	end
+
+	local list = {
+		pc.kill(c) + { "k", desc = "kill", highlight = { bg = "#F7768E" } },
+		pc.minimize(c) + { "n" },
+		pc.toggle_property("fullscreen", c, true) + { "f" },
+		pc.toggle_property("maximized", c, true) + { "m" },
+		pc.toggle_property("floating", c) + { "o", desc = "floating" },
+		pc.move_to_tag_menu(c) + { "t", desc = "send to tag ➜", opts = { hints = { placement = "no_offscreen" } } },
+		pc.unminimize_menu(false)
+			+ { "u", desc = "unminimize  ➜", opts = { hints = { placement = "no_offscreen" } } },
+		chrome_tabbar(c),
+	}
+
+	require("modalisa").fake_input("stop")
+	require("modalisa").run_tree(list, opts, c.name or "")
+end
+```
+
+</details>
+
+<details><summary>Tag Menu</summary>
+
+```lua
+local function tag_menu(t)
+	local mt = require("modalisa.presets.tag")
+
+	local opts = {
+		stop_on_unknown_key = true,
+		hints = {
+			enabled = true,
+			sort = "id",
+			show_header = true,
+			delay = 0,
+			fill_remaining_space = false,
+			placement = function(x)
+				awful.placement.under_mouse(x)
+				awful.placement.no_offscreen(x)
+			end,
+			flow_horizontal = false,
+			stretch_vertical = false,
+			stretch_horizontal = false,
+			expand_horizontal = false,
+			width = 0.3,
+			height = 0.3,
+			show_disabled_keys = false,
+			min_entry_width = 15, -- chars
+			max_entry_width = 15, -- chars
+			entry_key_width = 0, -- chars
+			entry_padding = {
+				left = dpi(10),
+			},
+			separator = "",
+		},
+	}
+
+	local list = {
+		mt.new_tag_copy("") + { "n", desc = "new tag", highlight = { desc = { fg = "#94CF95" } } },
+		mt.layout_select_menu(t) + { " ", desc = "layout ➜", opts = { hints = { placement = "no_offscreen" } } },
+		mt.rename(t) + { "r", desc = "rename", opts = { hints = { placement = "no_offscreen" } } },
+		mt.set_gap(t) + { "g", desc = "gap" },
+		mt.master_width_increase(t) + { "w", desc = "master_width +", continue = false },
+		mt.master_width_decrease(t) + { "W", desc = "master_width -", continue = false },
+		mt.master_count_increase(t) + { "m", desc = "master_count +", continue = false },
+		mt.master_count_decrease(t) + { "M", desc = "master_count -", continue = false },
+		mt.move_all_clients_to_tag_menu(t)
+			+ { "a", desc = "move all to ➜", opts = { hints = { placement = "no_offscreen" } } },
+		mt.move_tag_to_screen_menu(t)
+			+ { "s", desc = "move to screen ➜", opts = { hints = { placement = "no_offscreen" } } },
+		mt.delete(t) + { "D", desc = "delete tag", highlight = { desc = { fg = "#F7768E" } } },
+	}
+
+	require("modalisa").fake_input("stop")
+	require("modalisa").run_tree(list, opts, t.name or t.index or "")
+end
+```
+
+</details>
