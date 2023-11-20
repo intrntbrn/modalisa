@@ -899,10 +899,10 @@ function M.setup(opts)
 	if root_keys then
 		if type(root_keys) == "string" then
 			M.add_globalkey_run_root(root_keys, "")
-		end
-	elseif type(root_keys) == "table" then
-		for _, key in ipairs(root_keys) do
-			M.add_globalkey_run_root(key, "")
+		elseif type(root_keys) == "table" then
+			for _, key in pairs(root_keys) do
+				M.add_globalkey_run_root(key, "")
+			end
 		end
 	end
 end
