@@ -10,6 +10,7 @@ local modmap = require("modalisa.modmap")
 local akeygrabber = require("awful.keygrabber")
 local gears = require("gears")
 local config = require("modalisa.config")
+local notify = require("modalisa.notify")
 
 local trunner = {}
 
@@ -337,8 +338,14 @@ function trunner:init()
 end
 
 function trunner:start(t, root_key)
-	assert(not trunner.is_running, "keygrabber is already running")
-	assert(not vim.tbl_isempty(t:opts()), "trunner:new t opts are empty")
+	if trunner.is_running then
+		notify.error("modalisa is already running.")
+		trunner:stop()
+
+		if trunner.is_running then
+			trunner:on_stop()
+		end
+	end
 
 	if root_key then
 		self.mm = modmap(root_key.key, root_key.mods, mod_conversion)
