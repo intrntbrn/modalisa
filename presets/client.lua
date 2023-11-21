@@ -230,6 +230,7 @@ local function swap_with_master(c)
 
 	if new_master then
 		client.focus = new_master
+		new_master:raise()
 	end
 end
 
