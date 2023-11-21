@@ -388,24 +388,20 @@ function trunner:on_start()
 	-- called by keygrabber
 	local t = self.tree
 	self.is_running = true
-	print("on::start", t:desc())
 	awesome.emit_signal("modalisa::on_start", t)
 end
 
 function trunner:on_enter(t)
-	print("on::enter", t:desc())
 	t:exec_on_enter()
 	awesome.emit_signal("modalisa::on_enter", t)
 end
 
 function trunner:on_leave(t)
-	print("on::leave", t:desc())
 	t:exec_on_leave()
 	awesome.emit_signal("modalisa::on_leave", t)
 end
 
 function trunner:on_exec(t, result)
-	print("on::executed", t:desc())
 	awesome.emit_signal("modalisa::on_exec", t, result)
 end
 
@@ -414,7 +410,6 @@ function trunner:on_stop()
 	local t = self.tree
 	self.is_running = false
 	self:on_leave(t) -- also emit leave event
-	print("on::stop", t:desc())
 	awesome.emit_signal("modalisa::on_stop", t)
 end
 
@@ -455,8 +450,6 @@ function trunner:stop_maybe(reason)
 
 	local opts = self.tree:opts()
 	local mode = opts.mode
-
-	print("maybe_stop: ", reason)
 
 	if reason == "release_mod" then
 		-- only "hold" and "hybrid" depend on mod states
@@ -575,8 +568,6 @@ function trunner:step_into(node)
 end
 
 function trunner:input(key)
-	print("press key: ", dump(key))
-
 	local tree = self.tree
 
 	-- special keys that have no actual function
@@ -621,7 +612,7 @@ function trunner:keypressed_callback()
 		end
 		modifiers = filtered_modifiers
 
-		print("pressed callback: ", dump(modifiers), dump(key))
+		-- print("pressed callback: ", dump(modifiers), dump(key))
 
 		self:start_timer()
 
