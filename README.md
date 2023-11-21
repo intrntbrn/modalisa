@@ -476,9 +476,17 @@ Keys can be configured by using the following properties:
 | `on_leave`  | function(opts, tree) | The function to be executed when leaving a menu (non-leaf node).                                                                                                                                                                                                         |
 | `result`    | table                | Specifies the results or notifications to be shown using `echo` after executing the key's function (e.g. { volume = 0.5 }).                                                                                                                                              |
 
-### 📢 Signals
+### 🖌️ Custom UI
+
+One of the design principles is to fully isolate core functionality from UI.
+Every UI building block (echo, prompt, label) can be disabled individually
+allowing users to build custom versions by solely implementing signal handlers.
+
+To implement custom UI please refer to the sourcecode.
 
 ## 📡 API
+
+Todo.
 
 ## 💡 More Examples
 
