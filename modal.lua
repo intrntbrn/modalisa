@@ -414,8 +414,8 @@ end
 
 function trunner:on_stop()
 	-- called by keygrabber
-	local t = self.tree
 	self.is_running = false
+	local t = self.tree
 	self:on_leave(t) -- also emit leave event
 	awesome.emit_signal("modalisa::on_stop", t)
 end
@@ -569,7 +569,7 @@ function trunner:step_into(node)
 	end
 
 	local stopped = self:stop_maybe("no_next_tree")
-	if stopped then
+	if stopped or not self.is_running then
 		return
 	end
 
