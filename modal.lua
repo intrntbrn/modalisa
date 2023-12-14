@@ -546,7 +546,9 @@ function trunner:step_into(node)
 
 	node:remove_temp_successors()
 
-	if node:is_leaf() then
+	local is_exec = node:is_leaf()
+
+	if is_exec then
 		next_tree = self:execute(node)
 	else
 		next_tree = node
@@ -569,6 +571,13 @@ function trunner:step_into(node)
 	local stopped = self:stop_maybe("no_next_tree")
 	if stopped then
 		return
+	end
+
+	if is_exec then
+		local opts = node:opts()
+		if not opts.stay_on_exec then
+			self:set_tree(node:get_root_tree())
+		end
 	end
 
 	self.continue_external = false

@@ -301,6 +301,15 @@ function M:successors()
 	return tree_objects
 end
 
+function M:get_root_tree()
+	local t = self
+	while t:pred() do
+		t = t:pred()
+	end
+
+	return t
+end
+
 function M:is_leaf()
 	local succs = self._succs
 	if not succs or vim.tbl_isempty(succs) then

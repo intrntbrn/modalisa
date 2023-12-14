@@ -17,6 +17,7 @@ local defaults = {
 
 	mode = "hybrid", -- "modal" | "hold" | "hybrid" | "forever"
 	smart_modifiers = true, -- like smartcase but for all root key modifiers
+	stay_on_exec = true, -- stay on tree level or reset tree after executing
 	stop_on_unknown_key = false,
 	timeout = 0, -- ms
 	labels = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~",
